@@ -19,18 +19,22 @@ function App() {
     // --- Inventory & Threshold State ---
     const [lowStockThreshold, setLowStockThreshold] = useState(1000);
     const [isThresholdEnabled, setIsThresholdEnabled] = useState(true);
-    
+    const [activeWarehouseFilter, setActiveWarehouseFilter] = useState('All');
+
     // Lifted Inventory Data to app level for global status calculations 
     const [inventoryData, setInventoryData] = useState([
         { id: "MBN-001", name: "Zantham Gum", category: "Food Ingridient", quantity: "150 Sacks", warehouse: "Malabon - M.H. Del Pilar", supplier: "Titan Forge Inc." },
         // Added a 1500 unit item so the default 1000 threshold functions properly
-        { id: "MBN-002", name: "Citric Acid", category: "Food Ingridient", quantity: "1500 Sacks", warehouse: "Malabon - M.H. Del Pilar", supplier: "Acme Industrial Supplies" }
+        { id: "MBN-002", name: "Citric Acid", category: "Food Ingridient", quantity: "1500 Sacks", warehouse: "Quezon City Facility", supplier: "Acme Industrial Supplies" }
     ]);
 
     // Lifted Supplier Data for global prompt access
     const [supplierData, setSupplierData] = useState([
         { id: "SUP-01", name: "Acme Industrial Supplies", contact: "Jane Doe", address: "24 Taft Ave, Manila", phone: "+63 917 123 1234", email: "contact@acme.com" },
     ]);
+
+    // Compute unique warehouses for the new Filter Bar
+    const warehouses = ['All', ...new Set(inventoryData.map(item => item.warehouse))];
 
     // --- Handlers ---
     // Flips the system theme and updates the master HTML attribute
@@ -71,56 +75,76 @@ function App() {
 
     // --- Render ---
     return (
-        <div className="app-layout">
-
-            {/* Top Navigation Bar */}
-            <nav className="tab-navigation">
-                <div className="nav-tabs-left">
+        <div className="app-wrapper">
+            {/* Topmost Brand Bar (Navigation Bar) */}
+            <div className="top-brand-bar">
+                <div className="brand-left">
+                    <img src="Resources/icon.png" alt="Icon" className="brand-icon" />
                     <div className="app-logo">CloudBased</div>
-                    <button
-                        className={`nav-btn ${activeTab === 'inventory' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('inventory')}
-                    >
-                        Inventory
-                    </button>
-                    <button
-                        className={`nav-btn ${activeTab === 'suppliers' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('suppliers')}
-                    >
-                        Suppliers
-                    </button>
-                </div>
 
-                {/* Right Aligned Avatar */}
-                <div className="nav-tabs-right">
+                    {/* Integrated Navigation Links */}
+                    <div className="nav-tabs-left" style={{ marginLeft: '1rem' }}>
+                        <button
+                            className={`nav-btn ${activeTab === 'inventory' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('inventory')}
+                        >
+                            Inventory
+                        </button>
+                        <button
+                            className={`nav-btn ${activeTab === 'suppliers' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('suppliers')}
+                        >
+                            Suppliers
+                        </button>
+                    </div>
+                </div>
+                <div className="brand-right" onClick={() => setActiveTab('settings')}>
                     <button
                         className={`user-avatar-btn ${activeTab === 'settings' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('settings')}
                         title="User Settings"
                     >
                         U
                     </button>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}>
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                 </div>
-            </nav>
+            </div>
 
-            {/* Main Content Router */}
-            <main className="main-content">
-                {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} />}
-                {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
-                {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={setLowStockThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={setIsThresholdEnabled} />}
-            </main>
+            <div className="app-layout">
+                {/* Filter Bar (replaces the old Navigation Bar) */}
+                {activeTab === 'inventory' && (
+                    <div className="filter-bar">
+                        {warehouses.map(wh => (
+                            <button
+                                key={wh}
+                                className={`filter-card ${activeWarehouseFilter === wh ? 'active' : ''}`}
+                                onClick={() => setActiveWarehouseFilter(wh)}
+                            >
+                                {wh}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
-            {/* Global Prompt Overlay */}
-            <Prompt
-                isOpen={promptState.isOpen}
-                title={promptState.title}
-                type={promptState.type}
-                items={promptState.items}
-                onClose={closePrompt}
-                onConfirm={handlePromptConfirm}
-                supplierData={supplierData}
-            />
+                {/* Main Content Router */}
+                <main className="main-content">
+                    {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
+                    {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
+                    {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={setLowStockThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={setIsThresholdEnabled} />}
+                </main>
 
+                {/* Global Prompt Overlay */}
+                <Prompt
+                    isOpen={promptState.isOpen}
+                    title={promptState.title}
+                    type={promptState.type}
+                    items={promptState.items}
+                    onClose={closePrompt}
+                    onConfirm={handlePromptConfirm}
+                    supplierData={supplierData}
+                />
+            </div>
         </div>
     );
 }

@@ -6,14 +6,20 @@
  * toolbars for physical stock items.
  */
 
-const InventoryTable = ({ openPrompt, inventoryData, lowStockThreshold, isThresholdEnabled }) => {
+const InventoryTable = ({ openPrompt, inventoryData, lowStockThreshold, isThresholdEnabled, activeWarehouseFilter }) => {
     // --- Local State ---
     // Tracks which specific rows the user has checked off
     const [selectedRows, setSelectedRows] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     // --- Computed Data ---
-    const processedData = inventoryData.map(item => {
+    // First, apply the warehouse filter to the incoming list
+    const warehouseFilteredData = activeWarehouseFilter === 'All' 
+        ? inventoryData 
+        : inventoryData.filter(item => item.warehouse === activeWarehouseFilter);
+
+    // Compute status badges
+    const processedData = warehouseFilteredData.map(item => {
         const qtyNum = parseInt(item.quantity, 10) || 0;
         const status = (isThresholdEnabled && qtyNum <= lowStockThreshold) ? "Low Stock" : "In Stock";
         return { ...item, status };
@@ -99,7 +105,7 @@ const InventoryTable = ({ openPrompt, inventoryData, lowStockThreshold, isThresh
                     </tr>
 
                     {/* Column Headers */}
-                    <tr className="header-row">
+                    <tr className="header-row" onClick={toggleAll} style={{ cursor: 'pointer' }}>
                         <th className="checkbox-col">
                             <input
                                 type="checkbox"

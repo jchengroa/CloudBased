@@ -86,7 +86,7 @@ const SupplierTable = ({ openPrompt, supplierData }) => {
                     </tr>
 
                     {/* Adjusted Column Headers */}
-                    <tr className="header-row">
+                    <tr className="header-row" onClick={toggleAll} style={{ cursor: 'pointer' }}>
                         <th className="checkbox-col">
                             <input
                                 type="checkbox"
