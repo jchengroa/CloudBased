@@ -1,8 +1,13 @@
 # CloudBased
 The Cloud-Based Multi-Warehouse Inventory Management System. 
+
 This is the academic version, to fulfill subject requirements!
+
 <img width="500" height="500" alt="Icon" src="https://github.com/user-attachments/assets/b0adc3a9-9bbb-481f-84d7-96ddc4f67976" />
-A SOFDESG and LBYCPD2 project, created by Cheng Roa and Tejada
+
+===============================================================
+
+A SOFDESG and LBYCPD2 Project. Created by Cheng Roa and Tejada
 
 ===============================================================
 
