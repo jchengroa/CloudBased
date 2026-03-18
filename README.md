@@ -1,2 +1,35 @@
 # CloudBased
-The Cloud-Based Multi-Warehouse Inventory Management System. This is the academic version, to fulfill requirements for DLSU Computer Engineering Subjects: SOFDESG and LBYCPD2
+The Cloud-Based Multi-Warehouse Inventory Management System. 
+This is the academic version, to fulfill subject requirements!
+
+A SOFDESG and LBYCPD2 project, created by Cheng Roa and Tejada
+
+===============================================================
+
+Version 0.1 (March 18, 2026)
+
+Project Architecture & Interface
+- Created core project files (HTML, CSS, JS) and established the working interface.
+- App.js: Built the main application files, implemented global state management, and created seamless tab navigation between app screens.
+- UI/UX Styling: Fully modularized index.css using modern design principles, flexbox layouts, CSS variables, and clean interactive elements (hover states, custom UI buttons).
+
+Components & Features
+- InventoryTable.js: Implemented a dynamic interactive table displaying items and properties. Features include a management toolbar with Search/Add tools, individual/bulk row checkbox selection, and responsive state changes.
+- SupplierTable.js: Replicated and adapted core table functionalities to display suppliers and contact information, complete with unique column sizing and its own interactive toolbar.
+- UserSettings.js: Implemented a dedicated Settings dashboard populated with system configurations, featuring a working application-wide Light/Dark Mode theme switcher.
+
+===============================================================
+
+Version 0.2 (March 18, 2026) - Uploaded to Github!
+
+Project Architecture & Interface
+- Re-architected project tree: separated logic files into /App Logic/ folder and CSS into /Resources/ for modular cleanliness.
+- Implemented real-time dynamic search bars across both Inventory and Supplier tables, filtering across multiple columns simultaneously on every keystroke.
+- Added smart visual safety-locks preventing erroneous multiple "Edits" when checking off bulk items.
+- Upgraded entire table rows to be seamlessly clickable instead of targeting just the checkbox.
+
+Components & Features
+- Prompt.js: Developed a reusable, animated floating modal overlay (pop-up box). It elegantly dims the main background to safely handle all specific interaction forms (e.g., Add Item, Edit Supplier) anywhere in the application.
+- Prompt Modals: Fully implemented detailed Add/Edit mock forms matching Figma layout, equipped with native dropdowns and linked dynamically to global supplier data.
+- UserSettings.js: Added "Global Stock Threshold" module (with Enable/Disable disable logic), providing real-time bounding limit validation for computing inventory statuses dynamically across the app.
+- Supplier Details: Added a dedicated "Supplier Details" contact card view in the Prompt overlay, dynamically opened directly by clicking on any linked supplier name in the Inventory Table.
