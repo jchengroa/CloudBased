@@ -69,14 +69,14 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
             </div>
 
             {/* Low Stock Threshold Setting Block */}
-            <div className="setting-item" style={{ marginTop: '1.5rem', display: 'block' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
+                <div className="setting-item-inner">
                     <div className="setting-info">
                         <h3>Global Stock Threshold</h3>
                         <p>Items with quantities at or below this limit will automatically be flagged as "Low Stock".</p>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div className="threshold-controls">
                         <button
                             className="tool-btn edit-btn"
                             onClick={() => setIsThresholdEnabled(!isThresholdEnabled)}
@@ -109,7 +109,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 <div className="setting-info">
                     <h3>CloudBased</h3>
                     <p>  -ˋˏ ._. ˎˊ  </p>
-                    <p>Version: 0.2  |  Last Updated: March 18, 2026</p>
+                    <p>Version: 0.2.1  |  Last Updated: March 18, 2026</p>
                     <p>Created by: Cheng Roa and Tejada</p>
                 </div>
             </div>

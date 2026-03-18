@@ -30,3 +30,16 @@ Components & Features
 - Prompt Modals: Fully implemented detailed Add/Edit mock forms matching Figma layout, equipped with native dropdowns and linked dynamically to global supplier data.
 - UserSettings.js: Added "Global Stock Threshold" module (with Enable/Disable disable logic), providing real-time bounding limit validation for computing inventory statuses dynamically across the app.
 - Supplier Details: Added a dedicated "Supplier Details" contact card view in the Prompt overlay, dynamically opened directly by clicking on any linked supplier name in the Inventory Table.
+
+Version 0.2.1 (March 18, 2026)
+
+Git & Project Configuration
+- Removed spaces from `App Logic` folder (`AppLogic`) and updated paths in `index.html` to prevent URL encoding issues and cross-platform sync problems with Git and GitHub Pages.
+- Added `.gitignore` to safely prevent OS-level items like `.DS_Store` and generic config files from polluting the master branch.
+- Added `.gitattributes` to explicitly force LF line endings (`text=auto`) to avoid painful `CRLF` versus `LF` conversion issues on Windows when cloning or pushing.
+
+Mobile Responsiveness & UI Polish
+- UserSettings.js: Refactored hardcoded inline styles into dynamic CSS classes (`setting-item-inner`, `threshold-controls`) to allow for seamless mobile responsiveness.
+- index.css: Added comprehensive `@media` queries for mobile screens (`max-width: 768px`).
+- App Navigation: Shrunk tab bar elements and optimized spacing so the Logo, Inventory, Suppliers, and User Icon fit natively without breaking boundaries on smaller screens.
+- Settings Page: Fixed the "Global Stock Threshold" inputs, forcing them to stack vertically and cleanly utilize full 100% bounds on mobile devices.
