@@ -54,3 +54,22 @@ Header & Navigation Restructure
 New Features & Functionality
 - Warehouse Filter Bar: Repurposed the previous sub-navigation space into a horizontal scrollable filter bar. Automatically computes unique Warehouses and renders them as clickable "pill" cards that actively pre-filter the Inventory table data.
 - Table "Select All" Headers: Upgraded the main column definition row (`header-row`) in both the Inventory and Supplier tables so that clicking anywhere on the header dynamically selects or deselects all visible items instantly.
+
+Version 0.3 (March 18, 2026)
+ 
+Data Persistence & Creation of Backend System
+- AppDataHandler.js: Implemented a robust data loading system that prioritizes: Session Cache (localStorage) -> Modified Files (settings.json, uoms.json) -> Constant Defaults (defaultsettings.json, defaultuoms.json).
+- Default Logic: Added support for `defaultsettings.json` and `defaultuoms.json` as permanent constant fallbacks for initial application startup.
+- Temporary Files: Created `settings.json` and `uoms.json` to store user-defined overrides, ensuring defaults remain untouched.
+- Local Persistence: Configured the application to automatically record all modifications into temporary browser storage, providing a seamless bridge until a cloud database is established.
+
+App Logic & CRUD Operations
+- Inventory Management: Fully implemented Create, Read, Update, and Delete (CRUD) operations for the Inventory table.
+- Supplier Management: Fully implemented Create, Read, Update, and Delete (CRUD) operations for the Supplier table.
+- Prompt.js: Transformed the static Prompt modal into a dynamic, state-driven form handler with controlled inputs and intelligent pre-filling for edit operations.
+- UI Polish: Removed all development console logs and mockup simulation notes to provide a cleaner, production-ready user experience.
+- Selection Logic: Added automatic selection clearing across tables whenever data is modified, ensuring a seamless and error-free bulk action workflow.
+- UX Stability: Fixed React ReferenceErrors (useState/useEffect) caused by script-based Babel scoping.
+- Field Editing: Updated Quantity and Min Level fields to support empty inputs, allowing for easier clearing and precise data entry.
+- Supplier Assignment Fix: Added a dynamic placeholder and improved selection logic to ensure correct mapping of suppliers to inventory items, even when added after the item.
+- Visual Clarity: Updated the Inventory Table to display "N/A" for empty supplier fields, ensuring clear visibility of data gaps.

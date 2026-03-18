@@ -9,8 +9,8 @@
 const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThresholdEnabled, setIsThresholdEnabled }) => {
 
     // --- Local State for Threshold Input ---
-    const [inputValue, setInputValue] = useState(threshold.toString());
-    const [errorMsg, setErrorMsg] = useState("");
+    const [inputValue, setInputValue] = React.useState(threshold.toString());
+    const [errorMsg, setErrorMsg] = React.useState("");
 
     const handleThresholdChange = (e) => {
         let val = e.target.value;
@@ -109,7 +109,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 <div className="setting-info">
                     <h3>CloudBased</h3>
                     <p>  -ˋˏ ._. ˎˊ  </p>
-                    <p>Version: 0.2.2  |  Last Updated: March 18, 2026</p>
+                    <p>Version: 0.3  |  Last Updated: March 18, 2026</p>
                     <p>Created by: Cheng Roa and Tejada</p>
                 </div>
             </div>

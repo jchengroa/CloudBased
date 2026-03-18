@@ -21,20 +21,41 @@ function App() {
     const [isThresholdEnabled, setIsThresholdEnabled] = useState(true);
     const [activeWarehouseFilter, setActiveWarehouseFilter] = useState('All');
 
-    // Lifted Inventory Data to app level for global status calculations 
-    const [inventoryData, setInventoryData] = useState([
-        { id: "MBN-001", name: "Zantham Gum", category: "Food Ingridient", quantity: "150 Sacks", warehouse: "Malabon - M.H. Del Pilar", supplier: "Titan Forge Inc." },
-        // Added a 1500 unit item so the default 1000 threshold functions properly
-        { id: "MBN-002", name: "Citric Acid", category: "Food Ingridient", quantity: "1500 Sacks", warehouse: "Quezon City Facility", supplier: "Acme Industrial Supplies" }
-    ]);
+    // Lifted Inventory and Supplier Data 
+    const [inventoryData, setInventoryData] = useState([]);
+    const [supplierData, setSupplierData] = useState([]);
 
-    // Lifted Supplier Data for global prompt access
-    const [supplierData, setSupplierData] = useState([
-        { id: "SUP-01", name: "Acme Industrial Supplies", contact: "Jane Doe", address: "24 Taft Ave, Manila", phone: "+63 917 123 1234", email: "contact@acme.com" },
-    ]);
+    // Static Form Definitions
+    const [uoms, setUoms] = useState([]);
+    const [warehouseList, setWarehouseList] = useState([]);
 
-    // Compute unique warehouses for the new Filter Bar
-    const warehouses = ['All', ...new Set(inventoryData.map(item => item.warehouse))];
+    // Application Loading State
+    const [dataLoaded, setDataLoaded] = useState(false);
+
+    // Load Backend Data on Mount
+    React.useEffect(() => {
+        const loadInitialData = async () => {
+            const inv = await window.AppDataHandler.getInventory();
+            const sups = await window.AppDataHandler.getSuppliers();
+            const staticUoms = await window.AppDataHandler.getUOMs();
+            const staticWhs = await window.AppDataHandler.getWarehouses();
+            const settings = await window.AppDataHandler.getSettings();
+
+            setInventoryData(inv);
+            setSupplierData(sups);
+            setUoms(staticUoms);
+            setWarehouseList(staticWhs);
+            setTheme(settings.theme);
+            document.documentElement.setAttribute('data-theme', settings.theme);
+            setLowStockThreshold(settings.lowStockThreshold);
+            setIsThresholdEnabled(settings.isThresholdEnabled);
+            setDataLoaded(true);
+        };
+        loadInitialData();
+    }, []);
+
+    // Filter Bar uses the backend-defined warehouse list plus a generic All catch-all
+    const warehouses = ['All', ...warehouseList];
 
     // --- Handlers ---
     // Flips the system theme and updates the master HTML attribute
@@ -42,6 +63,18 @@ function App() {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         setTheme(newTheme);
         document.documentElement.setAttribute('data-theme', newTheme);
+        window.AppDataHandler.saveSettings({ theme: newTheme, lowStockThreshold, isThresholdEnabled });
+    };
+
+    // Threshold Setting Wrappers to automatically save to backend
+    const handleSetThreshold = (newVal) => {
+        setLowStockThreshold(newVal);
+        window.AppDataHandler.saveSettings({ theme, lowStockThreshold: newVal, isThresholdEnabled });
+    };
+
+    const handleSetThresholdEnabled = (newVal) => {
+        setIsThresholdEnabled(newVal);
+        window.AppDataHandler.saveSettings({ theme, lowStockThreshold, isThresholdEnabled: newVal });
     };
 
     // Opens the prompt with dynamic data parameters
@@ -58,17 +91,36 @@ function App() {
     };
 
     // Generalized method for Prompt confirming an action
-    // Currently redirects output to the development console to simulate database writes
-    const handlePromptConfirm = () => {
-        if (promptState.type === 'remove-item' || promptState.type === 'remove-supplier') {
-            console.log(`Mockup: Removing ${promptState.items.length} item(s)...`);
-            // Future logic: Slice items out of inventoryData or supplierData map here.
-        } else if (promptState.type === 'edit-item' || promptState.type === 'add-item') {
-            console.log(`Mockup: Saving item details...`);
-            // Future logic: Construct object from prompt payload and inject into inventoryData
-        } else if (promptState.type === 'edit-supplier' || promptState.type === 'add-supplier') {
-            console.log(`Mockup: Saving supplier details...`);
-            // Future logic: Push or modify object inside loaded supplierData
+    // Now implements actual state updates and calls the backend save methods
+    const handlePromptConfirm = (payload) => {
+        if (promptState.type === 'remove-item') {
+            const updatedInventory = inventoryData.filter(item => !promptState.items.includes(item.id));
+            setInventoryData(updatedInventory);
+            window.AppDataHandler.saveInventory(updatedInventory);
+        } else if (promptState.type === 'remove-supplier') {
+            const updatedSuppliers = supplierData.filter(sup => !promptState.items.includes(sup.id));
+            setSupplierData(updatedSuppliers);
+            window.AppDataHandler.saveSuppliers(updatedSuppliers);
+        } else if (promptState.type === 'add-item') {
+            const updatedInventory = [...inventoryData, payload];
+            setInventoryData(updatedInventory);
+            window.AppDataHandler.saveInventory(updatedInventory);
+        } else if (promptState.type === 'edit-item') {
+            const updatedInventory = inventoryData.map(item => 
+                item.id === payload.id ? payload : item
+            );
+            setInventoryData(updatedInventory);
+            window.AppDataHandler.saveInventory(updatedInventory);
+        } else if (promptState.type === 'add-supplier') {
+            const updatedSuppliers = [...supplierData, payload];
+            setSupplierData(updatedSuppliers);
+            window.AppDataHandler.saveSuppliers(updatedSuppliers);
+        } else if (promptState.type === 'edit-supplier') {
+            const updatedSuppliers = supplierData.map(sup => 
+                sup.id === payload.id ? payload : sup
+            );
+            setSupplierData(updatedSuppliers);
+            window.AppDataHandler.saveSuppliers(updatedSuppliers);
         }
         closePrompt();
     };
@@ -129,9 +181,18 @@ function App() {
 
                 {/* Main Content Router */}
                 <main className="main-content">
-                    {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
-                    {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
-                    {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={setLowStockThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={setIsThresholdEnabled} />}
+                    {!dataLoaded ? (
+                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                            <h2>Loading Data...</h2>
+                            <p>Fetching resources from the backend...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
+                            {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
+                            {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={handleSetThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={handleSetThresholdEnabled} />}
+                        </>
+                    )}
                 </main>
 
                 {/* Global Prompt Overlay */}
@@ -142,7 +203,10 @@ function App() {
                     items={promptState.items}
                     onClose={closePrompt}
                     onConfirm={handlePromptConfirm}
+                    inventoryData={inventoryData}
                     supplierData={supplierData}
+                    uoms={uoms}
+                    warehouses={warehouseList}
                 />
             </div>
         </div>

@@ -9,13 +9,18 @@
 const InventoryTable = ({ openPrompt, inventoryData, lowStockThreshold, isThresholdEnabled, activeWarehouseFilter }) => {
     // --- Local State ---
     // Tracks which specific rows the user has checked off
-    const [selectedRows, setSelectedRows] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedRows, setSelectedRows] = React.useState([]);
+    const [searchQuery, setSearchQuery] = React.useState("");
+    
+    // Clear selection when data changes (e.g., after remove or filter change)
+    React.useEffect(() => {
+        setSelectedRows([]);
+    }, [inventoryData, activeWarehouseFilter]);
 
     // --- Computed Data ---
     // First, apply the warehouse filter to the incoming list
-    const warehouseFilteredData = activeWarehouseFilter === 'All' 
-        ? inventoryData 
+    const warehouseFilteredData = activeWarehouseFilter === 'All'
+        ? inventoryData
         : inventoryData.filter(item => item.warehouse === activeWarehouseFilter);
 
     // Compute status badges
@@ -74,8 +79,8 @@ const InventoryTable = ({ openPrompt, inventoryData, lowStockThreshold, isThresh
                                         // Bulk Actions (visible when items are checked)
                                         <>
                                             <span className="selection-count">{selectedRows.length} item(s) selected</span>
-                                            <button 
-                                                className="tool-btn edit-btn" 
+                                            <button
+                                                className="tool-btn edit-btn"
                                                 onClick={() => openPrompt('Edit Item', 'edit-item', selectedRows)}
                                                 disabled={selectedRows.length !== 1}
                                                 style={{ opacity: selectedRows.length !== 1 ? 0.5 : 1, cursor: selectedRows.length !== 1 ? 'not-allowed' : 'pointer' }}
@@ -86,10 +91,10 @@ const InventoryTable = ({ openPrompt, inventoryData, lowStockThreshold, isThresh
                                         </>
                                     ) : (
                                         // Default Search State
-                                        <input 
-                                            type="text" 
-                                            className="search-bar" 
-                                            placeholder="Search items..." 
+                                        <input
+                                            type="text"
+                                            className="search-bar"
+                                            placeholder="Search items..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                         />
@@ -136,31 +141,31 @@ const InventoryTable = ({ openPrompt, inventoryData, lowStockThreshold, isThresh
                             const isSelected = selectedRows.includes(item.id);
 
                             return (
-                            <tr key={item.id} className={`data-row ${isSelected ? 'selected' : ''}`} onClick={() => toggleSelection(item.id)} style={{ cursor: 'pointer' }}>
-                                <td className="checkbox-col">
-                                    <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        readOnly
-                                    />
-                                </td>
-                                <td className="item-id">{item.id}</td>
-                                <td>{item.name}</td>
-                                <td>{item.category}</td>
-                                <td>{item.quantity}</td>
-                                <td>
-                                    <span className={`status-badge ${item.status === 'In Stock' ? 'success' : 'warning'}`}>
-                                        {item.status}
-                                    </span>
-                                </td>
-                                <td>{item.warehouse}</td>
-                                <td>
-                                    <span className="supplier-link" onClick={(e) => { e.stopPropagation(); openPrompt('Supplier Details', 'supplier-details', [item.supplier]); }}>{item.supplier}</span>
-                                </td>
-                            </tr>
-                        );
-                    })
-                )}
+                                <tr key={item.id} className={`data-row ${isSelected ? 'selected' : ''}`} onClick={() => toggleSelection(item.id)} style={{ cursor: 'pointer' }}>
+                                    <td className="checkbox-col">
+                                        <input
+                                            type="checkbox"
+                                            checked={isSelected}
+                                            readOnly
+                                        />
+                                    </td>
+                                    <td className="item-id">{item.id}</td>
+                                    <td>{item.name}</td>
+                                    <td>{item.category}</td>
+                                    <td>{item.quantity}</td>
+                                    <td>
+                                        <span className={`status-badge ${item.status === 'In Stock' ? 'success' : 'warning'}`}>
+                                            {item.status}
+                                        </span>
+                                    </td>
+                                    <td>{item.warehouse}</td>
+                                    <td>
+                                        <span className="supplier-link" onClick={(e) => { e.stopPropagation(); openPrompt('Supplier Details', 'supplier-details', [item.supplier]); }}>{item.supplier || 'N/A'}</span>
+                                    </td>
+                                </tr>
+                            );
+                        })
+                    )}
                 </tbody>
             </table>
         </div>

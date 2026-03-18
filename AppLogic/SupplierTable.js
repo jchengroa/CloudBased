@@ -8,8 +8,13 @@
 
 const SupplierTable = ({ openPrompt, supplierData }) => {
     // --- Local State ---
-    const [selectedRows, setSelectedRows] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedRows, setSelectedRows] = React.useState([]);
+    const [searchQuery, setSearchQuery] = React.useState("");
+
+    // Clear selection when data changes
+    React.useEffect(() => {
+        setSelectedRows([]);
+    }, [supplierData]);
 
     // --- Computed Data ---
     const filteredData = supplierData.filter(item => {
