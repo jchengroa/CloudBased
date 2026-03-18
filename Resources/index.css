@@ -1,0 +1,507 @@
+/* =========================================================================
+   1. COLOR VARIABLES & THEME REGISTRY
+   ========================================================================= */
+
+:root {
+    /* Dark Mode (Default) */
+    --bg-color: #0f1115;
+    --text-primary: #f0f3f6;
+    --text-secondary: #8b949e;
+    --accent-color: #2f81f7;
+    --accent-hover: #4493f8;
+    --border-color: #444c56;
+    --card-bg: #161b22;
+    --hover-bg: rgba(255, 255, 255, 0.03);
+    --selected-bg: rgba(47, 129, 247, 0.08);
+    --th-bg: rgba(255, 255, 255, 0.01);
+    --btn-edit-hover: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='light'] {
+    /* Light Mode Overrides */
+    --bg-color: #f6f8fa;
+    --text-primary: #1f2328;
+    --text-secondary: #656d76;
+    --accent-color: #0969da;
+    --accent-hover: #0a5cb8;
+    --border-color: #d0d7de;
+    --card-bg: #ffffff;
+    --hover-bg: rgba(0, 0, 0, 0.04);
+    --selected-bg: rgba(9, 105, 218, 0.08);
+    --th-bg: rgba(0, 0, 0, 0.02);
+    --btn-edit-hover: rgba(0, 0, 0, 0.05);
+}
+
+
+/* =========================================================================
+   2. GLOBAL RESET & BASE STYLES
+   ========================================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    
+    /* Strict viewport sizing to allow proper scroll behaviors */
+    height: 100vh;
+    padding: 7vh 4vw 7vh 4vw;
+    display: flex;
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+
+/* =========================================================================
+   3. APP LAYOUT & CORE NAVIGATION
+   ========================================================================= */
+
+.app-layout {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* === Top Dashboard Navigation === */
+.tab-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.app-logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-right: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+.nav-tabs-left, .nav-tabs-right {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Text Tab Buttons (e.g. Inventory, Suppliers) */
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.6rem 1.25rem;
+    cursor: pointer;
+}
+
+.nav-btn.active {
+    color: var(--accent-color);
+}
+
+/* The "U" Profile Settings Button */
+.user-avatar-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-avatar-btn.active {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+
+/* =========================================================================
+   4. SHARED UI CONTAINERS (THE "LIST BOX")
+   ========================================================================= */
+
+/* The flexible space where tabs inject their views */
+.main-content {
+    flex-grow: 1; 
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: hidden; 
+}
+
+/* The rounded bounding box applied to all tables/settings panes */
+.list-box {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 100%;
+    height: 100%; 
+    overflow: auto;
+}
+
+
+/* =========================================================================
+   5. SETTINGS TAB SPECIFICS
+   ========================================================================= */
+
+.settings-tab {
+    padding: 3rem;
+    height: auto; 
+    max-width: 800px;
+}
+
+.settings-tab h2 {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+/* Individual setting config bars */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--th-bg);
+}
+
+.setting-info h3 {
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.setting-info p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+
+/* =========================================================================
+   6. TABLE & TOOLBAR STYLES (Used by Inventory & Supplier Tables)
+   ========================================================================= */
+
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse; 
+    text-align: left; 
+}
+
+/* === Toolbar Row (Search & Action Buttons) === */
+.management-row th {
+    height: 70px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--th-bg); 
+    padding: 0 1.5rem;
+    font-weight: 400;
+}
+
+.management-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.toolbar-left, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.search-bar {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    width: 250px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-bar:focus {
+    border-color: var(--accent-color);
+}
+
+.selection-count {
+    color: var(--accent-color);
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+/* Universal Button Class */
+.tool-btn {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.add-btn {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+.add-btn:hover { background-color: var(--accent-hover); }
+
+.edit-btn {
+    background-color: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+.edit-btn:hover { background-color: var(--btn-edit-hover); }
+
+.remove-btn {
+    background-color: rgba(248, 81, 73, 0.1);
+    color: #f85149;
+    border: 1px solid rgba(248, 81, 73, 0.3);
+}
+.remove-btn:hover { background-color: rgba(248, 81, 73, 0.2); }
+
+/* === Column Descriptions Row === */
+.header-row th {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* === Main Data Rows === */
+.data-row td {
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: background-color 0.2s ease;
+}
+
+.data-row:hover td {
+    background-color: var(--hover-bg); 
+}
+
+.data-row.selected td {
+    background-color: var(--selected-bg);
+}
+
+/* Unique structural elements within tables */
+.checkbox-col {
+    width: 50px;
+    text-align: center;
+    padding-left: 1.5rem !important;
+}
+
+input[type="checkbox"] {
+    cursor: pointer;
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--accent-color);
+}
+
+.item-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: var(--accent-color);
+}
+
+/* Interactive Links */
+.supplier-link {
+    color: var(--accent-color);
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s, text-decoration 0.2s;
+}
+.supplier-link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+/* =========================================================================
+   7. PROMPT (MODAL) STYLES
+   ========================================================================= */
+
+/* Dimmed Background Overlay */
+.prompt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it stays above everything */
+    padding: 2rem;
+}
+
+/* The Floating Box */
+.prompt-box {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px; /* Nice reasonable width */
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: promptIn 0.2s ease-out forwards;
+}
+
+@keyframes promptIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Prompt Header area */
+.prompt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--th-bg);
+}
+
+.prompt-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* The subtle 'X' exit button */
+.prompt-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.prompt-close-btn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+/* Prompt Content area */
+.prompt-content {
+    padding: 2.5rem 1.5rem;
+    color: var(--text-secondary);
+}
+
+.prompt-placeholder {
+    font-size: 0.95rem;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Status Pill Indicators */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.success {
+    background-color: rgba(46, 160, 67, 0.15);
+    color: #3fb950;
+    border: 1px solid rgba(46, 160, 67, 0.4);
+}
+
+.status-badge.warning {
+    background-color: rgba(210, 153, 34, 0.15);
+    color: #d29922;
+    border: 1px solid rgba(210, 153, 34, 0.4);
+}
+
+/* =========================================================================
+   8. FORM ELEMENTS (FOR PROMPT MODALS)
+   ========================================================================= */
+
+.prompt-form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.prompt-form-row > div {
+    flex: 1;
+}
+
+.prompt-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.prompt-input, .prompt-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.prompt-input:focus, .prompt-select:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--selected-bg);
+}
+
+.prompt-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}
