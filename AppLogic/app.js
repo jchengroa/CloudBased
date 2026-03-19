@@ -17,6 +17,7 @@ function App() {
     const [promptState, setPromptState] = useState({ isOpen: false, title: '', type: '', items: [] });
 
     // --- Inventory & Threshold State ---
+    // Pre-load placeholder values — overwritten immediately once loadInitialData resolves
     const [lowStockThreshold, setLowStockThreshold] = useState(1000);
     const [isThresholdEnabled, setIsThresholdEnabled] = useState(true);
     const [activeWarehouseFilter, setActiveWarehouseFilter] = useState('All');
@@ -77,6 +78,18 @@ function App() {
         window.AppDataHandler.saveSettings({ theme, lowStockThreshold, isThresholdEnabled: newVal });
     };
 
+    // Updates the UOM list in state and persists it to the backend
+    const handleSaveUOMs = (newUoms) => {
+        setUoms(newUoms);
+        window.AppDataHandler.saveUOMs(newUoms);
+    };
+
+    // Updates the warehouse list in state and persists it to Firestore
+    const handleSaveWarehouses = (newWarehouses) => {
+        setWarehouseList(newWarehouses);
+        window.AppDataHandler.saveWarehouses(newWarehouses);
+    };
+
     // Opens the prompt with dynamic data parameters
     // title: string identifying prompt header
     // type: internal string dictating logic flow ('add-item', 'supplier-details', etc.)
@@ -106,8 +119,8 @@ function App() {
             setInventoryData(updatedInventory);
             window.AppDataHandler.saveInventory(updatedInventory);
         } else if (promptState.type === 'edit-item') {
-            const updatedInventory = inventoryData.map(item => 
-                item.id === payload.id ? payload : item
+            const updatedInventory = inventoryData.map(item =>
+                item.id === promptState.items[0] ? payload : item
             );
             setInventoryData(updatedInventory);
             window.AppDataHandler.saveInventory(updatedInventory);
@@ -116,8 +129,8 @@ function App() {
             setSupplierData(updatedSuppliers);
             window.AppDataHandler.saveSuppliers(updatedSuppliers);
         } else if (promptState.type === 'edit-supplier') {
-            const updatedSuppliers = supplierData.map(sup => 
-                sup.id === payload.id ? payload : sup
+            const updatedSuppliers = supplierData.map(sup =>
+                sup.id === promptState.items[0] ? payload : sup
             );
             setSupplierData(updatedSuppliers);
             window.AppDataHandler.saveSuppliers(updatedSuppliers);
@@ -126,6 +139,27 @@ function App() {
     };
 
     // --- Render ---
+
+    // Shows a loading screen while data is being fetched.
+    if (!dataLoaded) {
+        return (
+            <div style={{
+                width: '100vw',
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--bg-color)',
+                color: 'var(--text-secondary)',
+                fontSize: '1.1rem',
+                fontWeight: '500',
+                letterSpacing: '0.03em'
+            }}>
+                Cloud Face is loading resources...
+            </div> // lmao
+        );
+    }
+
     return (
         <div className="app-wrapper">
             {/* Topmost Brand Bar (Navigation Bar) */}
@@ -164,7 +198,7 @@ function App() {
             </div>
 
             <div className="app-layout">
-                {/* Filter Bar (replaces the old Navigation Bar) */}
+                {/* Filter Bar */}
                 {activeTab === 'inventory' && (
                     <div className="filter-bar">
                         {warehouses.map(wh => (
@@ -181,18 +215,9 @@ function App() {
 
                 {/* Main Content Router */}
                 <main className="main-content">
-                    {!dataLoaded ? (
-                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                            <h2>Loading Data...</h2>
-                            <p>Fetching resources from the backend...</p>
-                        </div>
-                    ) : (
-                        <>
-                            {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
-                            {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
-                            {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={handleSetThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={handleSetThresholdEnabled} />}
-                        </>
-                    )}
+                    {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
+                    {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
+                    {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={handleSetThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={handleSetThresholdEnabled} uoms={uoms} onSaveUOMs={handleSaveUOMs} warehouses={warehouseList} onSaveWarehouses={handleSaveWarehouses} />}
                 </main>
 
                 {/* Global Prompt Overlay */}

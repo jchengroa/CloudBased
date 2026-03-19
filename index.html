@@ -7,6 +7,18 @@
     <title>CloudBased</title>
     <link rel="icon" type="image/png" href="Resources/icon.png">
     <link rel="stylesheet" href="Resources/index.css">
+
+    <script>
+        // Apply the saved theme before React renders to avoid a flash.
+        // Reads from localStorage synchronously; defaults to 'light' (matching defaultsettings.json).
+        try {
+            const saved = localStorage.getItem('cloudbased_tmp_settings');
+            const theme = saved ? (JSON.parse(saved).theme || 'light') : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
 </head>
 
 <body>
@@ -22,6 +34,10 @@
     <script type="text/babel" src="AppLogic/InventoryTable.js"></script>
     <script type="text/babel" src="AppLogic/SupplierTable.js"></script>
     <script type="text/babel" src="AppLogic/UserSettings.js"></script>
+
+    <!-- Firebase SDK (compat builds work with plain <script> tags, no bundler needed) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
     <!-- Backend Controller -->
     <script src="AppData/AppDataHandler.js"></script>

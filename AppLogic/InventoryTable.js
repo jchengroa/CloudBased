@@ -160,7 +160,13 @@ const InventoryTable = ({ openPrompt, inventoryData, lowStockThreshold, isThresh
                                     </td>
                                     <td>{item.warehouse}</td>
                                     <td>
-                                        <span className="supplier-link" onClick={(e) => { e.stopPropagation(); openPrompt('Supplier Details', 'supplier-details', [item.supplier]); }}>{item.supplier || 'N/A'}</span>
+                                        {item.supplier ? (
+                                            <span className="supplier-link" onClick={(e) => { e.stopPropagation(); openPrompt('Supplier Details', 'supplier-details', [item.supplier]); }}>
+                                                {item.supplier}
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
+                                        )}
                                     </td>
                                 </tr>
                             );

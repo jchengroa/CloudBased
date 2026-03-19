@@ -236,8 +236,9 @@ body {
 
 .settings-tab {
     padding: 3rem;
-    height: auto; 
+    height: 100%;
     max-width: 800px;
+    overflow-y: auto;
 }
 
 .settings-tab h2 {
@@ -259,6 +260,12 @@ body {
 
 .setting-item.setting-column {
     display: block;
+}
+
+.setting-info {
+    flex: 1;
+    min-width: 0; /* Allows text to wrap instead of overflowing into button space */
+    padding-right: 1.5rem;
 }
 
 .setting-info h3 {
