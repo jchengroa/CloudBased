@@ -125,7 +125,16 @@ UI/UX Polish
 
 ===============================================================
 
-Version 0.4.1 (March 19, 2025)
+Version 0.4.1 (March 19, 2026)
 
 UI/UX Polish
 - index.css: Added scrolling to the prompts lmao. Added display 'flex' for auto stretch, and set 'overflow-y: auto' to automatically add a scrollbar once the prompt is taller than the viewport.
+
+===============================================================
+
+Version 0.4.2 (March 19, 2026)
+
+Security & Authentication
+- index.html: Added Firebase Authentication compat SDK to the project headers.
+- AppDataHandler.js: Implemented automatic anonymous authentication (`signInAnonymously`). This provides a secure layer for Firestore, allowing the transition from open "Test Mode" rules to authenticated-only access (`if request.auth != null`).
+- Security Patch: Addressed automated secret scanning alerts from GitHub and Google by securing the database logic against unauthorized external access.

@@ -32,6 +32,13 @@ window.AppDataHandler = (function () {
     // Guard against double-initialization (e.g. hot reloads)
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
+
+        // --- Anonymous Authentication ---
+        // Silently sign in the user to satisfy 'if request.auth != null' security rules.
+        // This is a "set and forget" call; the SDK handles the session and queues Firestore queries until ready.
+        firebase.auth().signInAnonymously().catch(e => {
+            console.error("Firebase Auth Error: Access to Firestore may be restricted.", e);
+        });
     }
 
     const db = firebase.firestore();
