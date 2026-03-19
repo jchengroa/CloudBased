@@ -32,7 +32,7 @@ window.AppDataHandler = (function () {
     // Guard against double-initialization (e.g. hot reloads)
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
-
+        // TEMPORARY
         // --- Anonymous Authentication ---
         // Silently sign in the user to satisfy 'if request.auth != null' security rules.
         // This is a "set and forget" call; the SDK handles the session and queues Firestore queries until ready.
@@ -51,7 +51,7 @@ window.AppDataHandler = (function () {
         try {
             const response = await fetch(path);
             if (response.ok) return await response.json();
-        } catch (e) {}
+        } catch (e) { }
         return null;
     }
 
@@ -120,7 +120,7 @@ window.AppDataHandler = (function () {
             // Settings stay in localStorage — they are device-specific preferences
             // Fallback: defaultsettings.json → hardcoded fallback
             const cached = localStorage.getItem(storagePrefix + 'settings');
-            if (cached) { try { return JSON.parse(cached); } catch (e) {} }
+            if (cached) { try { return JSON.parse(cached); } catch (e) { } }
             return (await fetchJson('AppData/defaultsettings.json')) ?? { theme: "light", lowStockThreshold: 1000, isThresholdEnabled: true };
         },
 
