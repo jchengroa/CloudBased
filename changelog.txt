@@ -119,3 +119,9 @@ Security & Authentication
 - AppDataHandler.js: Implemented automatic anonymous authentication (`signInAnonymously`). This provides a secure layer for Firestore, allowing the transition from open "Test Mode" rules to authenticated-only access (`if request.auth != null`).
 - Security Patch: Addressed automated secret scanning alerts from GitHub and Google by securing the database logic against unauthorized external access.
 
+Version 0.4.3 (March 19, 2026)
+
+Security & Data Load Fixes
+- AppDataHandler.js: Resolved a race condition where data fetches would fire before authentication was established. Implemented a global `authPromise` that all Firestore methods await to ensure database queries only execute once signed in.
+- app.js: Wrapped the initial startup sequence in a `try...finally` block to prevent the application from hanging on the "Loading Resources" screen if a network error or authentication delay occurs.
+

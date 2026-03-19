@@ -329,7 +329,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 <div className="setting-info">
                     <h3>CloudBased</h3>
                     <p>  -ˋˏ ._. ˎˊ  </p>
-                    <p>Version: 0.4.2  |  Last Updated: March 19, 2026</p>
+                    <p>Version: 0.4.3  |  Last Updated: March 19, 2026</p>
                     <p>Created by: Cheng Roa and Tejada</p>
                 </div>
             </div>

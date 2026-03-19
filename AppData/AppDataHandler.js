@@ -29,16 +29,18 @@ window.AppDataHandler = (function () {
     const savedConfig = localStorage.getItem(CONFIG_KEY);
     const firebaseConfig = savedConfig ? JSON.parse(savedConfig) : DEFAULT_CONFIG;
 
-    // Guard against double-initialization (e.g. hot reloads)
+    // --- Firebase Initialization ---
+    // We capture this as a promise so fetch methods can await it,
+    // ensuring 'if request.auth != null' rules are satisfied before the first query hits.
+    let authPromise = null;
+
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
-        // TEMPORARY
-        // --- Anonymous Authentication ---
-        // Silently sign in the user to satisfy 'if request.auth != null' security rules.
-        // This is a "set and forget" call; the SDK handles the session and queues Firestore queries until ready.
-        firebase.auth().signInAnonymously().catch(e => {
+        authPromise = firebase.auth().signInAnonymously().catch(e => {
             console.error("Firebase Auth Error: Access to Firestore may be restricted.", e);
         });
+    } else {
+        authPromise = Promise.resolve();
     }
 
     const db = firebase.firestore();
@@ -58,6 +60,7 @@ window.AppDataHandler = (function () {
     // Fetches all documents from a Firestore collection.
     // Each document's Firestore ID is mapped back as the item's 'id' field.
     async function getCollection(collectionName) {
+        await authPromise;
         const snapshot = await db.collection(collectionName).get();
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
@@ -65,6 +68,7 @@ window.AppDataHandler = (function () {
     // Replaces the entire contents of a Firestore collection with a new data array.
     // Each item's 'id' field is used as the Firestore document ID.
     async function saveCollection(collectionName, items) {
+        await authPromise;
         const collRef = db.collection(collectionName);
         const existing = await collRef.get();
         const batch = db.batch();
@@ -95,6 +99,7 @@ window.AppDataHandler = (function () {
         },
 
         getUOMs: async function () {
+            await authPromise;
             // Source: Firestore 'uoms/list' → { values: [...] }
             // On first load (doc missing), seeds Firestore from defaultuoms.json so future reads come from the database
             const doc = await db.collection('uoms').doc('list').get();
@@ -106,6 +111,7 @@ window.AppDataHandler = (function () {
         },
 
         getWarehouses: async function () {
+            await authPromise;
             // Source: Firestore 'warehouses/list' → { values: [...] }
             // On first load (doc missing), seeds Firestore from defaultwarehouses.json so future reads come from the database
             const doc = await db.collection('warehouses').doc('list').get();
@@ -135,11 +141,13 @@ window.AppDataHandler = (function () {
         },
 
         saveUOMs: async function (newData) {
+            await authPromise;
             // Saved as a single document with a 'values' array
             await db.collection('uoms').doc('list').set({ values: newData });
         },
 
         saveWarehouses: async function (newData) {
+            await authPromise;
             // Saved as a single document with a 'values' array
             await db.collection('warehouses').doc('list').set({ values: newData });
         },

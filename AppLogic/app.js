@@ -36,21 +36,26 @@ function App() {
     // Load Backend Data on Mount
     React.useEffect(() => {
         const loadInitialData = async () => {
-            const inv = await window.AppDataHandler.getInventory();
-            const sups = await window.AppDataHandler.getSuppliers();
-            const staticUoms = await window.AppDataHandler.getUOMs();
-            const staticWhs = await window.AppDataHandler.getWarehouses();
-            const settings = await window.AppDataHandler.getSettings();
+            try {
+                const inv = await window.AppDataHandler.getInventory();
+                const sups = await window.AppDataHandler.getSuppliers();
+                const staticUoms = await window.AppDataHandler.getUOMs();
+                const staticWhs = await window.AppDataHandler.getWarehouses();
+                const settings = await window.AppDataHandler.getSettings();
 
-            setInventoryData(inv);
-            setSupplierData(sups);
-            setUoms(staticUoms);
-            setWarehouseList(staticWhs);
-            setTheme(settings.theme);
-            document.documentElement.setAttribute('data-theme', settings.theme);
-            setLowStockThreshold(settings.lowStockThreshold);
-            setIsThresholdEnabled(settings.isThresholdEnabled);
-            setDataLoaded(true);
+                setInventoryData(inv);
+                setSupplierData(sups);
+                setUoms(staticUoms);
+                setWarehouseList(staticWhs);
+                setTheme(settings.theme);
+                document.documentElement.setAttribute('data-theme', settings.theme);
+                setLowStockThreshold(settings.lowStockThreshold);
+                setIsThresholdEnabled(settings.isThresholdEnabled);
+            } catch (e) {
+                console.error("Critical error during data load:", e);
+            } finally {
+                setDataLoaded(true);
+            }
         };
         loadInitialData();
     }, []);
