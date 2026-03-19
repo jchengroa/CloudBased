@@ -1,16 +1,26 @@
-/**
- * ==========================================
- * PROMPT COMPONENT
- * ==========================================
- * A reusable modal overlay that 
- * handles all popup interactions.
+/*
+ * Prompt Modal Overlay
+ * Manages dynamically-rendered form bodies for CRUD operations based on requested 'type'.
  */
 
-const Prompt = ({ isOpen, onClose, onConfirm, title, type, items, inventoryData = [], supplierData = [], uoms = [], warehouses = [] }) => {
-    // --- Local State for Form Fields ---
+const Prompt = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    type,
+    items,
+    inventoryData = [],
+    supplierData  = [],
+    inputLogs     = [],
+    outputLogs    = [],
+    uoms          = [],
+    warehouses    = []
+}) => {
+    // state
     const [formData, setFormData] = React.useState({});
 
-    // Reset form data when prompt opens or type/items change
+    // re-initialize target form map when opening
     React.useEffect(() => {
         if (!isOpen) {
             setFormData({});
@@ -20,40 +30,73 @@ const Prompt = ({ isOpen, onClose, onConfirm, title, type, items, inventoryData 
         if (type === 'edit-item' && items.length === 1) {
             const itemToEdit = inventoryData.find(i => i.id === items[0]);
             if (itemToEdit) setFormData({ ...itemToEdit });
+
+        } else if (type === 'add-item') {
+            setFormData({
+                id:        `ITM-${Math.floor(1000 + Math.random() * 9000)}`,
+                name:      '',
+                category:  '',
+                quantity:  '',
+                uom:       uoms[0] || 'Pieces',
+                msl:       '',
+                warehouse: warehouses[0] || 'Main',
+                supplier:  ''
+            });
+
         } else if (type === 'edit-supplier' && items.length === 1) {
             const supplierToEdit = supplierData.find(s => s.id === items[0]);
             if (supplierToEdit) setFormData({ ...supplierToEdit });
-        } else if (type === 'add-item') {
-            setFormData({
-                id: `ITM-${Math.floor(1000 + Math.random() * 9000)}`,
-                name: '',
-                category: '',
-                quantity: '',
-                uom: uoms[0] || 'Pieces',
-                msl: '',
-                warehouse: warehouses[0] || 'Main',
-                supplier: ''
-            });
+
         } else if (type === 'add-supplier') {
             setFormData({
-                id: `SUP-${Math.floor(100 + Math.random() * 900)}`,
-                name: '',
+                id:      `SUP-${Math.floor(100 + Math.random() * 900)}`,
+                name:    '',
                 contact: '',
                 address: '',
-                phone: '',
-                email: ''
+                phone:   '',
+                email:   ''
             });
+
+        } else if (type === 'add-input-log' || type === 'add-output-log') {
+            const firstItem = inventoryData[0];
+            setFormData({
+                transactionId: `TXN-${Math.floor(10000 + Math.random() * 90000)}`,
+                itemCode:      firstItem ? firstItem.id   : '',
+                itemName:      firstItem ? firstItem.name : '',
+                quantity:      '',
+                uom:           (firstItem && firstItem.uom) ? firstItem.uom : (uoms[0] || 'Pieces'),
+                date:          new Date().toISOString().split('T')[0],
+                supplier:      '',
+                batchLot:      ''
+            });
+
+        } else if (type === 'edit-input-log' && items.length === 1) {
+            const logToEdit = outputLogs.find(l => l.id === items[0]);
+            if (logToEdit) setFormData({ ...logToEdit });
         }
-    }, [isOpen, type, items, inventoryData, supplierData, uoms, warehouses]);
+
+    }, [isOpen, type, items, inventoryData, supplierData, inputLogs, outputLogs, uoms, warehouses]);
 
     if (!isOpen) return null;
 
+    // handlers
     const handleChange = (e) => {
         const { name, value, type } = e.target;
-        // For number inputs, let the raw string value persist in state so user can clear it
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'number' && value !== '' ? parseInt(value, 10) : value
+            [name]: type === 'number' && value !== '' ? parseFloat(value) : value
+        }));
+    };
+
+    // auto-hydrate log form info from targeted item
+    const handleItemCodeChange = (e) => {
+        const selectedId = e.target.value;
+        const found = inventoryData.find(i => i.id === selectedId);
+        setFormData(prev => ({
+            ...prev,
+            itemCode: selectedId,
+            itemName: found ? found.name : '',
+            uom:      (found && found.uom) ? found.uom : (uoms[0] || 'Pieces')
         }));
     };
 
@@ -62,10 +105,22 @@ const Prompt = ({ isOpen, onClose, onConfirm, title, type, items, inventoryData 
     };
 
     const handleOverlayClick = (e) => {
-        if (e.target.className === 'prompt-overlay') {
-            onClose();
-        }
+        if (e.target.className === 'prompt-overlay') onClose();
     };
+
+    const FormButtons = () => (
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+            <button className="tool-btn edit-btn" onClick={onClose} style={{ padding: '0.6rem 1.5rem', background: 'var(--card-bg)' }}>
+                Cancel
+            </button>
+            <button className="tool-btn add-btn" onClick={handleConfirm} style={{ padding: '0.6rem 1.5rem', background: 'var(--text-primary)', color: 'var(--bg-color)' }}>
+                Save Changes
+            </button>
+        </div>
+    );
+
+    const isLogType = type === 'add-input-log' || type === 'edit-input-log' || type === 'add-output-log' || type === 'edit-output-log';
+    const isInputLog = type === 'add-input-log' || type === 'edit-input-log';
 
     return (
         <div className="prompt-overlay" onClick={handleOverlayClick}>
@@ -78,11 +133,18 @@ const Prompt = ({ isOpen, onClose, onConfirm, title, type, items, inventoryData 
                 </div>
 
                 <div className="prompt-content">
-                    {(type === 'remove-item' || type === 'remove-supplier') && (
+
+                    {/* Remove Confirmation */}
+                    {(type === 'remove-item' || type === 'remove-supplier' || type === 'remove-input-log' || type === 'remove-output-log') && (
                         <div className="prompt-remove-confirmation">
                             <p style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.05rem' }}>
-                                Are you sure you want to remove <strong>{items.length}</strong> selected {items.length === 1 ? 'item' : 'items'}?
+                                Are you sure you want to remove <strong>{items.length}</strong> selected {items.length === 1 ? 'entry' : 'entries'}?
                             </p>
+                            {(type === 'remove-input-log' || type === 'remove-output-log') && (
+                                <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                    Note: removing a log entry will reverse its quantity impact on the linked inventory item.
+                                </p>
+                            )}
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                 <button className="tool-btn add-btn" onClick={onClose} style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
                                     Cancel
@@ -94,6 +156,7 @@ const Prompt = ({ isOpen, onClose, onConfirm, title, type, items, inventoryData 
                         </div>
                     )}
 
+                    {/* Inventory Editing */}
                     {(type === 'edit-item' || type === 'add-item') && (
                         <div className="prompt-form-container">
                             <div className="prompt-form-row">
@@ -114,53 +177,42 @@ const Prompt = ({ isOpen, onClose, onConfirm, title, type, items, inventoryData 
                             </div>
                             <div className="prompt-form-row">
                                 <div>
-                                    <label className="prompt-label">Quantity</label>
-                                    <input type="number" name="quantity" className="prompt-input" value={formData.quantity ?? ''} onChange={handleChange} placeholder="0" />
+                                    <label className="prompt-label">
+                                        {type === 'add-item' ? 'Initial Quantity' : 'Quantity'}
+                                    </label>
+                                    <input type="number" name="quantity" step="any" className="prompt-input" value={formData.quantity ?? ''} onChange={handleChange} placeholder="0" />
                                 </div>
                                 <div>
                                     <label className="prompt-label">UOM</label>
                                     <select name="uom" className="prompt-select" value={formData.uom || ''} onChange={handleChange}>
-                                        {uoms.map(u => (
-                                            <option key={u} value={u}>{u}</option>
-                                        ))}
+                                        {uoms.map(u => <option key={u} value={u}>{u}</option>)}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="prompt-label">Min. Level (MSL)</label>
-                                    <input type="number" name="msl" className="prompt-input" value={formData.msl ?? ''} onChange={handleChange} placeholder="0" />
+                                    <input type="number" name="msl" step="any" className="prompt-input" value={formData.msl ?? ''} onChange={handleChange} placeholder="0" />
                                 </div>
                             </div>
                             <div className="prompt-form-row">
                                 <div>
                                     <label className="prompt-label">Warehouse Location</label>
                                     <select name="warehouse" className="prompt-select" value={formData.warehouse || ''} onChange={handleChange}>
-                                        {warehouses.map(wh => (
-                                            <option key={wh} value={wh}>{wh}</option>
-                                        ))}
+                                        {warehouses.map(wh => <option key={wh} value={wh}>{wh}</option>)}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="prompt-label">Supplier</label>
                                     <select name="supplier" className="prompt-select" value={formData.supplier || ''} onChange={handleChange}>
                                         {!formData.supplier && <option value="">-- Select a supplier --</option>}
-                                        {supplierData.map(sup => (
-                                            <option key={sup.id} value={sup.name}>{sup.name}</option>
-                                        ))}
+                                        {supplierData.map(sup => <option key={sup.id} value={sup.name}>{sup.name}</option>)}
                                     </select>
                                 </div>
                             </div>
-
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                <button className="tool-btn edit-btn" onClick={onClose} style={{ padding: '0.6rem 1.5rem', background: 'var(--card-bg)' }}>
-                                    Cancel
-                                </button>
-                                <button className="tool-btn add-btn" onClick={handleConfirm} style={{ padding: '0.6rem 1.5rem', background: 'var(--text-primary)', color: 'var(--bg-color)' }}>
-                                    Save Changes
-                                </button>
-                            </div>
+                            <FormButtons />
                         </div>
                     )}
 
+                    {/* Supplier Editing */}
                     {(type === 'edit-supplier' || type === 'add-supplier') && (
                         <div className="prompt-form-container">
                             <div className="prompt-form-row">
@@ -189,21 +241,82 @@ const Prompt = ({ isOpen, onClose, onConfirm, title, type, items, inventoryData 
                                     <input type="email" name="email" className="prompt-input" value={formData.email || ''} onChange={handleChange} placeholder="e.g. contact@supplier.com" />
                                 </div>
                             </div>
-
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                <button className="tool-btn edit-btn" onClick={onClose} style={{ padding: '0.6rem 1.5rem', background: 'var(--card-bg)' }}>
-                                    Cancel
-                                </button>
-                                <button className="tool-btn add-btn" onClick={handleConfirm} style={{ padding: '0.6rem 1.5rem', background: 'var(--text-primary)', color: 'var(--bg-color)' }}>
-                                    Save Changes
-                                </button>
-                            </div>
+                            <FormButtons />
                         </div>
                     )}
 
+                    {/* Input/Output LogsEditing */}
+                    {isLogType && (
+                        <div className="prompt-form-container">
+                            <div className="prompt-form-row">
+                                <div>
+                                    <label className="prompt-label">Transaction ID</label>
+                                    <input type="text" name="transactionId" className="prompt-input" value={formData.transactionId || ''} onChange={handleChange} placeholder="e.g. TXN-00000" />
+                                </div>
+                                <div>
+                                    <label className="prompt-label">Date</label>
+                                    <input type="date" name="date" className="prompt-input" value={formData.date || ''} onChange={handleChange} />
+                                </div>
+                            </div>
+
+                            <div className="prompt-form-row">
+                                <div>
+                                    <label className="prompt-label">Item Code</label>
+                                    <select name="itemCode" className="prompt-select" value={formData.itemCode || ''} onChange={handleItemCodeChange}>
+                                        {inventoryData.length === 0 && <option value="">-- No items found --</option>}
+                                        {inventoryData.map(item => (
+                                            <option key={item.id} value={item.id}>{item.id}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div style={{ flex: 2 }}>
+                                    <label className="prompt-label">Item Name</label>
+                                    <input
+                                        type="text"
+                                        name="itemName"
+                                        className="prompt-input"
+                                        value={formData.itemName || ''}
+                                        readOnly
+                                        style={{ opacity: 0.7, cursor: 'not-allowed' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="prompt-form-row">
+                                <div>
+                                    <label className="prompt-label">{isInputLog ? 'Input Quantity' : 'Output Quantity'}</label>
+                                    <input type="number" name="quantity" step="any" min="0" className="prompt-input" value={formData.quantity ?? ''} onChange={handleChange} placeholder="0" />
+                                </div>
+                                <div>
+                                    <label className="prompt-label">UOM</label>
+                                    <select name="uom" className="prompt-select" value={formData.uom || ''} onChange={handleChange}>
+                                        {uoms.map(u => <option key={u} value={u}>{u}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="prompt-form-row">
+                                <div>
+                                    <label className="prompt-label">Supplier</label>
+                                    <select name="supplier" className="prompt-select" value={formData.supplier || ''} onChange={handleChange}>
+                                        <option value="">-- None --</option>
+                                        {supplierData.map(sup => <option key={sup.id} value={sup.name}>{sup.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="prompt-label">Batch / LOT</label>
+                                    <input type="text" name="batchLot" className="prompt-input" value={formData.batchLot || ''} onChange={handleChange} placeholder="e.g. LOT-2024-001" />
+                                </div>
+                            </div>
+
+                            <FormButtons />
+                        </div>
+                    )}
+
+                    {/* Read-Only Details Card */}
                     {type === 'supplier-details' && (() => {
-                        const supName = items && items.length > 0 ? items[0] : "";
-                        const supplier = supplierData.find(s => s.name === supName) || { name: supName, contact: "N/A", email: "N/A", phone: "N/A", address: "N/A" };
+                        const supName  = items && items.length > 0 ? items[0] : '';
+                        const supplier = supplierData.find(s => s.name === supName) || { name: supName, contact: 'N/A', email: 'N/A', phone: 'N/A', address: 'N/A' };
 
                         return (
                             <div className="supplier-details-container" style={{ padding: '0.5rem 0' }}>
@@ -217,25 +330,28 @@ const Prompt = ({ isOpen, onClose, onConfirm, title, type, items, inventoryData 
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    <div style={{ color: 'var(--text-secondary)' }}>
-                                        {supplier.email}
-                                    </div>
-                                    <div style={{ color: 'var(--text-secondary)' }}>
-                                        {supplier.phone}
-                                    </div>
-                                    <div style={{ color: 'var(--text-secondary)' }}>
-                                        {supplier.address}
-                                    </div>
+                                    <div style={{ color: 'var(--text-secondary)' }}>{supplier.email}</div>
+                                    <div style={{ color: 'var(--text-secondary)' }}>{supplier.phone}</div>
+                                    <div style={{ color: 'var(--text-secondary)' }}>{supplier.address}</div>
                                 </div>
                             </div>
                         );
                     })()}
 
-                    {(!type || (type !== 'remove-item' && type !== 'remove-supplier' && type !== 'edit-item' && type !== 'add-item' && type !== 'edit-supplier' && type !== 'add-supplier' && type !== 'supplier-details')) && (
+                    {/* Fallback */}
+                    {(!type || ![
+                        'remove-item', 'remove-supplier', 'remove-input-log', 'remove-output-log',
+                        'add-item', 'edit-item',
+                        'add-supplier', 'edit-supplier',
+                        'add-input-log', 'edit-input-log',
+                        'add-output-log', 'edit-output-log',
+                        'supplier-details'
+                    ].includes(type)) && (
                         <p className="prompt-placeholder">
                             Details and inputs for "{title}" will be implemented here.
                         </p>
                     )}
+
                 </div>
             </div>
         </div>

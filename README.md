@@ -146,4 +146,38 @@ Version 0.4.3 (March 19, 2026)
 Security & Data Load Fixes
 - AppDataHandler.js: Resolved a race condition where data fetches would fire before authentication was established. Implemented a global `authPromise` that all Firestore methods await to ensure database queries only execute once signed in.
 - app.js: Wrapped the initial startup sequence in a `try...finally` block to prevent the application from hanging on the "Loading Resources" screen if a network error or authentication delay occurs.
-
+
+===============================================================
+
+Version 0.5 (March 19, 2026)
+
+Inventory Transaction Logs
+- Triple-View Switcher: Seamlessly toggle between Overview (Live Stock), Input Log (Incoming), and Output Log (Outgoing).
+- Unified Table Architecture: All views share the same high-density interface with bulk selection, checkbox controls, and smart search.
+- Bi-Directional Quantity Sync: Input logs automatically increase inventory (+), while output logs subtract (-), with robust decimal precision.
+- Full History Editing: Edit or remove log entries with automatic quantity reversal.
+- Location-Aware Logs: The Warehouse filter bar now dynamically filters logs based on the linked item's storage location.
+
+Advanced Sorting System
+- Intelligent Sort Button: A new interactive pill-button matching the search bar height.
+- Custom Sort Logic: Alphabetical (A-Z/Z-A), Numerical (High/Low), and Time-based (Newest/Oldest) sorting across all tables.
+- Smart Priority: "Status" sorting places Low Stock items at the top; Warehouse sorting allows prioritizing specific locations.
+- Visual Feedback: The button highlights in accent color and displays the active sort choice for quick reference.
+
+UI/UX Finalization
+- "Save Changes" Standardization: Synchronized button styles across all administrative forms for a consistent premium feel.
+- Status Badge Polish: Fixed badge wrapping to maintain a clean pill shape on mobile and high-density screens.
+- Animated Dropdowns: Implemented smooth fade-in animations for the new sorting controls.
+
+Codebase Architecture & Simplification
+- Shared Components: Extracted the complex SortButton and ViewSwitcher into a generalized `AppLogic/Shared.js` utility module.
+- InventoryTable Refactoring: Consolidated the duplicate 100+ line table template structures into a single unified render loop that switches row contents based on activeView.
+- app.js Simplification: Rewrote the massive `if-else` cascade in `handlePromptConfirm` into a cleanly delineated `switch` statement for improved maintainability.
+
+Comment Naturalization
+- Removed overly robotic AI-generated block comments (`// =======================`, `// --- Local State ---`) across all major files (`UserSettings.js`, `Prompt.js`, `InventoryTable.js`, `SupplierTable.js`, `AppDataHandler.js`).
+- Replaced rigid structural markers with concise, functional developer notes.
+
+File System & Coding Style
+- Unified all JavaScript filenames to `lowerCamelCase` style for project consistency.
+- Renamed `Shared.js` to `sharedComponents.js` and updated `index.html` references.

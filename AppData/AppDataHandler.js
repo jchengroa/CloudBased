@@ -1,18 +1,15 @@
-/**
- * ==========================================
- * APP DATA HANDLER
- * ==========================================
- * Controller handling data flow between the cloud database (Firestore)
- * and the application logic.
+/*
+ * App Data Handler
+ * Acts as the data controller between Firestore and the local app state.
  *
- * Data storage split:
- *   - Firestore : inventory, suppliers, UOMs, warehouses (shared, persistent)
- *   - localStorage : user settings only (theme, threshold — device-specific)
+ * Data scope:
+ * - Firestore: user inventory, suppliers, UOMs, warehouses
+ * - LocalStorage: device-specific theming and thresholds
  */
 
 window.AppDataHandler = (function () {
 
-    // --- Firebase Initialization ---
+    // firebase init configuration
 
     // Hardcoded fallback config — used when no custom config has been saved in localStorage
     const DEFAULT_CONFIG = {
@@ -29,7 +26,7 @@ window.AppDataHandler = (function () {
     const savedConfig = localStorage.getItem(CONFIG_KEY);
     const firebaseConfig = savedConfig ? JSON.parse(savedConfig) : DEFAULT_CONFIG;
 
-    // --- Firebase Initialization ---
+    // firebase connection establishment
     // We capture this as a promise so fetch methods can await it,
     // ensuring 'if request.auth != null' rules are satisfied before the first query hits.
     let authPromise = null;
@@ -86,11 +83,21 @@ window.AppDataHandler = (function () {
     }
 
     return {
-        // --- Fetch Methods ---
+        // fetch utilities
 
         getInventory: async function () {
             // Source: Firestore 'inventory' collection
             return await getCollection('inventory');
+        },
+
+        getInputLogs: async function () {
+            // Source: Firestore 'inputLogs' collection
+            return await getCollection('inputLogs');
+        },
+
+        getOutputLogs: async function () {
+            // Source: Firestore 'outputLogs' collection
+            return await getCollection('outputLogs');
         },
 
         getSuppliers: async function () {
@@ -130,10 +137,18 @@ window.AppDataHandler = (function () {
             return (await fetchJson('AppData/defaultsettings.json')) ?? { theme: "light", lowStockThreshold: 1000, isThresholdEnabled: true };
         },
 
-        // --- Save Methods ---
+        // commit utilities
 
         saveInventory: async function (newData) {
             await saveCollection('inventory', newData);
+        },
+
+        saveInputLogs: async function (newData) {
+            await saveCollection('inputLogs', newData);
+        },
+
+        saveOutputLogs: async function (newData) {
+            await saveCollection('outputLogs', newData);
         },
 
         saveSuppliers: async function (newData) {
@@ -157,7 +172,7 @@ window.AppDataHandler = (function () {
             localStorage.setItem(storagePrefix + 'settings', JSON.stringify(newSettings));
         },
 
-        // --- Utility Methods ---
+        // client state utilities
 
         clearAllData: function () {
             // Clears saved user settings from localStorage.

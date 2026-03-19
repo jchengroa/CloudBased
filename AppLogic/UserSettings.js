@@ -1,26 +1,20 @@
-/**
- * ==========================================
- * USER SETTINGS COMPONENT
- * ==========================================
- * Isolated view for application configurations
- * such as the global light/dark theme toggle.
+/*
+ * User Settings Component
+ * Isolated tab for configuring app preferences like theme and stock thresholds.
  */
 
 const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThresholdEnabled, setIsThresholdEnabled, uoms = [], onSaveUOMs, warehouses = [], onSaveWarehouses }) => {
 
-    // --- Local State for Threshold Input ---
+    // local field states
     const [inputValue, setInputValue] = React.useState(threshold.toString());
     const [errorMsg, setErrorMsg] = React.useState("");
 
-    // --- Local State for UOM Editor ---
     const [newUom, setNewUom] = React.useState("");
     const [uomError, setUomError] = React.useState("");
 
-    // --- Local State for Warehouse Editor ---
     const [newWarehouse, setNewWarehouse] = React.useState("");
     const [warehouseError, setWarehouseError] = React.useState("");
 
-    // --- Local State for Firebase Config Editor ---
     const [fbConfig, setFbConfig] = React.useState(() => window.AppDataHandler.getFirebaseConfig());
 
     const handleFbConfigChange = (e) => {
@@ -38,7 +32,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
         window.location.reload();
     };
 
-    // --- Handlers ---
+    // form event handlers
     const handleThresholdChange = (e) => {
         let val = e.target.value;
         setInputValue(val); // Always update text field to let user verify
@@ -100,13 +94,13 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
         onSaveWarehouses(warehouses.filter(w => w !== whToRemove));
     };
 
-    // --- Render ---
+    // view markup
     return (
         <div className="list-box settings-tab">
 
             <h2>Settings</h2>
 
-            {/* Application Theme Setting Block */}
+            {/* Theme Card */}
             <div className="setting-item">
                 <div className="setting-info">
                     <h3>Themes</h3>
@@ -119,7 +113,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 </button>
             </div>
 
-            {/* Low Stock Threshold Setting Block */}
+            {/* Low Stock Config */}
             <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
                 <div className="setting-item-inner">
                     <div className="setting-info">
@@ -155,7 +149,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 )}
             </div>
 
-            {/* Units of Measure (UOM) Setting Block */}
+            {/* Unit Labels */}
             <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
                 <div className="setting-item-inner">
                     <div className="setting-info">
@@ -209,7 +203,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 )}
             </div>
 
-            {/* Warehouses Setting Block */}
+            {/* Warehouse Configuration */}
             <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
                 <div className="setting-item-inner">
                     <div className="setting-info">
@@ -263,7 +257,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 )}
             </div>
 
-            {/* Reset App Data Block */}
+            {/* Factory Reset */}
             <div className="setting-item" style={{ marginTop: '1.5rem' }}>
                 <div className="setting-info">
                     <h3>Reset App Data</h3>
@@ -281,7 +275,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 </button>
             </div>
 
-            {/* Firebase Configuration Block */}
+            {/* Custom DB Injection */}
             <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
                 <div className="setting-item-inner">
                     <div className="setting-info">
@@ -324,12 +318,12 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 </div>
             </div>
 
-            {/* Application Info Block */}
+            {/* Credits */}
             <div className="setting-item" style={{ marginTop: '1.5rem' }}>
                 <div className="setting-info">
                     <h3>CloudBased</h3>
                     <p>  -ˋˏ ._. ˎˊ  </p>
-                    <p>Version: 0.4.3  |  Last Updated: March 19, 2026</p>
+                    <p>Version: 0.5.0  |  Last Updated: March 19, 2026</p>
                     <p>Created by: Cheng Roa and Tejada</p>
                 </div>
             </div>

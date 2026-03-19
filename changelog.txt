@@ -125,3 +125,43 @@ Security & Data Load Fixes
 - AppDataHandler.js: Resolved a race condition where data fetches would fire before authentication was established. Implemented a global `authPromise` that all Firestore methods await to ensure database queries only execute once signed in.
 - app.js: Wrapped the initial startup sequence in a `try...finally` block to prevent the application from hanging on the "Loading Resources" screen if a network error or authentication delay occurs.
 
+
+Version 0.5 (March 19, 2026)
+
+UI & Layout Finalization
+- InventoryTable.js: Fixed "Status" bubble text wrapping. Added `white-space: nowrap` and `inline-flex` styling to ensure badges remain readable and maintain their pill shape on smaller screens.
+
+Inventory Transaction Logs
+- InventoryTable.js: Added a three-way View Switcher (Overview / Input Log / Output Log) rendered as a styled pill group next to the search bar. The switcher is automatically hidden when bulk rows are selected to avoid UI conflicts.
+- Unified Architecture: Integrated the same selection, checkbox, and click-to-row logic from the Overview table into the log views.
+- Input Log: New table view tracking incoming stock. Each entry records: Transaction ID, Item Code, Item Name (auto-filled), Input Quantity/UOM, Date, Supplier, and Batch/LOT.
+- Output Log: Symmetric table view for outgoing stock.
+- Quantity Sync Logic: Logging an Input entry automatically increments the matching inventory item's quantity; logging an Output entry decrements it.
+- Edit & Remove Logs: Implemented full CRUD for log entries. Editing a log recalculates the quantity delta; removing a log automatically reverses its quantity impact on the inventory.
+- Warehouse filtering: Integrated log views with the warehouse filter bar, which cross-references item codes to show logs from specific locations.
+- Decimal Support: All quantity fields now use `parseFloat`, enabling high-precision fractional quantity tracking.
+
+Advanced Sorting System
+- Sort Filter Button: Designed a custom interactive sort button that sits before the search bar in all table views.
+- Sort Dropdown: Features a sleek, animated dropdown with A-Z, Z-A, Numeric (Low/High), Date (Oldest/Newest), and Status/Warehouse priority sorting.
+- Persistent Logic: Applied sorting across all tables (Inventory Overview, Input/Output Logs, and Suppliers).
+- Style: Integrated new `.sort-btn` and `.sort-dropdown` CSS with hover and active states.
+
+Prompt & UX Refinements
+- Prompt.js: Standardized all form buttons to use the consistent "Save Changes" style throughout the app.
+- UX Polish: Re-filling logic for Edit Log forms now pulls data directly from the selected log record.
+- AppDataHandler.js: Expanded Firestore sync methods to include Input and Output logs.
+
+Codebase Architecture & Simplification
+- Shared Components: Extracted the complex SortButton and ViewSwitcher into a new generalized `AppLogic/Shared.js` utility class to adhere to DRY (Don't Repeat Yourself) principles.
+- InventoryTable Refactoring: Consolidated the duplicate 100+ line table structures into a single unified render loop that switches row contents based on activeView.
+- app.js Simplification: Re-wrote the massive `if-else` cascade in `handlePromptConfirm` into a cleanly delineated `switch` statement for improved maintainability.
+
+Comment Naturalization
+- Removed overly robotic AI-generated block comments (`// =======================`, `// --- Local State ---`) across all major files (`UserSettings.js`, `Prompt.js`, `InventoryTable.js`, `SupplierTable.js`, `AppDataHandler.js`).
+- Replaced structural comments with concise, functional developer notes.
+
+File System & Coding Style
+- Unified all JavaScript filenames to `lowerCamelCase` style for project consistency.
+- Renamed `Shared.js` to `sharedComponents.js` to more clearly describe its purpose.
+- Updated `index.html` script references to match the new file structure.

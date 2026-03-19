@@ -1,36 +1,36 @@
-/**
- * ==========================================
- * APP.JS - Main Application Entry Point
- * ==========================================
- * This file handles global state (themes, tabs)
- * and acts as the router for the sub-components.
+/*
+ * App.js - Main Application Entry Point
+ * Maintains global state (themes, tabs) and routes props to sub-components.
  */
 
 const { useState } = React;
 
 function App() {
-    // --- Global State ---
+    // global state
     const [theme, setTheme] = useState('dark');
     const [activeTab, setActiveTab] = useState('inventory');
 
-    // --- Prompt/Modal State ---
+    // modal overlay data
     const [promptState, setPromptState] = useState({ isOpen: false, title: '', type: '', items: [] });
 
-    // --- Inventory & Threshold State ---
-    // Pre-load placeholder values — overwritten immediately once loadInitialData resolves
+    // shared numeric thresholding data (loaded async on mount)
     const [lowStockThreshold, setLowStockThreshold] = useState(1000);
     const [isThresholdEnabled, setIsThresholdEnabled] = useState(true);
     const [activeWarehouseFilter, setActiveWarehouseFilter] = useState('All');
 
-    // Lifted Inventory and Supplier Data 
+    // unified cloud data arrays
     const [inventoryData, setInventoryData] = useState([]);
     const [supplierData, setSupplierData] = useState([]);
 
-    // Static Form Definitions
+    // transaction logs
+    const [inputLogs, setInputLogs] = useState([]);
+    const [outputLogs, setOutputLogs] = useState([]);
+
+    // shared dropdown lists
     const [uoms, setUoms] = useState([]);
     const [warehouseList, setWarehouseList] = useState([]);
 
-    // Application Loading State
+    // initial app load flag
     const [dataLoaded, setDataLoaded] = useState(false);
 
     // Load Backend Data on Mount
@@ -42,6 +42,8 @@ function App() {
                 const staticUoms = await window.AppDataHandler.getUOMs();
                 const staticWhs = await window.AppDataHandler.getWarehouses();
                 const settings = await window.AppDataHandler.getSettings();
+                const inLogs = await window.AppDataHandler.getInputLogs();
+                const outLogs = await window.AppDataHandler.getOutputLogs();
 
                 setInventoryData(inv);
                 setSupplierData(sups);
@@ -51,6 +53,8 @@ function App() {
                 document.documentElement.setAttribute('data-theme', settings.theme);
                 setLowStockThreshold(settings.lowStockThreshold);
                 setIsThresholdEnabled(settings.isThresholdEnabled);
+                setInputLogs(inLogs);
+                setOutputLogs(outLogs);
             } catch (e) {
                 console.error("Critical error during data load:", e);
             } finally {
@@ -60,10 +64,10 @@ function App() {
         loadInitialData();
     }, []);
 
-    // Filter Bar uses the backend-defined warehouse list plus a generic All catch-all
+    // inject visual filter "All" into user-defined warehouse array
     const warehouses = ['All', ...warehouseList];
 
-    // --- Handlers ---
+    // handlers
     // Flips the system theme and updates the master HTML attribute
     const toggleTheme = () => {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -72,7 +76,7 @@ function App() {
         window.AppDataHandler.saveSettings({ theme: newTheme, lowStockThreshold, isThresholdEnabled });
     };
 
-    // Threshold Setting Wrappers to automatically save to backend
+    // pass-through settings controllers
     const handleSetThreshold = (newVal) => {
         setLowStockThreshold(newVal);
         window.AppDataHandler.saveSettings({ theme, lowStockThreshold: newVal, isThresholdEnabled });
@@ -108,44 +112,169 @@ function App() {
         setPromptState({ ...promptState, isOpen: false });
     };
 
-    // Generalized method for Prompt confirming an action
-    // Now implements actual state updates and calls the backend save methods
+    // dynamic form submission router
     const handlePromptConfirm = (payload) => {
-        if (promptState.type === 'remove-item') {
-            const updatedInventory = inventoryData.filter(item => !promptState.items.includes(item.id));
-            setInventoryData(updatedInventory);
-            window.AppDataHandler.saveInventory(updatedInventory);
-        } else if (promptState.type === 'remove-supplier') {
-            const updatedSuppliers = supplierData.filter(sup => !promptState.items.includes(sup.id));
-            setSupplierData(updatedSuppliers);
-            window.AppDataHandler.saveSuppliers(updatedSuppliers);
-        } else if (promptState.type === 'add-item') {
-            const updatedInventory = [...inventoryData, payload];
-            setInventoryData(updatedInventory);
-            window.AppDataHandler.saveInventory(updatedInventory);
-        } else if (promptState.type === 'edit-item') {
-            const updatedInventory = inventoryData.map(item =>
-                item.id === promptState.items[0] ? payload : item
-            );
-            setInventoryData(updatedInventory);
-            window.AppDataHandler.saveInventory(updatedInventory);
-        } else if (promptState.type === 'add-supplier') {
-            const updatedSuppliers = [...supplierData, payload];
-            setSupplierData(updatedSuppliers);
-            window.AppDataHandler.saveSuppliers(updatedSuppliers);
-        } else if (promptState.type === 'edit-supplier') {
-            const updatedSuppliers = supplierData.map(sup =>
-                sup.id === promptState.items[0] ? payload : sup
-            );
-            setSupplierData(updatedSuppliers);
-            window.AppDataHandler.saveSuppliers(updatedSuppliers);
+        let updatedInventory, updatedSuppliers, updatedLogs;
+
+        switch (promptState.type) {
+            case 'remove-item':
+                updatedInventory = inventoryData.filter(item => !promptState.items.includes(item.id));
+                setInventoryData(updatedInventory);
+                window.AppDataHandler.saveInventory(updatedInventory);
+                break;
+
+            case 'remove-supplier':
+                updatedSuppliers = supplierData.filter(sup => !promptState.items.includes(sup.id));
+                setSupplierData(updatedSuppliers);
+                window.AppDataHandler.saveSuppliers(updatedSuppliers);
+                break;
+
+            case 'add-item':
+                updatedInventory = [...inventoryData, payload];
+                setInventoryData(updatedInventory);
+                window.AppDataHandler.saveInventory(updatedInventory);
+                break;
+
+            case 'edit-item':
+                updatedInventory = inventoryData.map(item =>
+                    item.id === promptState.items[0] ? payload : item
+                );
+                setInventoryData(updatedInventory);
+                window.AppDataHandler.saveInventory(updatedInventory);
+                break;
+
+            case 'add-supplier':
+                updatedSuppliers = [...supplierData, payload];
+                setSupplierData(updatedSuppliers);
+                window.AppDataHandler.saveSuppliers(updatedSuppliers);
+                break;
+
+            case 'edit-supplier':
+                updatedSuppliers = supplierData.map(sup =>
+                    sup.id === promptState.items[0] ? payload : sup
+                );
+                setSupplierData(updatedSuppliers);
+                window.AppDataHandler.saveSuppliers(updatedSuppliers);
+                break;
+
+            case 'add-input-log':
+                payload = { ...payload, id: `in-${Date.now()}` };
+                updatedLogs = [...inputLogs, payload];
+                setInputLogs(updatedLogs);
+                window.AppDataHandler.saveInputLogs(updatedLogs);
+
+                // auto increment
+                updatedInventory = inventoryData.map(item => {
+                    if (item.id === payload.itemCode) return { ...item, quantity: Math.round(((parseFloat(item.quantity) || 0) + (parseFloat(payload.quantity) || 0)) * 1e10) / 1e10 };
+                    return item;
+                });
+                setInventoryData(updatedInventory);
+                window.AppDataHandler.saveInventory(updatedInventory);
+                break;
+
+            case 'edit-input-log':
+                {
+                    const oldLog = inputLogs.find(l => l.id === promptState.items[0]);
+                    updatedLogs = inputLogs.map(l => l.id === promptState.items[0] ? { ...payload, id: l.id } : l);
+                    setInputLogs(updatedLogs);
+                    window.AppDataHandler.saveInputLogs(updatedLogs);
+
+                    if (oldLog) {
+                        const oldQty = parseFloat(oldLog.quantity) || 0;
+                        const newQty = parseFloat(payload.quantity) || 0;
+                        updatedInventory = inventoryData.map(item => {
+                            let q = parseFloat(item.quantity) || 0;
+                            if (item.id === oldLog.itemCode) q = Math.round((q - oldQty) * 1e10) / 1e10;
+                            if (item.id === payload.itemCode) q = Math.round((q + newQty) * 1e10) / 1e10;
+                            return item.id === oldLog.itemCode || item.id === payload.itemCode ? { ...item, quantity: q } : item;
+                        });
+                        setInventoryData(updatedInventory);
+                        window.AppDataHandler.saveInventory(updatedInventory);
+                    }
+                }
+                break;
+
+            case 'remove-input-log':
+                {
+                    const logsToRemove = inputLogs.filter(l => promptState.items.includes(l.id));
+                    updatedLogs = inputLogs.filter(l => !promptState.items.includes(l.id));
+                    setInputLogs(updatedLogs);
+                    window.AppDataHandler.saveInputLogs(updatedLogs);
+
+                    updatedInventory = [...inventoryData];
+                    logsToRemove.forEach(log => {
+                        const qty = parseFloat(log.quantity) || 0;
+                        updatedInventory = updatedInventory.map(item => {
+                            if (item.id === log.itemCode) return { ...item, quantity: Math.round(((parseFloat(item.quantity) || 0) - qty) * 1e10) / 1e10 };
+                            return item;
+                        });
+                    });
+                    setInventoryData(updatedInventory);
+                    window.AppDataHandler.saveInventory(updatedInventory);
+                }
+                break;
+
+            case 'add-output-log':
+                payload = { ...payload, id: `out-${Date.now()}` };
+                updatedLogs = [...outputLogs, payload];
+                setOutputLogs(updatedLogs);
+                window.AppDataHandler.saveOutputLogs(updatedLogs);
+
+                // auto decrement
+                updatedInventory = inventoryData.map(item => {
+                    if (item.id === payload.itemCode) return { ...item, quantity: Math.round(((parseFloat(item.quantity) || 0) - (parseFloat(payload.quantity) || 0)) * 1e10) / 1e10 };
+                    return item;
+                });
+                setInventoryData(updatedInventory);
+                window.AppDataHandler.saveInventory(updatedInventory);
+                break;
+
+            case 'edit-output-log':
+                {
+                    const oldLog = outputLogs.find(l => l.id === promptState.items[0]);
+                    updatedLogs = outputLogs.map(l => l.id === promptState.items[0] ? { ...payload, id: l.id } : l);
+                    setOutputLogs(updatedLogs);
+                    window.AppDataHandler.saveOutputLogs(updatedLogs);
+
+                    if (oldLog) {
+                        const oldQty = parseFloat(oldLog.quantity) || 0;
+                        const newQty = parseFloat(payload.quantity) || 0;
+                        updatedInventory = inventoryData.map(item => {
+                            let q = parseFloat(item.quantity) || 0;
+                            if (item.id === oldLog.itemCode) q = Math.round((q + oldQty) * 1e10) / 1e10;
+                            if (item.id === payload.itemCode) q = Math.round((q - newQty) * 1e10) / 1e10;
+                            return item.id === oldLog.itemCode || item.id === payload.itemCode ? { ...item, quantity: q } : item;
+                        });
+                        setInventoryData(updatedInventory);
+                        window.AppDataHandler.saveInventory(updatedInventory);
+                    }
+                }
+                break;
+
+            case 'remove-output-log':
+                {
+                    const logsToRemove = outputLogs.filter(l => promptState.items.includes(l.id));
+                    updatedLogs = outputLogs.filter(l => !promptState.items.includes(l.id));
+                    setOutputLogs(updatedLogs);
+                    window.AppDataHandler.saveOutputLogs(updatedLogs);
+
+                    updatedInventory = [...inventoryData];
+                    logsToRemove.forEach(log => {
+                        const qty = parseFloat(log.quantity) || 0;
+                        updatedInventory = updatedInventory.map(item => {
+                            if (item.id === log.itemCode) return { ...item, quantity: Math.round(((parseFloat(item.quantity) || 0) + qty) * 1e10) / 1e10 };
+                            return item;
+                        });
+                    });
+                    setInventoryData(updatedInventory);
+                    window.AppDataHandler.saveInventory(updatedInventory);
+                }
+                break;
         }
         closePrompt();
     };
 
-    // --- Render ---
-
-    // Shows a loading screen while data is being fetched.
+    // render
     if (!dataLoaded) {
         return (
             <div style={{
@@ -220,7 +349,7 @@ function App() {
 
                 {/* Main Content Router */}
                 <main className="main-content">
-                    {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
+                    {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} inputLogs={inputLogs} outputLogs={outputLogs} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
                     {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
                     {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={handleSetThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={handleSetThresholdEnabled} uoms={uoms} onSaveUOMs={handleSaveUOMs} warehouses={warehouseList} onSaveWarehouses={handleSaveWarehouses} />}
                 </main>
@@ -235,6 +364,8 @@ function App() {
                     onConfirm={handlePromptConfirm}
                     inventoryData={inventoryData}
                     supplierData={supplierData}
+                    inputLogs={inputLogs}
+                    outputLogs={outputLogs}
                     uoms={uoms}
                     warehouses={warehouseList}
                 />
@@ -243,6 +374,5 @@ function App() {
     );
 }
 
-// --- App Initialization ---
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
