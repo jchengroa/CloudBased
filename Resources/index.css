@@ -47,7 +47,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    
+
     /* Strict viewport sizing to allow proper scroll behaviors */
     height: 100vh;
     padding: 0;
@@ -78,7 +78,8 @@ body {
     flex-direction: column;
     padding: 3vh 4vw 7vh 4vw;
     gap: 1.5rem;
-    overflow: hidden; /* To allow list-boxes to handle their own scrolling */
+    overflow: hidden;
+    /* To allow list-boxes to handle their own scrolling */
 }
 
 /* === Top Dashboard Navigation === */
@@ -87,7 +88,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 4vw;
-    background-color: var(--card-bg); /* Highlight color similar to tables */
+    background-color: var(--card-bg);
+    /* Highlight color similar to tables */
     border-bottom: 1px solid var(--border-color);
     width: 100%;
 }
@@ -212,11 +214,11 @@ body {
 
 /* The flexible space where tabs inject their views */
 .main-content {
-    flex-grow: 1; 
+    flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 /* The rounded bounding box applied to all tables/settings panes */
@@ -225,7 +227,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     width: 100%;
-    height: 100%; 
+    height: 100%;
     overflow: auto;
 }
 
@@ -264,7 +266,8 @@ body {
 
 .setting-info {
     flex: 1;
-    min-width: 0; /* Allows text to wrap instead of overflowing into button space */
+    min-width: 0;
+    /* Allows text to wrap instead of overflowing into button space */
     padding-right: 1.5rem;
 }
 
@@ -299,15 +302,15 @@ body {
 
 .inventory-table {
     width: 100%;
-    border-collapse: collapse; 
-    text-align: left; 
+    border-collapse: collapse;
+    text-align: left;
 }
 
 /* === Toolbar Row (Search & Action Buttons) === */
 .management-row th {
     height: 70px;
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--th-bg); 
+    background-color: var(--th-bg);
     padding: 0 1.5rem;
     font-weight: 400;
 }
@@ -319,7 +322,8 @@ body {
     width: 100%;
 }
 
-.toolbar-left, .toolbar-right {
+.toolbar-left,
+.toolbar-right {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -364,21 +368,30 @@ body {
     background-color: var(--accent-color);
     color: #fff;
 }
-.add-btn:hover { background-color: var(--accent-hover); }
+
+.add-btn:hover {
+    background-color: var(--accent-hover);
+}
 
 .edit-btn {
     background-color: transparent;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
 }
-.edit-btn:hover { background-color: var(--btn-edit-hover); }
+
+.edit-btn:hover {
+    background-color: var(--btn-edit-hover);
+}
 
 .remove-btn {
     background-color: rgba(248, 81, 73, 0.1);
     color: #f85149;
     border: 1px solid rgba(248, 81, 73, 0.3);
 }
-.remove-btn:hover { background-color: rgba(248, 81, 73, 0.2); }
+
+.remove-btn:hover {
+    background-color: rgba(248, 81, 73, 0.2);
+}
 
 /* === Column Descriptions Row === */
 .header-row th {
@@ -401,7 +414,7 @@ body {
 }
 
 .data-row:hover td {
-    background-color: var(--hover-bg); 
+    background-color: var(--hover-bg);
 }
 
 .data-row.selected td {
@@ -434,6 +447,7 @@ input[type="checkbox"] {
     font-weight: 500;
     transition: color 0.2s, text-decoration 0.2s;
 }
+
 .supplier-link:hover {
     color: var(--accent-hover);
     text-decoration: underline;
@@ -455,7 +469,8 @@ input[type="checkbox"] {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure it stays above everything */
+    z-index: 1000;
+    /* Ensure it stays above everything */
     padding: 2rem;
 }
 
@@ -465,7 +480,8 @@ input[type="checkbox"] {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     width: 100%;
-    max-width: 500px; /* Nice reasonable width */
+    max-width: 500px;
+    /* Nice reasonable width */
     max-height: 90vh;
     overflow: hidden;
     display: flex;
@@ -479,6 +495,7 @@ input[type="checkbox"] {
         opacity: 0;
         transform: translateY(10px) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -527,8 +544,8 @@ input[type="checkbox"] {
 .prompt-content {
     padding: 2.5rem 1.5rem;
     color: var(--text-secondary);
-    flex: 1;        /* Fill remaining height inside the flex-column prompt-box */
-    overflow-y: auto; /* Scroll when form content is taller than the visible area */
+    flex: 1;
+    overflow-y: auto;
 }
 
 .prompt-placeholder {
@@ -567,7 +584,7 @@ input[type="checkbox"] {
     margin-bottom: 1.5rem;
 }
 
-.prompt-form-row > div {
+.prompt-form-row>div {
     flex: 1;
 }
 
@@ -579,7 +596,8 @@ input[type="checkbox"] {
     color: var(--text-secondary);
 }
 
-.prompt-input, .prompt-select {
+.prompt-input,
+.prompt-select {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid var(--border-color);
@@ -591,7 +609,8 @@ input[type="checkbox"] {
     transition: all 0.2s ease;
 }
 
-.prompt-input:focus, .prompt-select:focus {
+.prompt-input:focus,
+.prompt-select:focus {
     border-color: var(--accent-color);
     outline: none;
     box-shadow: 0 0 0 2px var(--selected-bg);
@@ -672,8 +691,8 @@ input[type="checkbox"] {
         width: 100%;
     }
 
-    .setting-item > button,
-    .setting-item-inner > button {
+    .setting-item>button,
+    .setting-item-inner>button {
         width: 100% !important;
     }
 
@@ -689,7 +708,7 @@ input[type="checkbox"] {
         flex: 1;
         width: auto !important;
     }
-    
+
     .threshold-controls input {
         flex: 1;
         width: 100% !important;
