@@ -165,3 +165,17 @@ File System & Coding Style
 - Unified all JavaScript filenames to `lowerCamelCase` style for project consistency.
 - Renamed `Shared.js` to `sharedComponents.js` to more clearly describe its purpose.
 - Updated `index.html` script references to match the new file structure.
+
+Version 0.6 (March 19, 2026)
+
+ERPNext Integration & Data Exporting
+- ERPNext Export Tool: Developed a brand new `exportTool.js` module that generates CSV files pre-configured for ERPNext's multi-row import system.
+- 4-Row Header Mapping: Implemented the mandatory ERPNext structure (Entry Type, Field Label, Field Name/Db Key, and Metadata) to ensure zero-config auto-mapping during imports.
+- New Record Creation: Configured exports to leave the ID column blank by default, allowing ERPNext to automatically create new records rather than updating existing ones.
+- Export Modules: Added support for "Item List" (formerly Item Master) and "Stock Reconciliation" (Current Inventory Levels) DocTypes.
+- Precise Data Encoding: Utilized UTF-8 with BOM (Byte Order Mark) encoding to guarantee that high-precision quantity data and special characters are correctly displayed in Excel.
+- Human Commenting: Refactored internal code documentation in the export tool to follow the project's natural, developer-centric commenting style.
+
+Settings UI Enhancements
+- Export Block: Integrated a new "Export to ERPNext" section into the User Settings dashboard, featuring one-click download buttons for inventory and stock data.
+- User Context Support: Connected the export engine to the live application state, ensuring CSVs always reflect the most recent Firestore data.

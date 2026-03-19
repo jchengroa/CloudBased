@@ -3,7 +3,7 @@
  * Isolated tab for configuring app preferences like theme and stock thresholds.
  */
 
-const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThresholdEnabled, setIsThresholdEnabled, uoms = [], onSaveUOMs, warehouses = [], onSaveWarehouses }) => {
+const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThresholdEnabled, setIsThresholdEnabled, uoms = [], onSaveUOMs, warehouses = [], onSaveWarehouses, inventoryData = [] }) => {
 
     // local field states
     const [inputValue, setInputValue] = React.useState(threshold.toString());
@@ -318,12 +318,63 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 </div>
             </div>
 
+            {/* Export */}
+            <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
+                <div className="setting-item-inner">
+                    <div className="setting-info">
+                        <h3>Export to ERPNext</h3>
+                        <p>Download a CSV pre-formatted with ERPNext Support.</p>
+                        <p>Note: Leave the ID column blank to create new records.</p>
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+
+                    {/* Item List */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: '600', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Item List</div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                                Exports item codes, names, categories, and UOM. Imports into ERPNext's <em>Item</em> DocType.
+                            </div>
+                        </div>
+                        <button
+                            className="tool-btn add-btn"
+                            style={{ whiteSpace: 'nowrap', padding: '0.5rem 1.25rem' }}
+                            onClick={() => window.ExportTool.exportItemMaster(inventoryData)}
+                        >
+                            ↓ Item List
+                        </button>
+                    </div>
+
+                    <div style={{ height: '1px', background: 'var(--border-color)' }} />
+
+                    {/* Stock Reconciliation */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: '600', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Stock Reconciliation</div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                                Exports item codes, warehouses, and current quantities. Valuation rate is left blank — fill it in before importing.
+                            </div>
+                        </div>
+                        <button
+                            className="tool-btn add-btn"
+                            style={{ whiteSpace: 'nowrap', padding: '0.5rem 1.25rem' }}
+                            onClick={() => window.ExportTool.exportStockRecon(inventoryData)}
+                        >
+                            ↓ Stock Recon
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
             {/* Credits */}
             <div className="setting-item" style={{ marginTop: '1.5rem' }}>
                 <div className="setting-info">
                     <h3>CloudBased</h3>
                     <p>  -ˋˏ ._. ˎˊ  </p>
-                    <p>Version: 0.5.0  |  Last Updated: March 19, 2026</p>
+                    <p>Version: 0.6.0  |  Last Updated: March 19, 2026</p>
                     <p>Created by: Cheng Roa and Tejada</p>
                 </div>
             </div>

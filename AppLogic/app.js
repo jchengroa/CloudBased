@@ -351,7 +351,7 @@ function App() {
                 <main className="main-content">
                     {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} inputLogs={inputLogs} outputLogs={outputLogs} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
                     {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
-                    {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={handleSetThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={handleSetThresholdEnabled} uoms={uoms} onSaveUOMs={handleSaveUOMs} warehouses={warehouseList} onSaveWarehouses={handleSaveWarehouses} />}
+                    {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={handleSetThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={handleSetThresholdEnabled} uoms={uoms} onSaveUOMs={handleSaveUOMs} warehouses={warehouseList} onSaveWarehouses={handleSaveWarehouses} inventoryData={inventoryData} />}
                 </main>
 
                 {/* Global Prompt Overlay */}
