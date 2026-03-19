@@ -122,3 +122,10 @@ Loading Screen Overhaul
 UI/UX Polish
 - index.css: Fixed Settings tab overflow — content now scrolls within the bounding box instead of pushing beyond the viewport.
 - index.css: Added `.setting-info` flex constraints to prevent long description text from crowding adjacent buttons in setting rows.
+
+===============================================================
+
+Version 0.4.1 (March 19, 2025)
+
+UI/UX Polish
+- index.css: Added scrolling to the prompts lmao. Added display 'flex' for auto stretch, and set 'overflow-y: auto' to automatically add a scrollbar once the prompt is taller than the viewport.
