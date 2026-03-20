@@ -11,39 +11,8 @@ window.AppDataHandler = (function () {
 
     // firebase init configuration
 
-    // Hardcoded fallback config — used when no custom config has been saved in localStorage
-    const DEFAULT_CONFIG = {
-        apiKey: "AIzaSyDoYkXBa66IQlOeJ1FaXQyiZcNbNAmtPWQ",
-        authDomain: "cloudbasedims.firebaseapp.com",
-        projectId: "cloudbasedims",
-        storageBucket: "cloudbasedims.firebasestorage.app",
-        messagingSenderId: "471198836966",
-        appId: "1:471198836966:web:e56577eefe5e3a213c3327"
-    };
-
-    // Load config from localStorage if the user has saved a custom one, otherwise use the default
     const CONFIG_KEY = 'cloudbased_firebase_config';
-    const savedConfig = localStorage.getItem(CONFIG_KEY);
-    const firebaseConfig = savedConfig ? JSON.parse(savedConfig) : DEFAULT_CONFIG;
-
-    // firebase connection establishment
-    // We capture this as a promise so fetch methods can await it,
-    // ensuring 'if request.auth != null' rules are satisfied before the first query hits.
-    let authPromise = null;
-
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-        authPromise = firebase.auth().signInAnonymously().catch(e => {
-            console.error("Firebase Auth Error: Access to Firestore may be restricted.", e);
-        });
-    } else {
-        authPromise = Promise.resolve();
-    }
-
-    const db = firebase.firestore();
-
-    // Prefix for localStorage keys — only used for user settings
-    const storagePrefix = 'cloudbased_tmp_';
+    let activeConfig = null; // Stores the loaded config (either from localStorage or JSON file)
 
     // Fetches a local JSON file, returns parsed content or null on failure
     async function fetchJson(path) {
@@ -53,6 +22,50 @@ window.AppDataHandler = (function () {
         } catch (e) { }
         return null;
     }
+
+    // firebase connection establishment
+    // We capture this as a promise so fetch methods can await it,
+    // ensuring 'if request.auth != null' rules are satisfied before the first query hits.
+    let dbError = null;
+    let db = null;
+    const authPromise = (async () => {
+        try {
+            const savedConfig = localStorage.getItem(CONFIG_KEY);
+            if (savedConfig) {
+                activeConfig = JSON.parse(savedConfig);
+            } else {
+                activeConfig = await fetchJson('AppData/defaultDatabase.json');
+            }
+
+            if (!activeConfig || Object.keys(activeConfig).length === 0) {
+                dbError = "Configuration not found in Local Storage and defaultDatabase.json.";
+                console.error("Critical: " + dbError);
+                return;
+            }
+
+            if (!firebase.apps.length) {
+                try {
+                    firebase.initializeApp(activeConfig);
+                    db = firebase.firestore();
+                    return firebase.auth().signInAnonymously().catch(e => {
+                        dbError = "Anonymous Authentication Failed: " + e.message;
+                        console.error("Firebase Auth Error: Access to Firestore may be restricted.", e);
+                    });
+                } catch (e) {
+                    dbError = "Firebase Initialization Failed (Possible Invalid Config): " + e.message;
+                    console.error("Firebase Init Error:", e);
+                }
+            } else {
+                db = firebase.firestore();
+            }
+        } catch (e) {
+            dbError = "Unexpected Initialization Error: " + e.message;
+            console.error(dbError, e);
+        }
+    })();
+
+    // Prefix for localStorage keys — only used for user settings
+    const storagePrefix = 'cloudbased_tmp_';
 
     // Fetches all documents from a Firestore collection.
     // Each document's Firestore ID is mapped back as the item's 'id' field.
@@ -183,10 +196,14 @@ window.AppDataHandler = (function () {
                 .forEach(key => localStorage.removeItem(key));
         },
 
-        // Returns the active Firebase config (user-saved or hardcoded default)
+        // Returns the active database initialization error if any
+        getDbError: function () {
+            return dbError;
+        },
+
+        // Returns the active Firebase config (user-saved or default from JSON)
         getFirebaseConfig: function () {
-            const saved = localStorage.getItem(CONFIG_KEY);
-            return saved ? JSON.parse(saved) : { ...DEFAULT_CONFIG };
+            return activeConfig ? { ...activeConfig } : {};
         },
 
         // Saves a new Firebase config to localStorage.

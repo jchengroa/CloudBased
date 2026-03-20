@@ -11,6 +11,7 @@ function App() {
     const [activeTab, setActiveTab] = useState('inventory');
 
     // modal overlay data
+    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [promptState, setPromptState] = useState({ isOpen: false, title: '', type: '', items: [] });
 
     // shared numeric thresholding data (loaded async on mount)
@@ -32,16 +33,24 @@ function App() {
 
     // initial app load flag
     const [dataLoaded, setDataLoaded] = useState(false);
+    const [dbError, setDbError] = useState(null);
 
     // Load Backend Data on Mount
     React.useEffect(() => {
         const loadInitialData = async () => {
             try {
+                // Settings are local, so they should be loaded first
+                const settings = await window.AppDataHandler.getSettings();
+                setTheme(settings.theme);
+                document.documentElement.setAttribute('data-theme', settings.theme);
+                setLowStockThreshold(settings.lowStockThreshold);
+                setIsThresholdEnabled(settings.isThresholdEnabled);
+
+                // These depend on Firebase
                 const inv = await window.AppDataHandler.getInventory();
                 const sups = await window.AppDataHandler.getSuppliers();
                 const staticUoms = await window.AppDataHandler.getUOMs();
                 const staticWhs = await window.AppDataHandler.getWarehouses();
-                const settings = await window.AppDataHandler.getSettings();
                 const inLogs = await window.AppDataHandler.getInputLogs();
                 const outLogs = await window.AppDataHandler.getOutputLogs();
 
@@ -49,14 +58,13 @@ function App() {
                 setSupplierData(sups);
                 setUoms(staticUoms);
                 setWarehouseList(staticWhs);
-                setTheme(settings.theme);
-                document.documentElement.setAttribute('data-theme', settings.theme);
-                setLowStockThreshold(settings.lowStockThreshold);
-                setIsThresholdEnabled(settings.isThresholdEnabled);
                 setInputLogs(inLogs);
                 setOutputLogs(outLogs);
+
+                setDbError(window.AppDataHandler.getDbError());
             } catch (e) {
                 console.error("Critical error during data load:", e);
+                setDbError(window.AppDataHandler.getDbError() || e.message);
             } finally {
                 setDataLoaded(true);
             }
@@ -318,16 +326,41 @@ function App() {
                         </button>
                     </div>
                 </div>
-                <div className="brand-right" onClick={() => setActiveTab('settings')}>
+                <div className="brand-right" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} style={{ position: 'relative' }}>
                     <button
                         className={`user-avatar-btn ${activeTab === 'settings' ? 'active' : ''}`}
                         title="User Settings"
                     >
                         U
                     </button>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)', transition: 'transform 0.2s', transform: isUserDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}>
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
+
+                    {/* Styled Dropdown Menu */}
+                    {isUserDropdownOpen && (
+                        <>
+                            {/* Backdrop to close when clicking outside */}
+                            <div
+                                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
+                                onClick={(e) => { e.stopPropagation(); setIsUserDropdownOpen(false); }}
+                            />
+                            <div className="user-dropdown">
+                                <div
+                                    className={`user-dropdown-item ${activeTab === 'settings' ? 'active' : ''}`}
+                                    onClick={() => { setActiveTab('settings'); setIsUserDropdownOpen(false); }}
+                                >
+                                    User Settings
+                                </div>
+                                <div
+                                    className="user-dropdown-item"
+                                    onClick={() => { window.open("https://docs.google.com/document/d/1AoBQg_2qeGFfdUL3JeSW7lP2VdIIPpO6pFgqCEiyC68/edit?usp=sharing", "_blank"); setIsUserDropdownOpen(false); }}
+                                >
+                                    Database Help
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -349,8 +382,8 @@ function App() {
 
                 {/* Main Content Router */}
                 <main className="main-content">
-                    {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} inputLogs={inputLogs} outputLogs={outputLogs} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} />}
-                    {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} />}
+                    {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} inputLogs={inputLogs} outputLogs={outputLogs} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} dbError={dbError} />}
+                    {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} dbError={dbError} />}
                     {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={handleSetThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={handleSetThresholdEnabled} uoms={uoms} onSaveUOMs={handleSaveUOMs} warehouses={warehouseList} onSaveWarehouses={handleSaveWarehouses} inventoryData={inventoryData} />}
                 </main>
 

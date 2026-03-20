@@ -10,7 +10,8 @@ const InventoryTable = ({
     outputLogs,
     lowStockThreshold,
     isThresholdEnabled,
-    activeWarehouseFilter
+    activeWarehouseFilter,
+    dbError
 }) => {
 
     // local state
@@ -221,7 +222,14 @@ const InventoryTable = ({
                 </thead>
 
                 <tbody>
-                    {filteredData.length === 0 ? (
+                    {dbError ? (
+                        <tr>
+                            <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Database Not Found</div>
+                                <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>{dbError}</div>
+                            </td>
+                        </tr>
+                    ) : filteredData.length === 0 ? (
                         <tr>
                             <td colSpan="8" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                                 {searchQuery ? `No entries found matching "${searchQuery}".` : `No ${isOverview ? 'items' : 'log entries'} yet.`}

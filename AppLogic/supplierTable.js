@@ -3,7 +3,7 @@
  * View for managing supplier contact info, sharing core features with inventory.
  */
 
-const SupplierTable = ({ openPrompt, supplierData }) => {
+const SupplierTable = ({ openPrompt, supplierData, dbError }) => {
     // local state
     const [selectedRows, setSelectedRows] = React.useState([]);
     const [searchQuery,  setSearchQuery]  = React.useState('');
@@ -128,7 +128,14 @@ const SupplierTable = ({ openPrompt, supplierData }) => {
                 </thead>
 
                 <tbody>
-                    {filteredData.length === 0 ? (
+                    {dbError ? (
+                        <tr>
+                            <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Database Not Found</div>
+                                <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>{dbError}</div>
+                            </td>
+                        </tr>
+                    ) : filteredData.length === 0 ? (
                         <tr>
                             <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                                 {searchQuery ? `No suppliers found matching "${searchQuery}".` : 'No suppliers yet.'}

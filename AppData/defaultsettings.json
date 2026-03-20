@@ -1,5 +1,5 @@
 {
   "theme": "light",
   "lowStockThreshold": 1000,
-  "isThresholdEnabled": true
+  "isThresholdEnabled": false
 }

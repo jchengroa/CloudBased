@@ -180,7 +180,8 @@ Comment Naturalization
 
 File System & Coding Style
 - Unified all JavaScript filenames to `lowerCamelCase` style for project consistency.
-- Renamed `Shared.js` to `sharedComponents.js` and updated `index.html` references.
+- Renamed `Shared.js` to `sharedComponents.js` to more clearly describe its purpose.
+- Updated `index.html` script references to match the new file structure.
 
 ===============================================================
 
@@ -197,3 +198,21 @@ ERPNext Integration & Data Exporting
 Settings UI Enhancements
 - Export Block: Integrated a new "Export to ERPNext" section into the User Settings dashboard, featuring one-click download buttons for inventory and stock data.
 - User Context Support: Connected the export engine to the live application state, ensuring CSVs always reflect the most recent Firestore data.
+
+===============================================================
+
+Version 0.6.1 (March 20, 2026)
+
+Database Configuration & Resilience
+- Default Configuration: Separated the hardcoded Firebase configuration into a standalone `AppData/defaultDatabase.json` file. The application now dynamically loads these defaults, allowing for cleaner code and easier environment management.
+- AppDataHandler Lifecycle: Refactored the initialization sequence to be fully asynchronous. It now automatically attempts to load configuration from: User Saved Settings (localStorage) -> Default Database File (defaultDatabase.json).
+- Error Handling & Recovery: Implemented a robust "Database Not Found" state. If the configuration is missing, empty, or invalid, the Inventory and Supplier tables will now clearly display the specific reason for the failure (e.g., config fetch errors, Firebase init issues, or auth failures) instead of remaining blank or crashing.
+
+Settings UI & Security Polish
+- API Key Toggle: Added a "SHOW/HIDE" visibility toggle for the Firebase API Key in the Database Configuration block. The key is now masked by default to improve security during presentations or shared screen usage.
+- Mobile Layout Fix: Resolved a layout bug in the Database Configuration module where long input fields would overflow the settings box on mobile screens. Labels and inputs now intelligently stack on narrower viewports.
+- Settings Reorganization: Completely restructured the User Settings dashboard into logical, high-level categories (Appearance, Inventory Framework, Data & Connectivity, System Operations).
+- Section Headers: Integrated a new `.settings-section-header` style featuring accent-colored text and divider lines for a more premium and organized user experience.
+- User Avatar Dropdown: Replaced the direct settings shortcut with a sleek dropdown menu accessible from the user avatar. It currently provides links to "User Settings" and a "Database Help" documentation guide.
+- Refined Animations: Implemented a smooth chevron rotation on the user avatar and upgraded the global `sortDropFadeIn` animation with a subtle scaling effect for a more polished UI.
+- Versioning: Updated the internal version to 0.6.1 and refreshed the "Last Updated" metadata in the Settings dashboard.

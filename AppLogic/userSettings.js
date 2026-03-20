@@ -16,6 +16,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
     const [warehouseError, setWarehouseError] = React.useState("");
 
     const [fbConfig, setFbConfig] = React.useState(() => window.AppDataHandler.getFirebaseConfig());
+    const [isApiKeyVisible, setIsApiKeyVisible] = React.useState(false);
 
     const handleFbConfigChange = (e) => {
         const { name, value } = e.target;
@@ -98,29 +99,31 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
     return (
         <div className="list-box settings-tab">
 
-            <h2>Settings</h2>
+            <h2>User Settings</h2>
 
-            {/* Theme Card */}
+            {/* --- Section 1: General Preferences --- */}
+            <div className="settings-section-header">Appearance</div>
+
             <div className="setting-item">
                 <div className="setting-info">
                     <h3>Themes</h3>
                     <p>Switch between different light and dark themes.</p>
                 </div>
-
-                {/* Inherits styling from the main toolbar buttons for consistency */}
                 <button className="tool-btn edit-btn" onClick={toggleTheme} style={{ width: '200px' }}>
                     {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
                 </button>
             </div>
 
-            {/* Low Stock Config */}
-            <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
+
+            {/* --- Section 2: Inventory Rules & Masters --- */}
+            <div className="settings-section-header">Inventory Framework</div>
+
+            <div className="setting-item setting-column">
                 <div className="setting-item-inner">
                     <div className="setting-info">
                         <h3>Global Stock Threshold</h3>
                         <p>Items with quantities at or below this limit will automatically be flagged as "Low Stock".</p>
                     </div>
-
                     <div className="threshold-controls">
                         <button
                             className="tool-btn edit-btn"
@@ -140,8 +143,6 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                         />
                     </div>
                 </div>
-
-                {/* Standard text autocorrect/error message beneath the field */}
                 {errorMsg && isThresholdEnabled && (
                     <div style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                         {errorMsg}
@@ -149,16 +150,13 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 )}
             </div>
 
-            {/* Unit Labels */}
-            <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
+            <div className="setting-item setting-column" style={{ marginTop: '1rem' }}>
                 <div className="setting-item-inner">
                     <div className="setting-info">
                         <h3>Units of Measure (UOM)</h3>
                         <p>Change the Units of Measure used in the application.</p>
                     </div>
                 </div>
-
-                {/* Existing UOM Tags */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
                     {uoms.map(uom => (
                         <div key={uom} style={{
@@ -168,51 +166,26 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                             fontSize: '0.9rem', color: 'var(--text-primary)'
                         }}>
                             <span>{uom}</span>
-                            <button
-                                onClick={() => handleRemoveUom(uom)}
-                                title={`Remove ${uom}`}
-                                style={{
-                                    background: 'none', border: 'none', cursor: 'pointer',
-                                    color: 'var(--text-secondary)', fontSize: '1rem',
-                                    lineHeight: 1, padding: '0 2px'
-                                }}
-                            >
+                            <button onClick={() => handleRemoveUom(uom)} title={`Remove ${uom}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}>
                                 &times;
                             </button>
                         </div>
                     ))}
                 </div>
-
-                {/* Add New UOM Row */}
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', alignItems: 'center' }}>
-                    <input
-                        type="text"
-                        className="search-bar"
-                        style={{ width: '200px', fontSize: '0.95rem' }}
-                        placeholder="e.g. Liters"
-                        value={newUom}
-                        onChange={(e) => { setNewUom(e.target.value); setUomError(""); }}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddUom()}
-                    />
+                    <input type="text" className="search-bar" style={{ width: '200px', fontSize: '0.95rem' }} placeholder="e.g. Liters" value={newUom} onChange={(e) => { setNewUom(e.target.value); setUomError(""); }} onKeyDown={(e) => e.key === 'Enter' && handleAddUom()} />
                     <button className="tool-btn add-btn" onClick={handleAddUom}>+ Add</button>
                 </div>
-                {uomError && (
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                        {uomError}
-                    </div>
-                )}
+                {uomError && <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{uomError}</div>}
             </div>
 
-            {/* Warehouse Configuration */}
-            <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
+            <div className="setting-item setting-column" style={{ marginTop: '1rem' }}>
                 <div className="setting-item-inner">
                     <div className="setting-info">
                         <h3>Warehouses</h3>
                         <p>Manage the warehouse locations available for filtering and item assignment.</p>
                     </div>
                 </div>
-
-                {/* Existing Warehouse Tags */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
                     {warehouses.map(wh => (
                         <div key={wh} style={{
@@ -222,46 +195,98 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                             fontSize: '0.9rem', color: 'var(--text-primary)'
                         }}>
                             <span>{wh}</span>
-                            <button
-                                onClick={() => handleRemoveWarehouse(wh)}
-                                title={`Remove ${wh}`}
-                                style={{
-                                    background: 'none', border: 'none', cursor: 'pointer',
-                                    color: 'var(--text-secondary)', fontSize: '1rem',
-                                    lineHeight: 1, padding: '0 2px'
-                                }}
-                            >
+                            <button onClick={() => handleRemoveWarehouse(wh)} title={`Remove ${wh}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}>
                                 &times;
                             </button>
                         </div>
                     ))}
                 </div>
-
-                {/* Add New Warehouse Row */}
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', alignItems: 'center' }}>
-                    <input
-                        type="text"
-                        className="search-bar"
-                        style={{ width: '200px', fontSize: '0.95rem' }}
-                        placeholder="e.g. North Warehouse"
-                        value={newWarehouse}
-                        onChange={(e) => { setNewWarehouse(e.target.value); setWarehouseError(""); }}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddWarehouse()}
-                    />
+                    <input type="text" className="search-bar" style={{ width: '200px', fontSize: '0.95rem' }} placeholder="e.g. North Warehouse" value={newWarehouse} onChange={(e) => { setNewWarehouse(e.target.value); setWarehouseError(""); }} onKeyDown={(e) => e.key === 'Enter' && handleAddWarehouse()} />
                     <button className="tool-btn add-btn" onClick={handleAddWarehouse}>+ Add</button>
                 </div>
-                {warehouseError && (
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                        {warehouseError}
-                    </div>
-                )}
+                {warehouseError && <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{warehouseError}</div>}
             </div>
 
-            {/* Factory Reset */}
-            <div className="setting-item" style={{ marginTop: '1.5rem' }}>
+
+            {/* --- Section 3: Connectivity & Integrations --- */}
+            <div className="settings-section-header">Data &amp; Connectivity</div>
+
+            <div className="setting-item setting-column">
+                <div className="setting-item-inner">
+                    <div className="setting-info">
+                        <h3>Database Configuration</h3>
+                        <p>Update these fields to switch to a different Firebase Firestore database. </p>
+                        <p style={{ marginTop: '0.5rem' }}>Note: The default database values are stored in defaultDatabase.json and initially loaded from the system if no custom config is present.</p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '1rem' }}>
+                    {[
+                        { key: 'apiKey', label: 'API Key' },
+                        { key: 'authDomain', label: 'Auth Domain' },
+                        { key: 'projectId', label: 'Project ID' },
+                        { key: 'storageBucket', label: 'Storage Bucket' },
+                        { key: 'messagingSenderId', label: 'Messaging Sender ID' },
+                        { key: 'appId', label: 'App ID' },
+                    ].map(({ key, label }) => (
+                        <div key={key} className="db-config-row">
+                            <span className="db-config-label">{label}</span>
+                            <div className="password-input-wrapper">
+                                <input
+                                    type={key === 'apiKey' && !isApiKeyVisible ? 'password' : 'text'}
+                                    name={key}
+                                    className="search-bar"
+                                    style={{ width: '100%', fontSize: '0.85rem', fontFamily: 'monospace', paddingRight: key === 'apiKey' ? '50px' : '1.2rem' }}
+                                    value={fbConfig[key] || ''}
+                                    onChange={handleFbConfigChange}
+                                />
+                                {key === 'apiKey' && (
+                                    <button type="button" className="password-toggle-btn" onClick={() => setIsApiKeyVisible(!isApiKeyVisible)} title={isApiKeyVisible ? "Hide API Key" : "Show API Key"}>
+                                        {isApiKeyVisible ? 'HIDE' : 'SHOW'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                    <button className="tool-btn add-btn" onClick={handleSaveFbConfig} style={{ padding: '0.5rem 1.5rem' }}>Save &amp; Reload</button>
+                    <button className="tool-btn edit-btn" onClick={handleResetFbConfig} style={{ padding: '0.5rem 1.5rem' }}>Reset to Default</button>
+                </div>
+            </div>
+
+            <div className="setting-item setting-column" style={{ marginTop: '1rem' }}>
+                <div className="setting-item-inner">
+                    <div className="setting-info">
+                        <h3>Export Data</h3>
+                        <p>Download database data in ERPNext-compatible formats.</p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: '600', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Item Master</div>
+                        </div>
+                        <button className="tool-btn add-btn" onClick={() => window.ExportTool.exportItemMaster(inventoryData)}>↓ Download .CSV</button>
+                    </div>
+                    <div style={{ height: '1px', background: 'var(--border-color)', opacity: 0.3 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: '600', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Stock Reconciliation</div>
+                        </div>
+                        <button className="tool-btn add-btn" onClick={() => window.ExportTool.exportStockRecon(inventoryData)}>↓ Download .CSV</button>
+                    </div>
+                </div>
+            </div>
+
+
+            {/* --- Section 4: System Management --- */}
+            <div className="settings-section-header">System Operations</div>
+
+            <div className="setting-item">
                 <div className="setting-info">
-                    <h3>Reset App Data</h3>
-                    <p>Clears all saved data from local storage. The app will reload and revert to its default values.</p>
+                    <h3>Clear Local Storage</h3>
+                    <p>Wipe all local storage data stored in browser. This will NOT delete cloud database records.</p>
                 </div>
                 <button
                     className="tool-btn remove-btn"
@@ -275,108 +300,13 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
                 </button>
             </div>
 
-            {/* Custom DB Injection */}
-            <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
-                <div className="setting-item-inner">
-                    <div className="setting-info">
-                        <h3>Database Configuration</h3>
-                        <p>Update these fields if you want switch to a different database. Changes take effect after reloading. </p>
-                        <p style={{ marginTop: '0.5rem' }}>Note: This project is using Firebase as its database, the hardcoded values are from Cheng Roa's firebase project.</p>
-                    </div>
-                </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '1rem' }}>
-                    {[
-                        { key: 'apiKey', label: 'API Key' },
-                        { key: 'authDomain', label: 'Auth Domain' },
-                        { key: 'projectId', label: 'Project ID' },
-                        { key: 'storageBucket', label: 'Storage Bucket' },
-                        { key: 'messagingSenderId', label: 'Messaging Sender ID' },
-                        { key: 'appId', label: 'App ID' },
-                    ].map(({ key, label }) => (
-                        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <span style={{ width: '160px', fontSize: '0.85rem', color: 'var(--text-secondary)', flexShrink: 0 }}>{label}</span>
-                            <input
-                                type="text"
-                                name={key}
-                                className="search-bar"
-                                style={{ flex: 1, fontSize: '0.85rem', fontFamily: 'monospace' }}
-                                value={fbConfig[key] || ''}
-                                onChange={handleFbConfigChange}
-                            />
-                        </div>
-                    ))}
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-                    <button className="tool-btn add-btn" onClick={handleSaveFbConfig} style={{ padding: '0.5rem 1.5rem' }}>
-                        Save &amp; Reload
-                    </button>
-                    <button className="tool-btn edit-btn" onClick={handleResetFbConfig} style={{ padding: '0.5rem 1.5rem' }}>
-                        Reset to Default
-                    </button>
-                </div>
-            </div>
-
-            {/* Export */}
-            <div className="setting-item setting-column" style={{ marginTop: '1.5rem' }}>
-                <div className="setting-item-inner">
-                    <div className="setting-info">
-                        <h3>Export to ERPNext</h3>
-                        <p>Download a CSV pre-formatted with ERPNext Support.</p>
-                        <p>Note: Leave the ID column blank to create new records.</p>
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
-
-                    {/* Item List */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: '600', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Item List</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                                Exports item codes, names, categories, and UOM. Imports into ERPNext's <em>Item</em> DocType.
-                            </div>
-                        </div>
-                        <button
-                            className="tool-btn add-btn"
-                            style={{ whiteSpace: 'nowrap', padding: '0.5rem 1.25rem' }}
-                            onClick={() => window.ExportTool.exportItemMaster(inventoryData)}
-                        >
-                            ↓ Item List
-                        </button>
-                    </div>
-
-                    <div style={{ height: '1px', background: 'var(--border-color)' }} />
-
-                    {/* Stock Reconciliation */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: '600', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Stock Reconciliation</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                                Exports item codes, warehouses, and current quantities. Valuation rate is left blank — fill it in before importing.
-                            </div>
-                        </div>
-                        <button
-                            className="tool-btn add-btn"
-                            style={{ whiteSpace: 'nowrap', padding: '0.5rem 1.25rem' }}
-                            onClick={() => window.ExportTool.exportStockRecon(inventoryData)}
-                        >
-                            ↓ Stock Recon
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-
-            {/* Credits */}
-            <div className="setting-item" style={{ marginTop: '1.5rem' }}>
-                <div className="setting-info">
-                    <h3>CloudBased</h3>
-                    <p>  -ˋˏ ._. ˎˊ  </p>
-                    <p>Version: 0.6.0  |  Last Updated: March 19, 2026</p>
-                    <p>Created by: Cheng Roa and Tejada</p>
-                </div>
+            {/* --- Footer / Credits --- */}
+            <div style={{ marginTop: '5rem', padding: '2rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', opacity: 0.6 }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>CloudBased</div>
+                <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>  -ˋˏ ._. ˎˊ  </p>
+                <p style={{ fontSize: '0.85rem' }}>Version: 0.6.1  |  Last Updated: March 20, 2026</p>
+                <p style={{ fontSize: '0.85rem' }}>Created by: Cheng Roa and Tejada</p>
             </div>
 
         </div>
