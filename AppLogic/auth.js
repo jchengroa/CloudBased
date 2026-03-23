@@ -10,6 +10,7 @@ const Auth = ({ onLoginSuccess }) => {
 
     // 'login', 'signup', 'forgot', 'change', 'resetNewPassword'
     const [view, setView] = React.useState(queryMode === 'resetPassword' ? 'resetNewPassword' : 'login'); 
+    const [branding, setBranding] = React.useState(window.AppDataHandler.getBrandingSync());
     const [showPassword, setShowPassword] = React.useState(false);
     const [oldPass, setOldPass] = React.useState('');
     const [newPass, setNewPass] = React.useState('');
@@ -25,6 +26,17 @@ const Auth = ({ onLoginSuccess }) => {
         confirmPassword: '',
         identifier: ''
     });
+
+    React.useEffect(() => {
+        const loadBranding = async () => {
+            const b = await window.AppDataHandler.getBranding();
+            setBranding(b);
+            if (b.companyName) {
+                document.title = `${b.companyName} - Login`;
+            }
+        };
+        loadBranding();
+    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -170,7 +182,15 @@ const Auth = ({ onLoginSuccess }) => {
         <div className="auth-overlay">
             <div className="auth-box">
                 <div className="auth-header">
-                    <div className="auth-logo">CloudBased</div>
+                    {branding.logoUrl ? (
+                         <div style={{ height: '48px', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+                            <img src={branding.logoUrl} alt="Logo" style={{ maxHeight: '100%', objectFit: 'contain' }} />
+                        </div>
+                    ) : (
+                        <div className="auth-logo" style={{ marginBottom: '1rem', textAlign: 'center' }}>
+                            {branding.companyName || 'CloudBased'}
+                        </div>
+                    )}
                     <div className="auth-subtitle">
                         {view === 'login' && 'Welcome back to perfection.'}
                         {view === 'signup' && 'Begin your journey with us.'}

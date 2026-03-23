@@ -40,7 +40,7 @@ const App = () => {
     const [outputLogs, setOutputLogs] = React.useState([]);
     const [suppliers, setSuppliers] = React.useState([]);
     const [selectedSupplier, setSelectedSupplier] = React.useState(null);
-    const [branding, setBranding] = React.useState({ companyName: 'CloudBased', logoUrl: '' });
+    const [branding, setBranding] = React.useState(window.AppDataHandler.getBrandingSync());
     const [globalSettings, setGlobalSettings] = React.useState({});
     const [uoms, setUoms] = React.useState([]);
     const [warehouses, setWarehouses] = React.useState([]);
@@ -87,10 +87,15 @@ const App = () => {
             setGlobalSettings(gSet);
             setDbError(window.AppDataHandler.getDbError());
             
-            // Initial title sync - full replace
+            // Initial title and theme sync
             if (brand.companyName) {
                 document.title = brand.companyName;
             }
+            document.documentElement.setAttribute('data-theme', settings.theme || 'light');
+            
+            // Priority: User Setting > Company Global Branding > Default Indigo
+            const finalAccent = settings.themeColor || brand.accentColor || '#4f46e5';
+            document.documentElement.style.setProperty('--accent-color', finalAccent);
         } catch (e) {
             setDbError("System sync failed: " + e.message);
         } finally { setDbLoading(false); }
@@ -136,7 +141,15 @@ const App = () => {
     if (dbLoading) {
         return (
             <div style={{ background: 'var(--bg-color)', color: 'var(--text-primary)', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
-                <div style={{ fontSize: '2.5rem', fontWeight: '700', letterSpacing: '-1.5px', opacity: 0.9 }} className="app-logo">CloudBased</div>
+                {branding.logoUrl ? (
+                    <img src={branding.logoUrl} alt="Logo" style={{ height: '60px', opacity: 0.9 }} />
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-1.5px', opacity: 0.9 }} className="app-logo">
+                            {branding.companyName || 'CloudBased'}
+                        </div>
+                    </div>
+                )}
                 <div style={{ padding: '2px', width: '240px', background: 'var(--hover-bg)', borderRadius: '12px', overflow: 'hidden' }}>
                     <div style={{ width: '40%', height: '4px', background: 'var(--accent-color)', borderRadius: '12px', animation: 'load 1.8s infinite ease-in-out' }}></div>
                 </div>
@@ -147,14 +160,15 @@ const App = () => {
     return (
         <div className="app-wrapper">
             <header className="top-brand-bar">
-                <div className="brand-left">
-                    {branding.logoUrl ? (
+                <div className="brand-left" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    {branding.logoUrl && (
                         <div style={{ height: '32px', display: 'flex', alignItems: 'center' }}>
                             <img src={branding.logoUrl} alt="Logo" style={{ maxHeight: '100%', objectFit: 'contain' }} />
                         </div>
-                    ) : (
-                        <div className="app-logo">{branding.companyName || 'CloudBased'}</div>
                     )}
+                    <div className="app-logo" style={{ fontSize: '1.25rem', fontWeight: '800', border: 'none', background: 'none', padding: 0, webkitTextFillColor: 'initial', color: 'var(--text-primary)' }}>
+                        {branding.companyName || 'CloudBased'}
+                    </div>
                 </div>
                 <nav className="nav-tabs-left">
                         <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => navigate('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -166,11 +180,9 @@ const App = () => {
                         <button className={`nav-btn ${view === 'inventory' ? 'active' : ''}`} onClick={() => navigate('inventory')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <window.LayersIcon width="16" height="16" /> Inventory
                         </button>
-                        {(user.role === 'Administrator' || user.role === 'Manager') && (
-                            <button className={`nav-btn ${view === 'suppliers' ? 'active' : ''}`} onClick={() => navigate('suppliers')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <window.TruckIcon width="16" height="16" /> Suppliers
-                            </button>
-                        )}
+                        <button className={`nav-btn ${view === 'suppliers' ? 'active' : ''}`} onClick={() => navigate('suppliers')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <window.TruckIcon width="16" height="16" /> Suppliers
+                        </button>
                         {user.role === 'Administrator' && (
                             <button 
                                 className={`nav-btn ${view === 'adminDashboard' ? 'active' : ''}`} 
@@ -230,10 +242,10 @@ const App = () => {
             )}
  
             <main className="app-layout">
-                {view === 'dashboard' && <window.Dashboard globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ theme, isThresholdEnabled: true }} />}
+                {view === 'dashboard' && <window.Dashboard onPerformAction={handlePromptConfirm} openPrompt={openPrompt} globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ theme, isThresholdEnabled: true }} />}
                 {view === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} />}
                 {view === 'itemList' && <ItemList inventoryData={inventory} openPrompt={openPrompt} />}
-                {(user.role === 'Administrator' || user.role === 'Manager') && view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} />}
+                {view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} />}
                 {user.role === 'Administrator' && view === 'adminDashboard' && (
                     <window.AdminDashboard 
                         currentUser={user} 
@@ -262,7 +274,11 @@ const App = () => {
                     user={user} 
                     inventoryData={inventory}
                     onClose={() => setIsAccountSettingsOpen(false)} 
-                    onUpdateUser={async (u) => { setUser(u); setIsAccountSettingsOpen(false); }}
+                    onUpdateUser={async (u) => { 
+                        setUser(u); 
+                        localStorage.setItem('cloudbased_session', JSON.stringify(u));
+                        setIsAccountSettingsOpen(false); 
+                    }}
                 />
             )}
         </div>

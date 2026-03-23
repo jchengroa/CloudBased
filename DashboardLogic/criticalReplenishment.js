@@ -1,6 +1,6 @@
-const CriticalReplenishment = ({ inventoryData, settings }) => {
+const CriticalReplenishment = ({ inventoryData, settings, supplierData = [], openPrompt }) => {
     const getMin = (item) => parseFloat(item.optimalStock) || (settings?.lowStockThreshold || 1000);
-    const criticalItems = inventoryData.filter(i => (parseFloat(i.quantity) || 0) < getMin(i));
+    const criticalItems = inventoryData.filter(i => (parseFloat(i.quantity) || 0) < getMin(i) && (i.isRestocked !== 'Yes' && i.isRestocked !== 'I'));
 
     return (
         <div className="dashboard-card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -33,7 +33,18 @@ const CriticalReplenishment = ({ inventoryData, settings }) => {
                                     <div style={{ fontWeight: '700', color: '#ef4444' }}>{item.quantity || 0} {item.uom || 'units'}</div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Min: {getMin(item)}</div>
                                 </div>
-                                <button className="auth-btn-text" style={{ padding: '0.4rem 1rem', background: 'rgba(99, 102, 241, 0.08)', color: 'var(--accent-color)', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '600' }} onClick={() => alert(`Contacting supplier for ${item.name}`)}>
+                                <button 
+                                    className="auth-btn-text" 
+                                    style={{ padding: '0.4rem 1rem', background: 'rgba(99, 102, 241, 0.08)', color: 'var(--accent-color)', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '600' }} 
+                                    onClick={() => {
+                                        const supplier = supplierData.find(s => s.id === item.supplier || s.name === item.supplier);
+                                        if (supplier) {
+                                            openPrompt('Supplier Details', 'supplier-details', [supplier.name]);
+                                        } else {
+                                            openPrompt('Procurement Note', 'message', [`No specific supplier has been assigned to ${item.name} yet. Please update the product details to include a partner.`]);
+                                        }
+                                    }}
+                                >
                                     Contact
                                 </button>
                             </div>

@@ -8,7 +8,9 @@ const GlobalSettingsTab = ({ globalSettings, onUpdateGlobalSettings }) => {
         showSuppliersOnly: true,
         showRecentArrivals: true,
         showRecentShipments: true,
-        showCriticalReplenishment: false, // Optional beta widget
+        showCriticalReplenishment: true,
+        showPredictiveReplenish: true,
+        showInnoAssistant: true,
         showCategoryPerformance: true,
         showWarehouseDistribution: true,
         ...globalSettings
@@ -92,7 +94,9 @@ const GlobalSettingsTab = ({ globalSettings, onUpdateGlobalSettings }) => {
                     <SettingRow label="Suppliers Analytics" desc="Overview of top suppliers by volume." stateKey="showSuppliersOnly" />
                     <SettingRow label="Recent Arrivals Log" desc="List of inputs processed across selected warehouses." stateKey="showRecentArrivals" />
                     <SettingRow label="Recent Shipments Log" desc="List of outputs and fulfillments." stateKey="showRecentShipments" />
-                    <SettingRow label="Critical Replenishment Beta" desc="Enables the AI forecasting alert system globally." stateKey="showCriticalReplenishment" />
+                    <SettingRow label="Predictive Replenishment Beta" desc="Enables the AI forecasting alert system globally." stateKey="showCriticalReplenishment" />
+                    <SettingRow label="Predictive Replenishment Engine" desc="Forecasts run-out dates and enables Google Calendar sync." stateKey="showPredictiveReplenish" />
+                    <SettingRow label="InnoAssistant AI Command Center" desc="Cognitive intake processing powered by TensorFlow & Compromise." stateKey="showInnoAssistant" />
                     <SettingRow label="Category Performance" desc="Distribution pie or bar charts by category." stateKey="showCategoryPerformance" />
                     <SettingRow label="Warehouse Distribution" desc="Stock breakdown per active warehouse location." stateKey="showWarehouseDistribution" />
                 </div>
@@ -148,6 +152,100 @@ const GlobalSettingsTab = ({ globalSettings, onUpdateGlobalSettings }) => {
                 >
                     {isNuking ? 'NUKING SYSTEM...' : 'ERASE ALL BUSINESS DATA'}
                 </button>
+            </div>
+
+            <div style={{ marginTop: '2.5rem' }}>
+                <FirebaseConfigurator />
+            </div>
+        </div>
+    );
+};
+
+const FirebaseConfigurator = () => {
+    const [config, setConfig] = React.useState({
+        apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: ''
+    });
+    const [showKey, setShowKey] = React.useState(false);
+    const [status, setStatus] = React.useState('');
+
+    React.useEffect(() => {
+        const fetchCurrent = async () => {
+            try {
+                const response = await fetch('AppData/defaultDatabase.json');
+                const defaultData = response.ok ? await response.json() : {};
+                const saved = window.AppDataHandler.getFirebaseConfig();
+                setConfig({ ...defaultData, ...saved });
+            } catch(e) {}
+        };
+        fetchCurrent();
+    }, []);
+
+    const handleSave = () => {
+        window.AppDataHandler.saveFirebaseConfig(config);
+        setStatus('Configuration saved! Please reload the page to apply changes.');
+    };
+
+    const handleReset = () => {
+        window.AppDataHandler.resetFirebaseConfig();
+        location.reload();
+    };
+
+    const inputStyle = { width: '100%', padding: '0.8rem', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', marginBottom: '1rem' };
+
+    return (
+        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', background: 'var(--hover-bg)' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <Icons.Shield size={20} /> Configure Firebase Database
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.4rem' }}>Update your Firestore and Auth endpoints here.</p>
+            </div>
+            
+            <div style={{ padding: '1.5rem' }}>
+                {status && <div style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', padding: '1rem', borderRadius: '10px', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: '700' }}>{status}</div>}
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ gridColumn: 'span 2', position: 'relative' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Firebase API Key</label>
+                        <input 
+                            type={showKey ? 'text' : 'password'} 
+                            style={{ ...inputStyle, paddingRight: '3rem' }} 
+                            value={config.apiKey} 
+                            onChange={e => setConfig({...config, apiKey: e.target.value})} 
+                        />
+                        <button 
+                            onClick={() => setShowKey(!showKey)}
+                            style={{ position: 'absolute', right: '10px', top: '34px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5 }}
+                        >
+                            {showKey ? 'Hide' : 'Show'}
+                        </button>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Project ID</label>
+                        <input style={inputStyle} value={config.projectId} onChange={e => setConfig({...config, projectId: e.target.value})} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Auth Domain</label>
+                        <input style={inputStyle} value={config.authDomain} onChange={e => setConfig({...config, authDomain: e.target.value})} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Storage Bucket</label>
+                        <input style={inputStyle} value={config.storageBucket} onChange={e => setConfig({...config, storageBucket: e.target.value})} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Messaging Sender ID</label>
+                        <input style={inputStyle} value={config.messagingSenderId} onChange={e => setConfig({...config, messagingSenderId: e.target.value})} />
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>App ID</label>
+                        <input style={inputStyle} value={config.appId} onChange={e => setConfig({...config, appId: e.target.value})} />
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button className="auth-btn-primary" onClick={handleSave} style={{ width: 'auto', padding: '0.8rem 2rem', margin: 0 }}>Save Config</button>
+                    <button onClick={handleReset} style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer' }}>Reset to Defaults</button>
+                </div>
             </div>
         </div>
     );

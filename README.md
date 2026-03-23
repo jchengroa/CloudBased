@@ -491,8 +491,32 @@ Version 0.9.0 (March 23, 2026)
 - **Smart Data Transformation**: Automatically extracts unique companies as Suppliers, generates randomized Transaction IDs, and maps all stock to the standard "Bulacan" warehouse.
 - **System Factory Reset (Nuke)**: Developed a high-security data clearing tool in Global Settings with double-confirmation (Standard dialog + Case-sensitive "NUKE" string challenge).
 - **Universal Scrolling Fix**: Refactored the global layout and `.list-box` CSS to enable smooth, high-density scrolling across Inventory, Suppliers, and Transaction Logs.
-- **Branding Architecture**: Fully synchronized the browser tab title and top-left dashboard branding with the user-defined Company Name field.
-- **Permission Layer Polish**: Resolved a critical UI crash for 'Auditor' roles by implementing null-safe permission handling in the User Management tab.
-- **Transition UI Glitch Fixed**: Corrected the absolute positioning of the active tab indicator bar in the Admin Dashboard navigation.
+- **System Operations Cleanup**: Removed redundant data-entry stubs to improve dashboard workflow and system focus.
+
+===============================================================
+
+Version 0.10.0 (March 23, 2026)
+
+### UI/UX Branding & Customization
+- **Logo Persistence Engine**: Launched a new branding module in the Admin Dashboard that supports real-time Company Logo uploads and removal. Integrated automated client-side resizing to ensure brand assets are optimized for cloud storage.
+- **Global Accent Picker**: Re-enabled the corporate identity color picker. This allows admins to define a singular accent color that synchronizes across all users, while specifically ensuring color values persist correctly through page refreshes.
+- **Unified Brand Header**: Overhauled the top-left edge of the application to display the Company Logo and Name as a single, cohesive brand unit, improving professional aesthetic.
+- **Header Visibility Fix**: Corrected a CSS transparency bug that rendered the company name invisible on certain dark themes by resetting `background-clip` and `text-fill` properties.
+
+### Inventory Lifecycle Tracking
+- **Restocked? Indicator**: Introduced a new "Restocked?" data point across the entire inventory masters. This allows teams to track whether low-stock alerts have been addressed even before the physical count arrives at the warehouse.
+- **In-Process (I) Status**: Added support for a specialized "I" code. This triggers a unique Indigo badge indicating that replenishment is currently "In-Flight," distinguishing it from both "To Restock" (No) and "Handled" (Yes).
+- **Import Mapping Logic**: Upgraded the Google Sheets and Excel import engines to intelligently parse replenishment status. Maps `y` to "Yes", `i` to "I", and blank cells to "No".
+- **Real-Time Badge UI**: Integrated high-contrast status badges (Green, Red, Indigo) into both the Inventory Table and the card-based Item List overview.
+
+### Interactive "Fat-Finger" Accessibility
+- **Full-Row Selection**: Transformed every data row into a high-precision interactive surface. Clicking anywhere on a row now toggles its selection state, significantly improving usability on mobile and touch devices.
+- **Master Selection Guard**: Implemented a "Select All" toggle directly into the header row. Clicking the header text now instantly captures all visible records for bulk operations.
+- **Standardized Hit Areas**: Increased vertical padding and hover feedback across all table views while maintaining standard-sized checkboxes to preserve visual balance.
+
+### Intelligent Dashboard Filtering & AI
+- **Alert Suppression**: Refined the "Critical Replenishment Required" and "Predictive Oracle" logic blocks. They now automatically suppress alerts for items marked as "Restocked" or "In-Process," ensuring that dashboards only display actionable tasks.
+- **InnoAssistant (AI) Cognitive Sync**: Upgraded the AI's neural processing to exclude restocked or in-transit items when generating restock suggestions. The assistant now provides smarter, more relevant operational advice based on live replenishing status.
+- **Stock Reconciliation Guard**: Restored the `getDbError` handler to ensure that database connectivity issues are reported gracefully within the main inventory view.
 
 

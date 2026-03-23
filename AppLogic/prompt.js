@@ -34,7 +34,7 @@ const Prompt = ({
                 id: `ITM-${Math.floor(1000 + Math.random() * 9000)}`,
                 name: '', category: '', quantity: '', optimalStock: '', 
                 uom: uoms[0] || 'Pieces', warehouse: warehouses[0] || 'Main', supplier: '',
-                imageUrl: '', description: ''
+                imageUrl: '', description: '', isRestocked: 'No'
             });
         } else if (type === 'add-supplier') {
             setFormData({
@@ -132,6 +132,9 @@ const Prompt = ({
                                     <label className="auth-label">Status (Auto-Calculated)</label>
                                     <input type="text" className="auth-input" readOnly disabled value={(parseFloat(formData.quantity) || 0) < (parseFloat(formData.optimalStock) || 0) ? 'Reorder' : 'Okay'} style={{ opacity: 0.6, cursor: 'not-allowed' }} />
                                 </div>
+                                <FormSelect label="Restocked?" name="isRestocked" value={formData.isRestocked || 'No'} onChange={handleChange} options={[{label: 'Yes', value: 'Yes'}, {label: 'No', value: 'No'}, {label: 'I (In-Process)', value: 'I'}]} />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
                                 <FormSelect label="Supplier (Optional)" name="supplier" value={formData.supplier || ''} onChange={handleChange} options={[{label: '-- None --', value: ''}, ...supplierData.map(s => ({label: s.name, value: s.id}))]} />
                             </div>
                             <div className="auth-input-group">
@@ -227,6 +230,13 @@ const Prompt = ({
                             </div>
                         );
                     })()}
+                    {type === 'message' && (
+                        <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+                           <div style={{ opacity: 0.3, marginBottom: '1.5rem' }}><Icons.Alert size={48} /></div>
+                           <p style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: '500', marginBottom: '2rem' }}>{items[0]}</p>
+                           <button className="auth-btn-primary" onClick={onClose} style={{ width: 'auto', padding: '0.6rem 2rem' }}>Got it</button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -83,7 +83,16 @@ const ImportDataTab = () => {
                 if (cUom !== -1 && row[cUom]) parsedItems[id].uom = row[cUom].toString().trim();
                 if (cOpt !== -1 && row[cOpt] !== undefined) parsedItems[id].optimalStock = parseFloat(row[cOpt]) || 0;
                 if (cReorder !== -1 && row[cReorder]) parsedItems[id].status = row[cReorder].toString().trim();
-                if (cReordered !== -1 && row[cReordered]) parsedItems[id].reordered = row[cReordered].toString().trim();
+                
+                // RESTOCKED LOGIC
+                if (cReordered !== -1 && row[cReordered]) {
+                    const val = row[cReordered].toString().trim().toLowerCase();
+                    if (val === 'y') parsedItems[id].isRestocked = 'Yes';
+                    else if (val === 'i') parsedItems[id].isRestocked = 'I';
+                    else parsedItems[id].isRestocked = 'No';
+                } else {
+                    parsedItems[id].isRestocked = 'No';
+                }
             }
         }
 
@@ -123,6 +132,7 @@ const ImportDataTab = () => {
 
                 newInputs.push({
                     id: 'IN-' + Date.now() + '-' + i + Math.floor(Math.random()*1000),
+                    transactionId: 'TXN-IN-' + Math.floor(100000 + Math.random() * 900000),
                     itemCode: id,
                     quantity: parseFloat(row[cQty]) || 0,
                     date: parseDate(row[cDate]),
@@ -162,6 +172,7 @@ const ImportDataTab = () => {
 
                 newOutputs.push({
                     id: 'OUT-' + Date.now() + '-' + i + Math.floor(Math.random()*1000),
+                    transactionId: 'TXN-OUT-' + Math.floor(100000 + Math.random() * 900000),
                     itemCode: id,
                     quantity: parseFloat(row[cQty]) || 0,
                     date: parseDate(row[cDate]),

@@ -12,16 +12,23 @@
 window.AppDataHandler = (function () {
 
     const CONFIG_KEY = 'cloudbased_firebase_config';
+    const BRANDING_CACHE_KEY = 'cloudbased_branding_cache';
     let db = null;
     let auth = null;
     let dbError = null;
-
-    // 1. Recover Session SYNCHRONOUSLY
     let currentUser = null;
+
     try {
         const savedUser = localStorage.getItem('cloudbased_session');
         if (savedUser) currentUser = JSON.parse(savedUser);
     } catch (e) { }
+
+    // Synchronous-ish branding data (fetched as soon as possible)
+    let staticBranding = { companyName: 'CloudBased', logoUrl: '' };
+    const brandingFetch = (async () => {
+        const data = await fetchJson('AppData/branding.json');
+        if (data) staticBranding = data;
+    })();
 
     async function fetchJson(path) {
         try {
@@ -173,8 +180,16 @@ window.AppDataHandler = (function () {
 
         updateProfile: async function (data) {
             await initPromise;
+            
+            // Check if username is being changed and is available
+            if (data.username && data.username !== currentUser.username) {
+                const check = await db.collection('users').where('username', '==', data.username).get();
+                if (!check.empty) throw new Error("Username is already taken.");
+            }
+            
             await db.collection('users').doc(currentUser.uid).update({
                 name: data.name,
+                username: data.username || currentUser.username,
                 profilePicture: data.profilePicture
             });
             // Removed redundant Auth update for photoURL since base64 data exceeds Auth limits.
@@ -193,6 +208,18 @@ window.AppDataHandler = (function () {
             const cred = firebase.auth.EmailAuthProvider.credential(user.email, oldPass);
             await user.reauthenticateWithCredential(cred);
             await user.updatePassword(newPass);
+        },
+
+        deleteAccount: async function () {
+            await initPromise;
+            const user = auth.currentUser;
+            if (user) {
+                await db.collection('users').doc(user.uid).delete();
+                await user.delete();
+                currentUser = null;
+                localStorage.removeItem('cloudbased_session');
+                location.reload();
+            }
         },
 
         sendPasswordResetEmail: async function (identifier) {
@@ -237,16 +264,33 @@ window.AppDataHandler = (function () {
         },
 
         getBranding: async function() {
-            await initPromise;
+            await brandingFetch; // Ensure the JSON is loaded first
             try {
-                const doc = await db.collection('settings').doc('branding').get();
-                if (doc.exists) return doc.data();
+                // If we are initialized, try to get the dynamic branding
+                if (db) {
+                    const doc = await db.collection('settings').doc('branding').get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(data));
+                        return data;
+                    }
+                }
             } catch(e) {}
-            return { companyName: 'CloudBased', logoUrl: '' };
+            // Fallback to cache or the static branding.json
+            const cached = localStorage.getItem(BRANDING_CACHE_KEY);
+            return cached ? JSON.parse(cached) : staticBranding;
+        },
+
+        getBrandingSync: function() {
+            const cached = localStorage.getItem(BRANDING_CACHE_KEY);
+            // Default to staticBranding which might be updated by brandingFetch (async),
+            // but is available immediately even if not logged in.
+            return cached ? JSON.parse(cached) : staticBranding;
         },
 
         saveBranding: async function(data) {
             await initPromise;
+            localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(data));
             await db.collection('settings').doc('branding').set(data, { merge: true });
         },
 
@@ -326,6 +370,12 @@ window.AppDataHandler = (function () {
         getFirebaseConfig: () => {
             const saved = localStorage.getItem(CONFIG_KEY);
             return saved ? JSON.parse(saved) : null;
+        },
+        saveFirebaseConfig: (config) => {
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+        },
+        resetFirebaseConfig: () => {
+            localStorage.removeItem(CONFIG_KEY);
         }
     };
 })();

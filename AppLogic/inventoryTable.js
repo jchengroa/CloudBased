@@ -27,11 +27,16 @@ const InventoryTable = ({
     const isOverview = activeView === 'overview';
     const isInput    = activeView === 'input';
 
-    const OVERVIEW_SORT_OPTIONS = [
-        { key: 'name-asc',  label: 'Name A-Z', icon: <SortAZIcon /> },
-        { key: 'name-desc', label: 'Name Z-A', icon: <SortZAIcon /> },
-        { key: 'qty-low',   label: 'Stock: Low → High', icon: <TrendingDownIcon /> },
-        { key: 'qty-high',  label: 'Stock: High → Low', icon: <TrendingUpIcon /> }
+    const SORT_OPTIONS = isOverview ? [
+        { key: 'name-asc',  label: 'Name A-Z', icon: <window.SortAZIcon /> },
+        { key: 'name-desc', label: 'Name Z-A', icon: <window.SortZAIcon /> },
+        { key: 'qty-low',   label: 'Stock: Low → High', icon: <window.TrendingDownIcon /> },
+        { key: 'qty-high',  label: 'Stock: High → Low', icon: <window.TrendingUpIcon /> }
+    ] : [
+        { key: 'date-new',  label: 'Newest Log', icon: <window.ArrowDownCircleIcon /> },
+        { key: 'date-old',  label: 'Oldest Log', icon: <window.ArrowUpCircleIcon /> },
+        { key: 'qty-high',  label: 'Quantity: High', icon: <window.TrendingUpIcon /> },
+        { key: 'qty-low',   label: 'Quantity: Low', icon: <window.TrendingDownIcon /> }
     ];
 
     const processed = React.useMemo(() => {
@@ -51,12 +56,25 @@ const InventoryTable = ({
         }
 
         const sq = searchQuery.toLowerCase();
-        return base.filter(i => {
+        let filtered = base.filter(i => {
             const matchesSearch = (i.name || i.itemName || '').toLowerCase().includes(sq) || (i.id || i.itemCode || '').toLowerCase().includes(sq);
             const matchesWarehouse = activeWarehouseFilter === 'All' || i.warehouse === activeWarehouseFilter;
             return matchesSearch && matchesWarehouse;
         });
-    }, [isOverview, isInput, inventoryData, inputLogs, outputLogs, searchQuery, activeWarehouseFilter]);
+
+        if (sortKey) {
+            filtered.sort((a, b) => {
+                if (sortKey === 'name-asc') return (a.name || '').localeCompare(b.name || '');
+                if (sortKey === 'name-desc') return (b.name || '').localeCompare(a.name || '');
+                if (sortKey === 'qty-low') return (parseFloat(a.quantity) || 0) - (parseFloat(b.quantity) || 0);
+                if (sortKey === 'qty-high') return (parseFloat(b.quantity) || 0) - (parseFloat(a.quantity) || 0);
+                if (sortKey === 'date-new') return new Date(b.date || 0) - new Date(a.date || 0);
+                if (sortKey === 'date-old') return new Date(a.date || 0) - new Date(b.date || 0);
+                return 0;
+            });
+        }
+        return filtered;
+    }, [isOverview, isInput, inventoryData, inputLogs, outputLogs, searchQuery, activeWarehouseFilter, sortKey]);
 
     const toggleRow = (id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
     
@@ -86,12 +104,12 @@ const InventoryTable = ({
                 addLabel={isOverview ? 'Add Product' : 'Log Transaction'}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
-                sortOptions={OVERVIEW_SORT_OPTIONS}
+                sortOptions={SORT_OPTIONS}
                 currentSortKey={sortKey}
                 onSortChange={setSortKey}
                 filterElement={null}
                 viewSwitcher={(
-                    <ViewSwitcher 
+                    <window.ViewSwitcher 
                         activeView={activeView} 
                         setActiveView={setActiveView} 
                         options={[
@@ -105,8 +123,21 @@ const InventoryTable = ({
 
             <table className="inventory-table">
                 <thead>
-                    <tr className="header-row">
-                        <th className="checkbox-col"></th>
+                    <tr className="header-row" style={{ cursor: 'pointer' }} onClick={() => {
+                        if (selectedRows.length === processed.length && processed.length > 0) {
+                            setSelectedRows([]);
+                        } else {
+                            setSelectedRows(processed.map(p => p.id));
+                        }
+                    }}>
+                        <th className="checkbox-col" style={{ textAlign: 'center' }}>
+                             <input 
+                                type="checkbox" 
+                                checked={selectedRows.length === processed.length && processed.length > 0} 
+                                style={{ pointerEvents: 'none' }}
+                                readOnly
+                            />
+                        </th>
                         {isOverview ? (
                             <>
                                 <th>Item Code</th>
@@ -115,6 +146,7 @@ const InventoryTable = ({
                                 <th>Stock on Hand</th>
                                 <th>Optimal Stock</th>
                                 <th>Status</th>
+                                <th>Restocked?</th>
                                 <th>Warehouse</th>
                             </>
                         ) : (
@@ -130,7 +162,7 @@ const InventoryTable = ({
                     </tr>
                 </thead>
                 <tbody>
-                    <TableMessage colSpan="8" dbError={dbError} isEmpty={processed.length === 0} emptyMessage="No matching records found." />
+                    <TableMessage colSpan="10" dbError={dbError} isEmpty={processed.length === 0} emptyMessage="No matching records found." />
                     {processed.map(item => {
                         const isSelected = selectedRows.includes(item.id);
                         return (
@@ -144,6 +176,10 @@ const InventoryTable = ({
                                         <td style={{ fontWeight: '700' }}>{item.quantity} <span style={{ fontSize: '0.7em', opacity: 0.6 }}>{item.uom}</span></td>
                                         <td>{item.optimalStock || 0}</td>
                                         <td><span className={`status-badge ${item.status === 'Reorder' ? 'reorder' : 'okay'}`}>{item.status}</span></td>
+                                        <td><span className="status-badge" style={{ 
+                                            background: item.isRestocked === 'Yes' ? 'rgba(16, 185, 129, 0.1)' : (item.isRestocked === 'I' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(239, 68, 68, 0.1)'), 
+                                            color: item.isRestocked === 'Yes' ? 'var(--success)' : (item.isRestocked === 'I' ? 'var(--accent-color)' : 'var(--danger)') 
+                                        }}>{item.isRestocked || 'No'}</span></td>
                                         <td>{item.warehouse}</td>
                                     </>
                                 ) : (

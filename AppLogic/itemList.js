@@ -72,7 +72,7 @@ const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresho
                 <div className="item-card-grid">
                     {filtered.map(item => {
                         const stockOnHand = parseFloat(item.quantity) || 0;
-                        const optimalStock = parseFloat(item.optimalStock) || 100; // default 100 if missing
+                        const optimalStock = parseFloat(item.optimalStock) || 0; 
                         const isLow = stockOnHand < optimalStock;
                         const status = isLow ? 'Reorder' : 'Okay';
                         const statusClass = isLow ? 'reorder' : 'okay';
@@ -85,8 +85,14 @@ const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresho
                                         alt={item.name} 
                                         className="item-image"
                                     />
-                                    <div className="item-status-overlay">
+                                    <div className="item-status-overlay" style={{ display: 'flex', gap: '0.4rem' }}>
                                         <span className={`status-badge ${statusClass}`}>{status}</span>
+                                        <span className="status-badge" style={{ 
+                                            background: item.isRestocked === 'Yes' ? 'rgba(16, 185, 129, 0.8)' : (item.isRestocked === 'I' ? 'rgba(99, 102, 241, 0.8)' : 'rgba(239, 68, 68, 0.8)'), 
+                                            color: 'white' 
+                                        }}>
+                                            {item.isRestocked === 'Yes' ? 'Restocked' : (item.isRestocked === 'I' ? 'Restocking (I)' : 'To Restock')}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="item-details-box">

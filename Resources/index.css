@@ -440,6 +440,11 @@ select.auth-input option {
     letter-spacing: 0.05em;
     background: var(--bg-color);
     border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+}
+
+.header-row:hover th {
+    background: var(--hover-bg); /* Highlight header on hover for clickability */
 }
 
 /* Location Pills Filter */
@@ -477,17 +482,21 @@ select.auth-input option {
     border-color: var(--text-secondary);
 }
 
-
 .data-row td {
-    padding: 1.1rem 2rem;
+    padding: 1.25rem 2rem; /* Fat finger! More vertical space */
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
     font-size: 0.95rem;
+    cursor: pointer; /* Entire cell is interactive */
     transition: background-color 0.15s;
 }
 
 .data-row:hover td {
-    background: var(--hover-bg);
+    background: var(--hover-bg); /* Full row highlight on hover */
+}
+.data-row input[type="checkbox"], .header-row input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: var(--accent-color);
 }
 
 .data-row.selected td {

@@ -37,6 +37,7 @@ const SettingsCard = ({ icon, title, children }) => (
 const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
     // Current States
     const [name, setName] = React.useState(user.name || '');
+    const [username, setUsername] = React.useState(user.username || '');
     const [pic, setPic] = React.useState(user.profilePicture || '');
     const [theme, setTheme] = React.useState(user.settings?.theme || 'light');
     const [themeColor, setThemeColor] = React.useState(user.settings?.themeColor || '#4f46e5');
@@ -61,7 +62,7 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
     const handleUpdateProfile = async () => {
         setLoading(true);
         try {
-            const updated = await window.AppDataHandler.updateProfile({ name, profilePicture: pic });
+            const updated = await window.AppDataHandler.updateProfile({ name, username, profilePicture: pic });
             onUpdateUser(updated);
             setAuthAction(null);
             showMessage('Profile updated successfully!');
@@ -234,6 +235,27 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                             <UIIcons.RefreshCw size={16} /> Resync Now
                         </button>
                     </div>
+
+                    {/* DANGER ZONE */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(239, 68, 68, 0.05)', margin: '1.5rem -1.5rem -1.5rem -1.5rem', padding: '1.5rem' }}>
+                        <div style={{ maxWidth: '75%' }}>
+                            <div style={{ fontWeight: '600', color: 'var(--danger)', marginBottom: '0.25rem' }}>Delete Account</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Permanently delete your account and profile data.</div>
+                        </div>
+                        <button onClick={async () => {
+                            if (confirm("WARNING: This will permanently delete your account. Are you absolutely sure?")) {
+                                try {
+                                    setLoading(true);
+                                    await window.AppDataHandler.deleteAccount();
+                                } catch (e) {
+                                    showMessage("Account deletion failed. You may need to log out and log back in first: " + e.message, true);
+                                    setLoading(false);
+                                }
+                            }
+                        }} disabled={loading} style={{ background: 'var(--danger)', color: 'white', border: 'none', padding: '0.6rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
+                            <UIIcons.Trash size={16} /> Delete Account
+                        </button>
+                    </div>
                 </SettingsCard>
 
                 <SettingsCard icon={<UIIcons.Info size={22} />} title="About">
@@ -243,11 +265,11 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                 <UIIcons.Info size={16} /> Version Info
                             </div>
                             <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontWeight: '500' }}>CloudBased IMS</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.9.0</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.10.0</div>
                             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Date Modified: March 23, 2026</div>
                         </div>
                         <div style={{ background: 'var(--hover-bg)', padding: '1.5rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                            <img src="resources/icon.png" alt="Icon" style={{ width: '40px', height: '40px', marginBottom: '0.75rem', opacity: 0.9 }} onError={(e) => { e.target.style.display = 'none'; }} />
+                            <img src="Resources/icon.png" alt="Icon" style={{ width: '40px', height: '40px', marginBottom: '0.75rem', opacity: 0.9 }} onError={(e) => { e.target.style.display = 'none'; }} />
                             <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>Made by Group 5</div>
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Created by: Cheng Roa & Tejada</div>
                         </div>
@@ -267,6 +289,7 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                         {authAction === 'editProfile' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <FormInput label="Display Name" value={name} onChange={e => setName(e.target.value)} />
+                                <FormInput label="Username" value={username} onChange={e => setUsername(e.target.value)} />
                                 <div className="auth-input-group">
                                     <label className="auth-label">Profile Picture (Upload)</label>
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
