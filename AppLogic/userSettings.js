@@ -305,7 +305,7 @@ const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThreshold
             <div style={{ marginTop: '5rem', padding: '2rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', opacity: 0.6 }}>
                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>CloudBased</div>
                 <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>  -ˋˏ ._. ˎˊ  </p>
-                <p style={{ fontSize: '0.85rem' }}>Version: 0.6.1  |  Last Updated: March 20, 2026</p>
+                <p style={{ fontSize: '0.85rem' }}>Version: 0.6.2  |  Last Updated: March 23, 2026</p>
                 <p style={{ fontSize: '0.85rem' }}>Created by: Cheng Roa and Tejada</p>
             </div>
 

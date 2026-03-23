@@ -19,6 +19,8 @@ const Prompt = ({
 }) => {
     // state
     const [formData, setFormData] = React.useState({});
+    const [error, setError] = React.useState('');
+
 
     // re-initialize target form map when opening
     React.useEffect(() => {
@@ -71,9 +73,15 @@ const Prompt = ({
             });
 
         } else if (type === 'edit-input-log' && items.length === 1) {
+            const logToEdit = inputLogs.find(l => l.id === items[0]);
+            if (logToEdit) setFormData({ ...logToEdit });
+
+        } else if (type === 'edit-output-log' && items.length === 1) {
             const logToEdit = outputLogs.find(l => l.id === items[0]);
             if (logToEdit) setFormData({ ...logToEdit });
         }
+
+        setError('');
 
     }, [isOpen, type, items, inventoryData, supplierData, inputLogs, outputLogs, uoms, warehouses]);
 
@@ -82,6 +90,7 @@ const Prompt = ({
     // handlers
     const handleChange = (e) => {
         const { name, value, type } = e.target;
+        setError('');
         setFormData(prev => ({
             ...prev,
             [name]: type === 'number' && value !== '' ? parseFloat(value) : value
@@ -92,6 +101,7 @@ const Prompt = ({
     const handleItemCodeChange = (e) => {
         const selectedId = e.target.value;
         const found = inventoryData.find(i => i.id === selectedId);
+        setError('');
         setFormData(prev => ({
             ...prev,
             itemCode: selectedId,
@@ -101,6 +111,34 @@ const Prompt = ({
     };
 
     const handleConfirm = () => {
+        // Validation logic
+        if (type === 'add-item' || type === 'edit-item') {
+            if (!formData.id) { setError('Item ID is required.'); return; }
+            if (!formData.name) { setError('Item Name is required.'); return; }
+            
+            const isDuplicate = inventoryData.some(i => i.id === formData.id && (type === 'add-item' || i.id !== items[0]));
+            if (isDuplicate) { setError(`Item ID "${formData.id}" already exists.`); return; }
+        }
+
+        if (type === 'add-supplier' || type === 'edit-supplier') {
+            if (!formData.id) { setError('Supplier ID is required.'); return; }
+            if (!formData.name) { setError('Supplier Name is required.'); return; }
+
+            const isIdDuplicate = supplierData.some(s => s.id === formData.id && (type === 'add-supplier' || s.id !== items[0]));
+            if (isIdDuplicate) { setError(`Supplier ID "${formData.id}" already exists.`); return; }
+
+            const isNameDuplicate = supplierData.some(s => s.name === formData.name && (type === 'add-supplier' || s.id !== items[0]));
+            if (isNameDuplicate) { setError(`Supplier Name "${formData.name}" already exists.`); return; }
+        }
+
+        if (isLogType) {
+            if (!formData.transactionId) { setError('Transaction ID is required.'); return; }
+            
+            const allLogs = [...inputLogs, ...outputLogs];
+            const isDuplicate = allLogs.some(l => l.transactionId === formData.transactionId && (type.startsWith('add') || l.id !== items[0]));
+            if (isDuplicate) { setError(`Transaction ID "${formData.transactionId}" already exists.`); return; }
+        }
+
         if (onConfirm) onConfirm(formData);
     };
 
@@ -133,6 +171,20 @@ const Prompt = ({
                 </div>
 
                 <div className="prompt-content">
+                    {error && (
+                        <div style={{ 
+                            background: 'rgba(248, 81, 73, 0.1)', 
+                            color: '#f85149', 
+                            padding: '0.75rem 1rem', 
+                            borderRadius: '8px', 
+                            marginBottom: '1.5rem',
+                            fontSize: '0.9rem',
+                            border: '1px solid rgba(248, 81, 73, 0.2)'
+                        }}>
+                            <strong>Error:</strong> {error}
+                        </div>
+                    )}
+
 
                     {/* Remove Confirmation */}
                     {(type === 'remove-item' || type === 'remove-supplier' || type === 'remove-input-log' || type === 'remove-output-log') && (
@@ -217,15 +269,19 @@ const Prompt = ({
                         <div className="prompt-form-container">
                             <div className="prompt-form-row">
                                 <div style={{ flex: 1 }}>
+                                    <label className="prompt-label">Supplier ID</label>
+                                    <input type="text" name="id" className="prompt-input" value={formData.id || ''} onChange={handleChange} placeholder="e.g. SUP-000" />
+                                </div>
+                                <div style={{ flex: 1 }}>
                                     <label className="prompt-label">Supplier Name</label>
                                     <input type="text" name="name" className="prompt-input" value={formData.name || ''} onChange={handleChange} placeholder="e.g. Tech Corp" />
                                 </div>
+                            </div>
+                            <div className="prompt-form-row">
                                 <div style={{ flex: 1 }}>
                                     <label className="prompt-label">Contact Person</label>
                                     <input type="text" name="contact" className="prompt-input" value={formData.contact || ''} onChange={handleChange} placeholder="e.g. Jane Doe" />
                                 </div>
-                            </div>
-                            <div className="prompt-form-row">
                                 <div style={{ flex: 1 }}>
                                     <label className="prompt-label">Address</label>
                                     <input type="text" name="address" className="prompt-input" value={formData.address || ''} onChange={handleChange} placeholder="e.g. 123 Main St, City" />

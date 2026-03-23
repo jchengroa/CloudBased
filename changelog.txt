@@ -195,3 +195,15 @@ Settings UI & Security Polish
 - User Avatar Dropdown: Replaced the direct settings shortcut with a sleek dropdown menu accessible from the user avatar. It currently provides links to "User Settings" and a "Database Help" documentation guide.
 - Refined Animations: Implemented a smooth chevron rotation on the user avatar and upgraded the global `sortDropFadeIn` animation with a subtle scaling effect for a more polished UI.
 - Versioning: Updated the internal version to 0.6.1 and refreshed the "Last Updated" metadata in the Settings dashboard.
+
+Version 0.6.2 (March 23, 2026)
+
+Data Integrity & Validation
+- Robust Validation: Implemented duplicate entry guards for Item IDs, Supplier Name/IDs, and Transaction IDs within the Prompt modal to prevent database collisions.
+- Error Feedback: Integrated a persistent error notification banner at the top of the Prompt overlay to provide real-time validation feedback during form submission.
+- Supplier Management: Explicitly exposed the Supplier ID field in Add/Edit forms, enabling manual control over unique identifiers for contact records.
+
+Component Bug Fixes & Refinements
+- Prompt Initialization: Resolved a bug in the dynamic form handler where `edit-input-log` would incorrectly attempt to source data from the output log collection.
+- Logic Coverage: Added missing initialization support for `edit-output-log` to ensure consistent CRUD behavior across all transaction types.
+- Field Resetting: Configured the validation error state to automatically clear upon form re-opening or whenever any input field is edited, improving UI fluidity.
