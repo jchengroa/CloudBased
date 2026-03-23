@@ -170,6 +170,23 @@ window.AppDataHandler = (function () {
             await user.updatePassword(newPass);
         },
 
+        sendPasswordResetEmail: async function (identifier) {
+            await initPromise;
+            let emailToSend = identifier;
+            // Support both username and email as the identifier
+            if (!identifier.includes('@')) {
+                const snap = await db.collection('users').where('username', '==', identifier).get();
+                if (snap.empty) throw new Error("User not found.");
+                emailToSend = snap.docs[0].data().email;
+            }
+            await auth.sendPasswordResetEmail(emailToSend);
+        },
+
+        confirmPasswordReset: async function (code, newPassword) {
+            await initPromise;
+            await auth.confirmPasswordReset(code, newPassword);
+        },
+
         // --- SHARED ROOT COLLECTIONS ---
         getInventory:   () => getData('inventory'),
         getInputLogs:   () => getData('inputLogs'),

@@ -34,7 +34,7 @@ const Prompt = ({
                 id: `ITM-${Math.floor(1000 + Math.random() * 9000)}`,
                 name: '', category: '', quantity: '', optimalStock: '', 
                 uom: uoms[0] || 'Pieces', warehouse: warehouses[0] || 'Main', supplier: '',
-                imageUrl: ''
+                imageUrl: '', description: ''
             });
         } else if (type === 'add-supplier') {
             setFormData({
@@ -92,7 +92,7 @@ const Prompt = ({
                 <div className="prompt-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
                     <h2 style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-0.5px' }}>{title}</h2>
                     <button className="prompt-close-btn" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5, padding: '0.4rem' }} onMouseEnter={e => e.target.style.opacity = 1} onMouseLeave={e => e.target.style.opacity = 0.5}>
-                        <CloseIcon />
+                        <Icons.Close />
                     </button>
                 </div>
 
@@ -133,6 +133,17 @@ const Prompt = ({
                                     <input type="text" className="auth-input" readOnly disabled value={(parseFloat(formData.quantity) || 0) < (parseFloat(formData.optimalStock) || 0) ? 'Reorder' : 'Okay'} style={{ opacity: 0.6, cursor: 'not-allowed' }} />
                                 </div>
                                 <FormSelect label="Supplier (Optional)" name="supplier" value={formData.supplier || ''} onChange={handleChange} options={[{label: '-- None --', value: ''}, ...supplierData.map(s => ({label: s.name, value: s.id}))]} />
+                            </div>
+                            <div className="auth-input-group">
+                                <label className="auth-label">Item Description</label>
+                                <textarea 
+                                    name="description" 
+                                    className="auth-input" 
+                                    style={{ height: '80px', paddingTop: '0.8rem', resize: 'none' }} 
+                                    placeholder="Enter a brief description of the product..." 
+                                    value={formData.description || ''} 
+                                    onChange={handleChange}
+                                />
                             </div>
                             <div className="auth-input-group">
                                 <label className="auth-label">Product Image (Upload)</label>

@@ -637,7 +637,7 @@ select.auth-input option {
 .item-header h3 { margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary); }
 .item-code-tag { font-family: 'Outfit'; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.6; }
 
-.item-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 4px 0; min-height: 2.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.item-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 4px 0; min-height: 2.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
 
 .item-stock-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: var(--hover-bg); padding: 1rem; border-radius: 14px; margin-top: auto; }
 .stock-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px; letter-spacing: 0.5px; }
@@ -686,3 +686,36 @@ select.auth-input option {
     z-index: 2000;
     padding: 2rem;
 }
+
+/* =========================================================================
+   9. DASHBOARD COMPONENTS
+   ========================================================================= */
+.dashboard-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.dash-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.dash-card-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+}
+
+.dash-card-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+

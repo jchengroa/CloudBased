@@ -236,4 +236,24 @@ Snappier UI & Refined Interaction
 - Snap-to-View Transitions: Eliminated aggressive 'pop-up' and movement animations. All components now appear instantly or via subtle, business-grade opacity fades.
 - Catalog Interactivity: Transformed Item List cards into fully clickable surfaces, allowing for instant 'tap-to-edit' inventory management.
 - Remove Image Logic: Integrated "Remove Photo" buttons across both Profile and Item forms to allow for instant asset resetting.
-- Critical Logic Fixes: Corrected permanent data deletion logic (replacing all 'Archive' stubs) and resolved a validation loop that blocked legitimate record removals.
+
+Version 0.7.1 (March 23, 2026)
+
+Executive Insights & Dashboard Logic
+- Integrated Analytical Dashboard: Launched a high-level executive dashboard featuring real-time data visualization across 8 specialized logic blocks.
+- Smart KPI Cards: Created dedicated modules for "Total Items", "Low Stock", and "Suppliers Only" for instant operational visibility.
+- Inventory Velocity: Implemented side-by-side specialized tables for "Recent Arrivals" and "Recent Shipments" with automated record fetching.
+- Risk Mitigation: Added a "Critical Replenishment Required" module that automatically flags items below safety stock levels.
+- Geographic & Category Distribution: Developed "Warehouse Distribution" and "Category Performance" modules to visualize stock concentration and product variety.
+
+Security & Authentication Refinement
+- Enhanced Password Recovery: Integrated a "Forgot Password" flow directly into the login portal and cross-linked it within the User Settings "Change Password" section.
+- Manual Credential Updates: Added a high-security manual password change view to the login gateway, allowing users to update credentials securely using current password verification.
+- Navigation Fluidity: Added "Back to Sign in" buttons and improved secondary navigation layout, increasing vertical spacing for a more modern, centered UI aesthetic.
+- Logic Patch: Resolved a Babel transpilation race condition in `login.html` that caused intermittent blank screens on initialization.
+
+Catalog & Property Enhancements
+- Product Descriptions: Expanded the Item Master schema to include a dedicated "Item Description" field.
+- Metadata Visibility: Updated Item List cards to display product descriptions, improving detail visibility without requiring a click.
+- Prompt Integration: Added a smart-resized description textarea to the Inventory Add/Edit modal.
+- Data Management Cleanup: Temporarily retired the "Import Inventory Data" stub from User Settings to streamline the interface for upcoming large-scale migration features.

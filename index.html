@@ -28,6 +28,15 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Firebase SDK (compat builds work with plain <script> tags, no bundler needed) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+    <!-- Data & Utils -->
+    <script src="AppData/appDataHandler.js"></script>
+    <script src="AppLogic/exportTool.js"></script>
+
     <!-- Core Logic & Components -->
     <script type="text/babel" src="AppLogic/validation.js"></script>
     <script type="text/babel" src="AppLogic/sharedComponents.js"></script>
@@ -37,14 +46,16 @@
     <script type="text/babel" src="AppLogic/itemList.js"></script>
     <script type="text/babel" src="AppLogic/userSettings.js"></script>
 
-    <!-- Firebase SDK (compat builds work with plain <script> tags, no bundler needed) -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-
-    <!-- Data & Utils -->
-    <script src="AppData/appDataHandler.js"></script>
-    <script src="AppLogic/exportTool.js"></script>
+    <!-- Dashboard Widgets -->
+    <script type="text/babel" src="DashboardLogic/totalItems.js"></script>
+    <script type="text/babel" src="DashboardLogic/lowStock.js"></script>
+    <script type="text/babel" src="DashboardLogic/suppliersOnly.js"></script>
+    <script type="text/babel" src="DashboardLogic/recentArrivals.js"></script>
+    <script type="text/babel" src="DashboardLogic/recentShipments.js"></script>
+    <script type="text/babel" src="DashboardLogic/criticalReplenishment.js"></script>
+    <script type="text/babel" src="DashboardLogic/categoryPerformance.js"></script>
+    <script type="text/babel" src="DashboardLogic/warehouseDistribution.js"></script>
+    <script type="text/babel" src="AppLogic/dashboard.js"></script>
 
     <!-- Main Entry -->
     <script type="text/babel" src="AppLogic/app.js"></script>

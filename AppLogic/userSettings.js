@@ -214,19 +214,6 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                             </button>
                         </div>
                     </div>
-                    <div style={{ borderTop: '1px solid var(--border-color)', margin: '0 -1.5rem', marginBottom: '1.5rem' }} />
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <div style={{ maxWidth: '75%' }}>
-                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Import Inventory Data</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Import existing data and automatically format it to work with this system.</div>
-                        </div>
-                        <button disabled style={{ background: 'transparent', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '0.6rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', opacity: 0.5, cursor: 'not-allowed' }}>
-                            <UIIcons.Upload size={16} /> Import CSV
-                        </button>
-                    </div>
-                    <div style={{ borderTop: '1px solid var(--border-color)', margin: '0 -1.5rem', marginBottom: '1.5rem' }} />
-
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <div style={{ maxWidth: '75%' }}>
                             <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Clear Local Storage</div>
@@ -314,6 +301,26 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                 <FormInput type="password" label="Current Password" value={oldPass} onChange={e => setOldPass(e.target.value)} />
                                 <FormInput type="password" label="New Password" value={newPass} onChange={e => setNewPass(e.target.value)} />
                                 <FormInput type="password" label="Confirm Password" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} />
+                                
+                                <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                                    <button 
+                                        type="button" 
+                                        className="auth-btn-text" 
+                                        style={{ fontSize: '0.85rem' }} 
+                                        onClick={async () => {
+                                            if (confirm("Send a password reset email to " + user.email + "?")) {
+                                                try {
+                                                    await window.AppDataHandler.sendPasswordResetEmail(user.email);
+                                                    alert("Reset email sent!");
+                                                    setAuthAction(null);
+                                                } catch(e) { alert(e.message); }
+                                            }
+                                        }}
+                                    >
+                                        Forgot current password?
+                                    </button>
+                                </div>
+
                                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                                     <button onClick={() => setAuthAction(null)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: '600' }}>Cancel</button>
                                     <button onClick={handleChangePassword} disabled={loading} style={{ background: 'var(--accent-color)', color: 'white', border: 'none', padding: '0.6rem 1.5rem', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Update Password</button>

@@ -44,6 +44,7 @@
     
     <!-- Entry Point for Login -->
     <script type="text/babel">
+        /** @jsx React.createElement */
         const LoginApp = () => {
             return (
                 <div className="app-wrapper" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -54,8 +55,10 @@
             );
         };
         const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
-        root.render(<LoginApp />);
+        if (rootElement) {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(<LoginApp />);
+        }
     </script>
 </body>
 

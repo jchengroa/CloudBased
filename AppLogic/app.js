@@ -8,7 +8,26 @@ const App = () => {
     // 1. Session & Global State
     const [user, setUser] = React.useState(window.AppDataHandler.getCurrentUser());
     const [theme, setTheme] = React.useState('light');
-    const [view, setView] = React.useState('inventory'); // 'inventory', 'suppliers', 'itemList'
+    
+    // URL Routing Logic (Simulated for SPA)
+    const getPathView = () => {
+        const hash = window.location.hash.replace('#/', '') || 'dashboard';
+        return ['dashboard', 'inventory', 'suppliers', 'itemList'].includes(hash) ? hash : 'dashboard';
+    };
+    
+    const [view, setView] = React.useState(getPathView());
+
+    // Sync state with URL hash
+    React.useEffect(() => {
+        const handleHashChange = () => setView(getPathView());
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
+    const navigate = (newView) => {
+        window.location.hash = `#/${newView}`;
+    };
+
     const [dbLoading, setDbLoading] = React.useState(true);
     const [dbError, setDbError] = React.useState(null);
 
@@ -105,9 +124,18 @@ const App = () => {
                 <div className="brand-left">
                     <div className="app-logo">CloudBased</div>
                     <nav className="nav-tabs-left">
-                        <button className={`nav-btn ${view === 'inventory' ? 'active' : ''}`} onClick={() => setView('inventory')}>Inventory</button>
-                        <button className={`nav-btn ${view === 'itemList' ? 'active' : ''}`} onClick={() => setView('itemList')}>Item List</button>
-                        <button className={`nav-btn ${view === 'suppliers' ? 'active' : ''}`} onClick={() => setView('suppliers')}>Suppliers</button>
+                        <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => navigate('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <window.DashboardIcon width="16" height="16" /> Dashboard
+                        </button>
+                        <button className={`nav-btn ${view === 'itemList' ? 'active' : ''}`} onClick={() => navigate('itemList')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <window.ListIcon width="16" height="16" /> Item List
+                        </button>
+                        <button className={`nav-btn ${view === 'inventory' ? 'active' : ''}`} onClick={() => navigate('inventory')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <window.LayersIcon width="16" height="16" /> Inventory
+                        </button>
+                        <button className={`nav-btn ${view === 'suppliers' ? 'active' : ''}`} onClick={() => navigate('suppliers')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <window.TruckIcon width="16" height="16" /> Suppliers
+                        </button>
                     </nav>
                 </div>
                 
@@ -150,6 +178,7 @@ const App = () => {
             )}
 
             <main className="app-layout">
+                {view === 'dashboard' && <window.Dashboard inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={user.settings || { lowStockThreshold: 1000 }} />}
                 {view === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} />}
                 {view === 'itemList' && <ItemList inventoryData={inventory} openPrompt={openPrompt} />}
                 {view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} />}
