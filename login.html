@@ -4,14 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudBased</title>
+    <title>CloudBased - Login</title>
     <link rel="icon" type="image/png" href="Resources/icon.png">
     <link rel="stylesheet" href="Resources/index.css">
 
     <script>
-        // Pre-render theme check to prevent light-flash
+        // Check if user is already logged in, redirect to app instantly
         try {
             const saved = localStorage.getItem('cloudbased_session');
+            if (saved) {
+                window.location.href = 'index.html';
+            }
             const theme = saved ? (JSON.parse(saved).settings?.theme || 'light') : 'light';
             document.documentElement.setAttribute('data-theme', theme);
         } catch (e) {
@@ -28,26 +31,32 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Core Logic & Components -->
-    <script type="text/babel" src="AppLogic/validation.js"></script>
-    <script type="text/babel" src="AppLogic/sharedComponents.js"></script>
-    <script type="text/babel" src="AppLogic/prompt.js"></script>
-    <script type="text/babel" src="AppLogic/inventoryTable.js"></script>
-    <script type="text/babel" src="AppLogic/supplierTable.js"></script>
-    <script type="text/babel" src="AppLogic/itemList.js"></script>
-    <script type="text/babel" src="AppLogic/userSettings.js"></script>
-
-    <!-- Firebase SDK (compat builds work with plain <script> tags, no bundler needed) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
-    <!-- Data & Utils -->
+    <!-- Core Logic & Components -->
     <script src="AppData/appDataHandler.js"></script>
-    <script src="AppLogic/exportTool.js"></script>
-
-    <!-- Main Entry -->
-    <script type="text/babel" src="AppLogic/app.js"></script>
+    <script type="text/babel" src="AppLogic/validation.js"></script>
+    <script type="text/babel" src="AppLogic/sharedComponents.js"></script>
+    <script type="text/babel" src="AppLogic/auth.js"></script>
+    
+    <!-- Entry Point for Login -->
+    <script type="text/babel">
+        const LoginApp = () => {
+            return (
+                <div className="app-wrapper" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Auth onLoginSuccess={(user) => {
+                        window.location.href = 'index.html';
+                    }} />
+                </div>
+            );
+        };
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(<LoginApp />);
+    </script>
 </body>
 
 </html>

@@ -207,3 +207,33 @@ Component Bug Fixes & Refinements
 - Prompt Initialization: Resolved a bug in the dynamic form handler where `edit-input-log` would incorrectly attempt to source data from the output log collection.
 - Logic Coverage: Added missing initialization support for `edit-output-log` to ensure consistent CRUD behavior across all transaction types.
 - Field Resetting: Configured the validation error state to automatically clear upon form re-opening or whenever any input field is edited, improving UI fluidity.
+===============================================================
+
+Version 0.7.0 (March 23, 2026)
+
+Authentication & Access Control
+- Dedicated Login Gateway: Launched `login.html`, a high-security entry point that cleanly separates the authentication flow from the main workspace.
+- Modern Auth UI: Developed an elegant, high-contrast Login/Signup interface with real-time field validation and secure credential handling.
+- Multi-User Identity: Implemented a robust profile system supporting unique display names and custom bio pictures per user.
+- Persistent Session Management: Engineered secure token-based redirects that intelligently route logged-out users to the entry gateway.
+
+Redesigned User Settings Dashboard
+- Category-First Layout: Completely rebuilt the settings menu to follow a modern modular layout (User Profile, System Operations, Version Info).
+- Profile Management: Added "Edit Profile" capabilities including one-click username updates and bio-picture clearing.
+- Credits & Origin: Implemented the official "Who Made This" section featuring Group 5 branding and the project's iconic heart-themed resources.
+- Version Tracking: Formalized the application's build info (v0.7.0, March 23, 2026) within the system dashboard.
+
+Core Architecture & Shared Logic
+- Component Abstraction: Performed a massive refactoring of redundant buttons, inputs, headers, and UI controls into `AppLogic/sharedComponents.js`, significantly improving codebase maintainability.
+- Multi-Purpose Form Components: Standardized `FormInput`, `FormSelect`, and `FormButtons` across all administrative prompts for pixel-perfect consistency.
+- Unified Media Engine: Developed a shared client-side image resizing utility that optimizes all incoming assets on-the-fly to ensure lightning-fast database performance.
+
+Advanced Navigation & Filtering
+- Dynamic Pill-Style Interface: Converted the entire application navigation (Main Tabs, View Switchers, and Location Filters) into a consistent, premium pill-tab design.
+- True Multi-Warehouse Filtering: Extended location pills to Arrivals, Shipments, and Suppliers. Logs now use "V-Lookup" logic to derive locations from inventory masters, while Suppliers are intelligently filtered based on their site-specific item associations.
+
+Snappier UI & Refined Interaction
+- Snap-to-View Transitions: Eliminated aggressive 'pop-up' and movement animations. All components now appear instantly or via subtle, business-grade opacity fades.
+- Catalog Interactivity: Transformed Item List cards into fully clickable surfaces, allowing for instant 'tap-to-edit' inventory management.
+- Remove Image Logic: Integrated "Remove Photo" buttons across both Profile and Item forms to allow for instant asset resetting.
+- Critical Logic Fixes: Corrected permanent data deletion logic (replacing all 'Archive' stubs) and resolved a validation loop that blocked legitimate record removals.

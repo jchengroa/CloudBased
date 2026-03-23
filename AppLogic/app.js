@@ -1,411 +1,186 @@
-/*
- * App.js - Main Application Entry Point
- * Maintains global state (themes, tabs) and routes props to sub-components.
+/**
+ * App Component
+ * The central controller for CloudBased.
+ * Now supports an elegant Multi-User system with Card-Based Views and Account Management.
  */
 
-const { useState } = React;
+const App = () => {
+    // 1. Session & Global State
+    const [user, setUser] = React.useState(window.AppDataHandler.getCurrentUser());
+    const [theme, setTheme] = React.useState('light');
+    const [view, setView] = React.useState('inventory'); // 'inventory', 'suppliers', 'itemList'
+    const [dbLoading, setDbLoading] = React.useState(true);
+    const [dbError, setDbError] = React.useState(null);
 
-function App() {
-    // global state
-    const [theme, setTheme] = useState('dark');
-    const [activeTab, setActiveTab] = useState('inventory');
+    // 2. Data State
+    const [inventory, setInventory] = React.useState([]);
+    const [inputLogs, setInputLogs] = React.useState([]);
+    const [outputLogs, setOutputLogs] = React.useState([]);
+    const [suppliers, setSuppliers] = React.useState([]);
+    const [uoms, setUoms] = React.useState([]);
+    const [warehouses, setWarehouses] = React.useState([]);
 
-    // modal overlay data
-    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-    const [promptState, setPromptState] = useState({ isOpen: false, title: '', type: '', items: [] });
+    // 3. UI state (Modals)
+    const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+    const [isAccountSettingsOpen, setIsAccountSettingsOpen] = React.useState(false);
+    const [promptState, setPromptState] = React.useState({ isOpen: false, title: '', type: '', items: [] });
 
-    // shared numeric thresholding data (loaded async on mount)
-    const [lowStockThreshold, setLowStockThreshold] = useState(1000);
-    const [isThresholdEnabled, setIsThresholdEnabled] = useState(true);
-    const [activeWarehouseFilter, setActiveWarehouseFilter] = useState('All');
+    const openPrompt = (title, type, items = []) => setPromptState({ isOpen: true, title, type, items });
+    const closePrompt = () => setPromptState({ ...promptState, isOpen: false });
 
-    // unified cloud data arrays
-    const [inventoryData, setInventoryData] = useState([]);
-    const [supplierData, setSupplierData] = useState([]);
-
-    // transaction logs
-    const [inputLogs, setInputLogs] = useState([]);
-    const [outputLogs, setOutputLogs] = useState([]);
-
-    // shared dropdown lists
-    const [uoms, setUoms] = useState([]);
-    const [warehouseList, setWarehouseList] = useState([]);
-
-    // initial app load flag
-    const [dataLoaded, setDataLoaded] = useState(false);
-    const [dbError, setDbError] = useState(null);
-
-    // Load Backend Data on Mount
+    // Initial load
     React.useEffect(() => {
-        const loadInitialData = async () => {
-            try {
-                // Settings are local, so they should be loaded first
-                const settings = await window.AppDataHandler.getSettings();
-                setTheme(settings.theme);
-                document.documentElement.setAttribute('data-theme', settings.theme);
-                setLowStockThreshold(settings.lowStockThreshold);
-                setIsThresholdEnabled(settings.isThresholdEnabled);
-
-                // These depend on Firebase
-                const inv = await window.AppDataHandler.getInventory();
-                const sups = await window.AppDataHandler.getSuppliers();
-                const staticUoms = await window.AppDataHandler.getUOMs();
-                const staticWhs = await window.AppDataHandler.getWarehouses();
-                const inLogs = await window.AppDataHandler.getInputLogs();
-                const outLogs = await window.AppDataHandler.getOutputLogs();
-
-                setInventoryData(inv);
-                setSupplierData(sups);
-                setUoms(staticUoms);
-                setWarehouseList(staticWhs);
-                setInputLogs(inLogs);
-                setOutputLogs(outLogs);
-
-                setDbError(window.AppDataHandler.getDbError());
-            } catch (e) {
-                console.error("Critical error during data load:", e);
-                setDbError(window.AppDataHandler.getDbError() || e.message);
-            } finally {
-                setDataLoaded(true);
-            }
-        };
-        loadInitialData();
-    }, []);
-
-    // inject visual filter "All" into user-defined warehouse array
-    const warehouses = ['All', ...warehouseList];
-
-    // handlers
-    // Flips the system theme and updates the master HTML attribute
-    const toggleTheme = () => {
-        const newTheme = theme === 'dark' ? 'light' : 'dark';
-        setTheme(newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
-        window.AppDataHandler.saveSettings({ theme: newTheme, lowStockThreshold, isThresholdEnabled });
-    };
-
-    // pass-through settings controllers
-    const handleSetThreshold = (newVal) => {
-        setLowStockThreshold(newVal);
-        window.AppDataHandler.saveSettings({ theme, lowStockThreshold: newVal, isThresholdEnabled });
-    };
-
-    const handleSetThresholdEnabled = (newVal) => {
-        setIsThresholdEnabled(newVal);
-        window.AppDataHandler.saveSettings({ theme, lowStockThreshold, isThresholdEnabled: newVal });
-    };
-
-    // Updates the UOM list in state and persists it to the backend
-    const handleSaveUOMs = (newUoms) => {
-        setUoms(newUoms);
-        window.AppDataHandler.saveUOMs(newUoms);
-    };
-
-    // Updates the warehouse list in state and persists it to Firestore
-    const handleSaveWarehouses = (newWarehouses) => {
-        setWarehouseList(newWarehouses);
-        window.AppDataHandler.saveWarehouses(newWarehouses);
-    };
-
-    // Opens the prompt with dynamic data parameters
-    // title: string identifying prompt header
-    // type: internal string dictating logic flow ('add-item', 'supplier-details', etc.)
-    // items: array of selected row IDs or strings needed for mapping
-    const openPrompt = (title, type = '', items = []) => {
-        setPromptState({ isOpen: true, title, type, items });
-    };
-
-    // Closes the prompt
-    const closePrompt = () => {
-        setPromptState({ ...promptState, isOpen: false });
-    };
-
-    // dynamic form submission router
-    const handlePromptConfirm = (payload) => {
-        let updatedInventory, updatedSuppliers, updatedLogs;
-
-        switch (promptState.type) {
-            case 'remove-item':
-                updatedInventory = inventoryData.filter(item => !promptState.items.includes(item.id));
-                setInventoryData(updatedInventory);
-                window.AppDataHandler.saveInventory(updatedInventory);
-                break;
-
-            case 'remove-supplier':
-                updatedSuppliers = supplierData.filter(sup => !promptState.items.includes(sup.id));
-                setSupplierData(updatedSuppliers);
-                window.AppDataHandler.saveSuppliers(updatedSuppliers);
-                break;
-
-            case 'add-item':
-                updatedInventory = [...inventoryData, payload];
-                setInventoryData(updatedInventory);
-                window.AppDataHandler.saveInventory(updatedInventory);
-                break;
-
-            case 'edit-item':
-                updatedInventory = inventoryData.map(item =>
-                    item.id === promptState.items[0] ? payload : item
-                );
-                setInventoryData(updatedInventory);
-                window.AppDataHandler.saveInventory(updatedInventory);
-                break;
-
-            case 'add-supplier':
-                updatedSuppliers = [...supplierData, payload];
-                setSupplierData(updatedSuppliers);
-                window.AppDataHandler.saveSuppliers(updatedSuppliers);
-                break;
-
-            case 'edit-supplier':
-                updatedSuppliers = supplierData.map(sup =>
-                    sup.id === promptState.items[0] ? payload : sup
-                );
-                setSupplierData(updatedSuppliers);
-                window.AppDataHandler.saveSuppliers(updatedSuppliers);
-                break;
-
-            case 'add-input-log':
-                payload = { ...payload, id: `in-${Date.now()}` };
-                updatedLogs = [...inputLogs, payload];
-                setInputLogs(updatedLogs);
-                window.AppDataHandler.saveInputLogs(updatedLogs);
-
-                // auto increment
-                updatedInventory = inventoryData.map(item => {
-                    if (item.id === payload.itemCode) return { ...item, quantity: Math.round(((parseFloat(item.quantity) || 0) + (parseFloat(payload.quantity) || 0)) * 1e10) / 1e10 };
-                    return item;
-                });
-                setInventoryData(updatedInventory);
-                window.AppDataHandler.saveInventory(updatedInventory);
-                break;
-
-            case 'edit-input-log':
-                {
-                    const oldLog = inputLogs.find(l => l.id === promptState.items[0]);
-                    updatedLogs = inputLogs.map(l => l.id === promptState.items[0] ? { ...payload, id: l.id } : l);
-                    setInputLogs(updatedLogs);
-                    window.AppDataHandler.saveInputLogs(updatedLogs);
-
-                    if (oldLog) {
-                        const oldQty = parseFloat(oldLog.quantity) || 0;
-                        const newQty = parseFloat(payload.quantity) || 0;
-                        updatedInventory = inventoryData.map(item => {
-                            let q = parseFloat(item.quantity) || 0;
-                            if (item.id === oldLog.itemCode) q = Math.round((q - oldQty) * 1e10) / 1e10;
-                            if (item.id === payload.itemCode) q = Math.round((q + newQty) * 1e10) / 1e10;
-                            return item.id === oldLog.itemCode || item.id === payload.itemCode ? { ...item, quantity: q } : item;
-                        });
-                        setInventoryData(updatedInventory);
-                        window.AppDataHandler.saveInventory(updatedInventory);
-                    }
-                }
-                break;
-
-            case 'remove-input-log':
-                {
-                    const logsToRemove = inputLogs.filter(l => promptState.items.includes(l.id));
-                    updatedLogs = inputLogs.filter(l => !promptState.items.includes(l.id));
-                    setInputLogs(updatedLogs);
-                    window.AppDataHandler.saveInputLogs(updatedLogs);
-
-                    updatedInventory = [...inventoryData];
-                    logsToRemove.forEach(log => {
-                        const qty = parseFloat(log.quantity) || 0;
-                        updatedInventory = updatedInventory.map(item => {
-                            if (item.id === log.itemCode) return { ...item, quantity: Math.round(((parseFloat(item.quantity) || 0) - qty) * 1e10) / 1e10 };
-                            return item;
-                        });
-                    });
-                    setInventoryData(updatedInventory);
-                    window.AppDataHandler.saveInventory(updatedInventory);
-                }
-                break;
-
-            case 'add-output-log':
-                payload = { ...payload, id: `out-${Date.now()}` };
-                updatedLogs = [...outputLogs, payload];
-                setOutputLogs(updatedLogs);
-                window.AppDataHandler.saveOutputLogs(updatedLogs);
-
-                // auto decrement
-                updatedInventory = inventoryData.map(item => {
-                    if (item.id === payload.itemCode) return { ...item, quantity: Math.round(((parseFloat(item.quantity) || 0) - (parseFloat(payload.quantity) || 0)) * 1e10) / 1e10 };
-                    return item;
-                });
-                setInventoryData(updatedInventory);
-                window.AppDataHandler.saveInventory(updatedInventory);
-                break;
-
-            case 'edit-output-log':
-                {
-                    const oldLog = outputLogs.find(l => l.id === promptState.items[0]);
-                    updatedLogs = outputLogs.map(l => l.id === promptState.items[0] ? { ...payload, id: l.id } : l);
-                    setOutputLogs(updatedLogs);
-                    window.AppDataHandler.saveOutputLogs(updatedLogs);
-
-                    if (oldLog) {
-                        const oldQty = parseFloat(oldLog.quantity) || 0;
-                        const newQty = parseFloat(payload.quantity) || 0;
-                        updatedInventory = inventoryData.map(item => {
-                            let q = parseFloat(item.quantity) || 0;
-                            if (item.id === oldLog.itemCode) q = Math.round((q + oldQty) * 1e10) / 1e10;
-                            if (item.id === payload.itemCode) q = Math.round((q - newQty) * 1e10) / 1e10;
-                            return item.id === oldLog.itemCode || item.id === payload.itemCode ? { ...item, quantity: q } : item;
-                        });
-                        setInventoryData(updatedInventory);
-                        window.AppDataHandler.saveInventory(updatedInventory);
-                    }
-                }
-                break;
-
-            case 'remove-output-log':
-                {
-                    const logsToRemove = outputLogs.filter(l => promptState.items.includes(l.id));
-                    updatedLogs = outputLogs.filter(l => !promptState.items.includes(l.id));
-                    setOutputLogs(updatedLogs);
-                    window.AppDataHandler.saveOutputLogs(updatedLogs);
-
-                    updatedInventory = [...inventoryData];
-                    logsToRemove.forEach(log => {
-                        const qty = parseFloat(log.quantity) || 0;
-                        updatedInventory = updatedInventory.map(item => {
-                            if (item.id === log.itemCode) return { ...item, quantity: Math.round(((parseFloat(item.quantity) || 0) + qty) * 1e10) / 1e10 };
-                            return item;
-                        });
-                    });
-                    setInventoryData(updatedInventory);
-                    window.AppDataHandler.saveInventory(updatedInventory);
-                }
-                break;
+        if (!user) { 
+            window.location.href = 'login.html';
+            return; 
         }
-        closePrompt();
+        loadAllData();
+    }, [user]);
+
+    const loadAllData = async () => {
+        setDbLoading(true);
+        try {
+            const [inv, inLogs, outLogs, sups, units, whs, settings] = await Promise.all([
+                window.AppDataHandler.getInventory(),
+                window.AppDataHandler.getInputLogs(),
+                window.AppDataHandler.getOutputLogs(),
+                window.AppDataHandler.getSuppliers(),
+                window.AppDataHandler.getUOMs(),
+                window.AppDataHandler.getWarehouses(),
+                window.AppDataHandler.getSettings()
+            ]);
+            setInventory(inv); setInputLogs(inLogs); setOutputLogs(outLogs);
+            setSuppliers(sups); setUoms(units); setWarehouses(whs);
+            setTheme(settings.theme || 'light');
+            setDbError(window.AppDataHandler.getDbError());
+        } catch (e) {
+            setDbError("System sync failed: " + e.message);
+        } finally { setDbLoading(false); }
     };
 
-    // render
-    if (!dataLoaded) {
+    const handlePromptConfirm = async (data) => {
+        try {
+            const type = promptState.type;
+            if (type === 'add-item') {
+                const updated = [...inventory, data];
+                setInventory(updated);
+                await window.AppDataHandler.saveInventory(updated);
+            } else if (type === 'edit-item') {
+                const updated = inventory.map(i => i.id === promptState.items[0] ? data : i);
+                setInventory(updated);
+                await window.AppDataHandler.saveInventory(updated);
+            } else if (type === 'remove-item') {
+                const updated = inventory.filter(i => !promptState.items.includes(i.id));
+                setInventory(updated);
+                await window.AppDataHandler.saveInventory(updated);
+            } else if (type === 'add-input-log') {
+                const updated = [...inputLogs, data]; setInputLogs(updated); await window.AppDataHandler.saveInputLogs(updated);
+                const invUpdated = inventory.map(i => i.id === data.itemCode ? { ...i, quantity: (parseFloat(i.quantity) || 0) + parseFloat(data.quantity) } : i);
+                setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
+            } else if (type === 'add-output-log') {
+                const updated = [...outputLogs, data]; setOutputLogs(updated); await window.AppDataHandler.saveOutputLogs(updated);
+                const invUpdated = inventory.map(i => i.id === data.itemCode ? { ...i, quantity: (parseFloat(i.quantity) || 0) - parseFloat(data.quantity) } : i);
+                setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
+            }
+            closePrompt();
+        } catch (err) { alert("Error saving data: " + err.message); }
+    };
+
+    if (!user) return null; // Redirect handled in useEffect
+
+    if (dbLoading) {
         return (
-            <div style={{
-                width: '100vw',
-                height: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'var(--bg-color)',
-                color: 'var(--text-secondary)',
-                fontSize: '1.1rem',
-                fontWeight: '500',
-                letterSpacing: '0.03em'
-            }}>
-                Cloud Face is loading resources...
-            </div> // lmao
+            <div style={{ background: 'var(--bg-color)', color: 'var(--text-primary)', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+                <div style={{ fontSize: '2.5rem', fontWeight: '700', letterSpacing: '-1.5px', opacity: 0.9 }} className="app-logo">CloudBased</div>
+                <div style={{ padding: '2px', width: '240px', background: 'var(--hover-bg)', borderRadius: '12px', overflow: 'hidden' }}>
+                    <div style={{ width: '40%', height: '4px', background: 'var(--accent-color)', borderRadius: '12px', animation: 'load 1.8s infinite ease-in-out' }}></div>
+                </div>
+            </div>
         );
     }
 
     return (
         <div className="app-wrapper">
-            {/* Topmost Brand Bar (Navigation Bar) */}
-            <div className="top-brand-bar">
+            <header className="top-brand-bar">
                 <div className="brand-left">
-                    <img src="Resources/icon.png" alt="Icon" className="brand-icon" />
                     <div className="app-logo">CloudBased</div>
-
-                    {/* Integrated Navigation Links */}
-                    <div className="nav-tabs-left" style={{ marginLeft: '1rem' }}>
-                        <button
-                            className={`nav-btn ${activeTab === 'inventory' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('inventory')}
-                        >
-                            Inventory
-                        </button>
-                        <button
-                            className={`nav-btn ${activeTab === 'suppliers' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('suppliers')}
-                        >
-                            Suppliers
-                        </button>
-                    </div>
+                    <nav className="nav-tabs-left">
+                        <button className={`nav-btn ${view === 'inventory' ? 'active' : ''}`} onClick={() => setView('inventory')}>Inventory</button>
+                        <button className={`nav-btn ${view === 'itemList' ? 'active' : ''}`} onClick={() => setView('itemList')}>Item List</button>
+                        <button className={`nav-btn ${view === 'suppliers' ? 'active' : ''}`} onClick={() => setView('suppliers')}>Suppliers</button>
+                    </nav>
                 </div>
-                <div className="brand-right" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} style={{ position: 'relative' }}>
-                    <button
-                        className={`user-avatar-btn ${activeTab === 'settings' ? 'active' : ''}`}
-                        title="User Settings"
-                    >
-                        U
-                    </button>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)', transition: 'transform 0.2s', transform: isUserDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}>
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
+                
+                <div className="brand-right" onClick={() => setIsProfileOpen(!isProfileOpen)} style={{ cursor: 'pointer' }}>
+                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center', marginRight: '0.5rem' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: '700', lineHeight: 1.2 }}>{user.name}</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '600', opacity: 0.8 }}>@{user.username}</span>
+                    </div>
+                    <img 
+                        src={user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&size=40`} 
+                        className="user-avatar-btn" 
+                        style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'cover', border: '2px solid var(--accent-color)' }} 
+                    />
+                </div>
+            </header>
 
-                    {/* Styled Dropdown Menu */}
-                    {isUserDropdownOpen && (
-                        <>
-                            {/* Backdrop to close when clicking outside */}
-                            <div
-                                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
-                                onClick={(e) => { e.stopPropagation(); setIsUserDropdownOpen(false); }}
-                            />
-                            <div className="user-dropdown">
-                                <div
-                                    className={`user-dropdown-item ${activeTab === 'settings' ? 'active' : ''}`}
-                                    onClick={() => { setActiveTab('settings'); setIsUserDropdownOpen(false); }}
-                                >
-                                    User Settings
-                                </div>
-                                <div
-                                    className="user-dropdown-item"
-                                    onClick={() => { window.open("https://docs.google.com/document/d/1AoBQg_2qeGFfdUL3JeSW7lP2VdIIPpO6pFgqCEiyC68/edit?usp=sharing", "_blank"); setIsUserDropdownOpen(false); }}
-                                >
-                                    Database Help
-                                </div>
+            {isProfileOpen && (
+                <>
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 999 }} onClick={() => setIsProfileOpen(false)}></div>
+                    <div style={{ position: 'fixed', top: '75px', right: '4vw', zIndex: 1000 }}>
+                        <div style={{ background: 'var(--glass-bg)', backdropFilter: 'blur(24px)', border: '1px solid var(--glass-border)', borderRadius: '20px', padding: '0.6rem', minWidth: '220px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                            <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '0.4rem' }}>
+                                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>My Workspace</div>
                             </div>
-                        </>
-                    )}
-                </div>
-            </div>
-
-            <div className="app-layout">
-                {/* Filter Bar */}
-                {activeTab === 'inventory' && (
-                    <div className="filter-bar">
-                        {warehouses.map(wh => (
-                            <button
-                                key={wh}
-                                className={`filter-card ${activeWarehouseFilter === wh ? 'active' : ''}`}
-                                onClick={() => setActiveWarehouseFilter(wh)}
-                            >
-                                {wh}
+                            <button style={{ width: '100%', textAlign: 'left', padding: '0.8rem 1rem', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '12px', fontSize: '0.9rem', fontWeight: '500' /* Removed transition: 'background 0.2s' */, display: 'flex', gap: '0.75rem', alignItems: 'center' }} 
+                                onMouseEnter={e => e.target.style.background = 'var(--hover-bg)'}
+                                onMouseLeave={e => e.target.style.background = 'none'}
+                                onClick={() => { setIsAccountSettingsOpen(true); setIsProfileOpen(false); }}>
+                                <span style={{ opacity: 0.6 }}><Icons.Edit /></span> User Settings
                             </button>
-                        ))}
+                            <button style={{ width: '100%', textAlign: 'left', padding: '0.8rem 1rem', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', borderRadius: '12px', fontSize: '0.9rem', fontWeight: '600', transition: 'background 0.2s', display: 'flex', gap: '0.75rem', alignItems: 'center' }} 
+                                onMouseEnter={e => e.target.style.background = 'rgba(239, 68, 68, 0.08)'}
+                                onMouseLeave={e => e.target.style.background = 'none'}
+                                onClick={() => window.AppDataHandler.logout() || location.reload()}>
+                                <span style={{ opacity: 0.6 }}><Icons.Trash /></span> Sign Out
+                            </button>
+                        </div>
                     </div>
-                )}
+                </>
+            )}
 
-                {/* Main Content Router */}
-                <main className="main-content">
-                    {activeTab === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventoryData} inputLogs={inputLogs} outputLogs={outputLogs} lowStockThreshold={lowStockThreshold} isThresholdEnabled={isThresholdEnabled} activeWarehouseFilter={activeWarehouseFilter} dbError={dbError} />}
-                    {activeTab === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={supplierData} dbError={dbError} />}
-                    {activeTab === 'settings' && <UserSettings theme={theme} toggleTheme={toggleTheme} threshold={lowStockThreshold} setThreshold={handleSetThreshold} isThresholdEnabled={isThresholdEnabled} setIsThresholdEnabled={handleSetThresholdEnabled} uoms={uoms} onSaveUOMs={handleSaveUOMs} warehouses={warehouseList} onSaveWarehouses={handleSaveWarehouses} inventoryData={inventoryData} />}
-                </main>
+            <main className="app-layout">
+                {view === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} />}
+                {view === 'itemList' && <ItemList inventoryData={inventory} openPrompt={openPrompt} />}
+                {view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} />}
+            </main>
 
-                {/* Global Prompt Overlay */}
-                <Prompt
-                    isOpen={promptState.isOpen}
-                    title={promptState.title}
-                    type={promptState.type}
-                    items={promptState.items}
-                    onClose={closePrompt}
-                    onConfirm={handlePromptConfirm}
-                    inventoryData={inventoryData}
-                    supplierData={supplierData}
-                    inputLogs={inputLogs}
-                    outputLogs={outputLogs}
-                    uoms={uoms}
-                    warehouses={warehouseList}
+            <Prompt 
+                isOpen={promptState.isOpen}
+                onClose={closePrompt}
+                onConfirm={handlePromptConfirm}
+                title={promptState.title}
+                type={promptState.type}
+                items={promptState.items}
+                inventoryData={inventory}
+                supplierData={suppliers}
+                uoms={uoms}
+                warehouses={warehouses}
+            />
+
+            {isAccountSettingsOpen && (
+                <UserSettings 
+                    user={user} 
+                    inventoryData={inventory}
+                    onClose={() => setIsAccountSettingsOpen(false)} 
+                    onUpdateUser={async (u) => { setUser(u); setIsAccountSettingsOpen(false); }}
                 />
-            </div>
+            )}
         </div>
     );
-}
+};
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+// Mount the App
+const rootElement = document.getElementById('root');
+const root = ReactDOM.createRoot(rootElement);
 root.render(<App />);

@@ -1,41 +1,47 @@
 /* =========================================================================
-   1. COLOR VARIABLES & THEME REGISTRY
+   1. ELEGANT DESIGN SYSTEM & TYPOGRAPHY
    ========================================================================= */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
 :root {
-    /* Dark Mode (Default) */
-    --bg-color: #0f1115;
-    --text-primary: #f0f3f6;
-    --text-secondary: #8b949e;
-    --accent-color: #2f81f7;
-    --accent-hover: #4493f8;
-    --border-color: #444c56;
-    --card-bg: #161b22;
-    --hover-bg: rgba(255, 255, 255, 0.03);
-    --selected-bg: rgba(47, 129, 247, 0.08);
-    --th-bg: rgba(255, 255, 255, 0.01);
-    --btn-edit-hover: rgba(255, 255, 255, 0.05);
+    /* Deep Slate & Indigo Theme (Dark) */
+    --bg-color: #0c0e12;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-color: #6366f1; /* Indigo */
+    --accent-hover: #818cf8;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --card-bg: #11141b;
+    --hover-bg: rgba(255, 255, 255, 0.04);
+    --selected-bg: rgba(99, 102, 241, 0.1);
+    --th-bg: rgba(255, 255, 255, 0.02);
+    --btn-edit-hover: rgba(255, 255, 255, 0.06);
+    --glass-bg: rgba(17, 20, 27, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --input-bg: rgba(255, 255, 255, 0.03);
 }
 
 [data-theme='light'] {
-    /* Light Mode Overrides */
-    --bg-color: #f6f8fa;
-    --text-primary: #1f2328;
-    --text-secondary: #656d76;
-    --accent-color: #0969da;
-    --accent-hover: #0a5cb8;
-    --border-color: #d0d7de;
+    /* Soft Slate & Indigo Theme (Light) */
+    --bg-color: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --accent-color: #4f46e5;
+    --accent-hover: #4338ca;
+    --border-color: rgba(0, 0, 0, 0.08);
     --card-bg: #ffffff;
-    --hover-bg: rgba(0, 0, 0, 0.04);
-    --selected-bg: rgba(9, 105, 218, 0.08);
-    --th-bg: rgba(0, 0, 0, 0.02);
-    --btn-edit-hover: rgba(0, 0, 0, 0.05);
+    --hover-bg: rgba(0, 0, 0, 0.03);
+    --selected-bg: rgba(79, 70, 229, 0.08);
+    --th-bg: rgba(0, 0, 0, 0.01);
+    --btn-edit-hover: rgba(0, 0, 0, 0.04);
+    --glass-bg: rgba(255, 255, 255, 0.82);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --input-bg: rgba(0, 0, 0, 0.03);
 }
-
-
-/* =========================================================================
-   2. GLOBAL RESET & BASE STYLES
-   ========================================================================= */
 
 * {
     box-sizing: border-box;
@@ -46,12 +52,15 @@
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-
-    /* Strict viewport sizing to allow proper scroll behaviors */
+    font-family: 'Inter', -apple-system, sans-serif;
     height: 100vh;
-    padding: 0;
     display: flex;
+    overflow: hidden;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+h1, h2, h3, .app-logo {
+    font-family: 'Outfit', sans-serif;
 }
 
 #root {
@@ -59,6 +68,160 @@ body {
     height: 100%;
 }
 
+/* =========================================================================
+   2. AUTHENTICATION & LOGIN UI (NEW)
+   ========================================================================= */
+
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent), var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.auth-box {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 440px;
+    padding: 3rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: authFadeIn 0.3s ease;
+}
+
+@keyframes authFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.auth-logo {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+    background: linear-gradient(to right, var(--accent-color), var(--accent-hover));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.auth-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.auth-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-left: 0.25rem;
+}
+
+.auth-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    height: 48px; /* Force consistent height for select vs input */
+}
+
+select.auth-input {
+    cursor: pointer;
+}
+
+select.auth-input option {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.auth-input-icon {
+    position: absolute;
+    right: 1rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.auth-input-icon:hover {
+    color: var(--accent-color);
+}
+
+.auth-btn-primary {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.9rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2), 0 2px 4px -1px rgba(99, 102, 241, 0.1);
+}
+
+.auth-btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3), 0 4px 6px -2px rgba(99, 102, 241, 0.2);
+}
+
+.auth-btn-text {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0; /* Removed forced margin for better alignment in shared components */
+    transition: opacity 0.2s;
+}
+
+.auth-btn-text:hover {
+    opacity: 0.8;
+}
 
 /* =========================================================================
    3. APP LAYOUT & CORE NAVIGATION
@@ -71,233 +234,128 @@ body {
     flex-direction: column;
 }
 
-.app-layout {
-    width: 100%;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 3vh 4vw 7vh 4vw;
-    gap: 1.5rem;
-    overflow: hidden;
-    /* To allow list-boxes to handle their own scrolling */
-}
-
-/* === Top Dashboard Navigation === */
 .top-brand-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 4vw;
-    background-color: var(--card-bg);
-    /* Highlight color similar to tables */
+    padding: 1.8rem 4vw; /* Significantly bigger/taller bar as requested */
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-color);
-    width: 100%;
+    z-index: 100;
 }
 
 .brand-left {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-}
-
-.brand-icon {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
+    gap: 1rem;
 }
 
 .app-logo {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
+    letter-spacing: -1px;
+    background: linear-gradient(to bottom, var(--text-primary), var(--text-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-tabs-left {
+    margin-left: 2rem;
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.03); /* Glassy pill container */
+    padding: 6px;
+    border-radius: 40px;
+    border: 1px solid var(--border-color);
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.6rem 1.75rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-btn.active {
+    background: var(--accent-color);
+    color: white;
+    box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4);
+}
+
+.nav-btn:hover:not(.active) {
+    background: var(--hover-bg);
     color: var(--text-primary);
-    letter-spacing: -0.5px;
 }
 
 .brand-right {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 8px;
-    transition: background-color 0.2s;
+    gap: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 12px;
+    transition: all 0.2s;
 }
 
 .brand-right:hover {
-    background-color: var(--hover-bg);
+    background: var(--hover-bg);
 }
 
-/* Filter Bar and Filter Cards */
-.filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding-bottom: 0.5rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.filter-bar::-webkit-scrollbar {
-    display: none;
-}
-
-.filter-card {
-    background-color: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s ease;
-}
-
-.filter-card:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
-}
-
-.filter-card.active {
-    background-color: var(--selected-bg);
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-
-.nav-tabs-left {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-/* Text Tab Buttons (e.g. Inventory, Suppliers) */
-.nav-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1rem;
-    font-weight: 600;
-    padding: 0.6rem 1.25rem;
-    cursor: pointer;
-}
-
-.nav-btn.active {
-    color: var(--accent-color);
-}
-
-/* The "U" Profile Settings Button */
 .user-avatar-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+    color: white;
+    border: none;
     font-weight: 700;
-    cursor: pointer;
+    font-size: 1rem;
     display: flex;
-    justify-content: center;
     align-items: center;
-}
-
-.user-avatar-btn.active {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-
-
-/* =========================================================================
-   4. SHARED UI CONTAINERS (THE "LIST BOX")
-   ========================================================================= */
-
-/* The flexible space where tabs inject their views */
-.main-content {
-    flex-grow: 1;
-    display: flex;
     justify-content: center;
-    align-items: flex-start;
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+}
+
+.app-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 4vw;
+    gap: 1.5rem;
     overflow: hidden;
 }
 
-/* The rounded bounding box applied to all tables/settings panes */
-.list-box {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-}
-
-
 /* =========================================================================
-   5. SETTINGS TAB SPECIFICS
+   4. DATA CONTAINERS (THE "LIST BOX")
    ========================================================================= */
 
-.settings-tab {
-    padding: 3rem;
-    height: 100%;
-    max-width: 800px;
-    overflow-y: auto;
-}
-
-.settings-tab h2 {
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-    font-weight: 600;
-}
-
-/* Individual setting config bars */
-.setting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--th-bg);
-}
-
-.setting-item.setting-column {
-    display: block;
-}
-
-.setting-info {
+.main-content {
     flex: 1;
-    min-width: 0;
-    /* Allows text to wrap instead of overflowing into button space */
-    padding-right: 1.5rem;
-}
-
-.setting-info h3 {
-    margin-bottom: 0.25rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.setting-info p {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-}
-
-.setting-item-inner {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.list-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
     width: 100%;
-}
-
-.threshold-controls {
+    height: 100%;
     display: flex;
-    gap: 1rem;
-    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
-
 
 /* =========================================================================
-   6. TABLE & TOOLBAR STYLES (Used by Inventory & Supplier Tables)
+   5. TABLES & TOOLBARS
    ========================================================================= */
 
 .inventory-table {
@@ -306,745 +364,325 @@ body {
     text-align: left;
 }
 
-/* === Toolbar Row (Search & Action Buttons) === */
 .management-row th {
-    height: 70px;
+    padding: 1.5rem 2.5rem; /* Increased padding significantly */
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--th-bg);
-    padding: 0 1.5rem;
-    font-weight: 400;
+    background: rgba(255, 255, 255, 0.01);
 }
 
 .management-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-}
-
-.toolbar-left,
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    padding: 2.2rem 2.5rem; /* Large bar padding, significantly taller than icons */
 }
 
 .search-bar {
-    background-color: var(--bg-color);
+    background: var(--bg-color);
     border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.65rem 1.25rem; /* Fixed: reset icon padding to be smaller within the large bar */
+    width: 280px;
     color: var(--text-primary);
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    width: 250px;
-    font-size: 0.9rem;
     font-family: inherit;
-    outline: none;
-    transition: border-color 0.2s;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    height: 42px;
 }
 
-.search-bar:focus {
+.active-input:focus, .search-bar:focus {
     border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-.selection-count {
-    color: var(--accent-color);
-    font-weight: 600;
-    margin-right: 0.5rem;
-}
-
-/* Universal Button Class */
 .tool-btn {
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
+    padding: 0.65rem 1.25rem; /* Fixed: reset icon padding within the large bar */
+    border-radius: 10px;
     font-size: 0.9rem;
-    font-weight: 500;
-    font-family: inherit;
+    font-weight: 600;
     cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    height: 42px;
+    display: flex;
+    align-items: center;
 }
 
 .add-btn {
-    background-color: var(--accent-color);
-    color: #fff;
+    background: var(--accent-color);
+    color: white;
 }
 
 .add-btn:hover {
-    background-color: var(--accent-hover);
+    background: var(--accent-hover);
+    transform: translateY(-1px);
 }
 
 .edit-btn {
-    background-color: transparent;
+    background: var(--hover-bg);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.edit-btn:hover {
-    background-color: var(--btn-edit-hover);
+    border-color: var(--border-color);
 }
 
 .remove-btn {
-    background-color: rgba(248, 81, 73, 0.1);
-    color: #f85149;
-    border: 1px solid rgba(248, 81, 73, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.2);
 }
 
-.remove-btn:hover {
-    background-color: rgba(248, 81, 73, 0.2);
-}
-
-/* === Column Descriptions Row === */
 .header-row th {
-    padding: 1rem 1.5rem;
-    font-weight: 600;
-    font-size: 0.85rem;
+    padding: 1rem 2rem;
+    font-size: 0.8rem;
+    font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    background: var(--bg-color);
     border-bottom: 1px solid var(--border-color);
 }
 
-/* === Main Data Rows === */
+/* Location Pills Filter */
+.location-pills {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.8rem 2.5rem 0 2.5rem; /* Spacious padding above the toolbar */
+    flex-wrap: wrap;
+    animation: authFadeIn 0.4s ease;
+}
+
+.location-pill {
+    padding: 0.6rem 1.4rem;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.location-pill.active {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+.location-pill:hover:not(.active) {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+
 .data-row td {
-    padding: 1rem 1.5rem;
-    font-size: 0.95rem;
+    padding: 1.1rem 2rem;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
-    transition: background-color 0.2s ease;
+    font-size: 0.95rem;
+    transition: background-color 0.15s;
 }
 
 .data-row:hover td {
-    background-color: var(--hover-bg);
+    background: var(--hover-bg);
 }
 
 .data-row.selected td {
-    background-color: var(--selected-bg);
+    background: var(--selected-bg);
 }
 
-/* Unique structural elements within tables */
-.checkbox-col {
-    width: 50px;
-    text-align: center;
-    padding-left: 1.5rem !important;
-}
-
-input[type="checkbox"] {
-    cursor: pointer;
-    width: 1.1rem;
-    height: 1.1rem;
-    accent-color: var(--accent-color);
-}
-
-.item-id {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    color: var(--accent-color);
-}
-
-/* Interactive Links */
-.supplier-link {
-    color: var(--accent-color);
-    cursor: pointer;
-    font-weight: 500;
-    transition: color 0.2s, text-decoration 0.2s;
-}
-
-.supplier-link:hover {
-    color: var(--accent-hover);
-    text-decoration: underline;
-}
-
-/* =========================================================================
-   7. PROMPT (MODAL) STYLES
-   ========================================================================= */
-
-/* Dimmed Background Overlay */
-.prompt-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(2px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    /* Ensure it stays above everything */
-    padding: 2rem;
-}
-
-/* The Floating Box */
-.prompt-box {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    width: 100%;
-    max-width: 500px;
-    /* Nice reasonable width */
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    animation: promptIn 0.2s ease-out forwards;
-}
-
-@keyframes promptIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Prompt Header area */
-.prompt-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    background: var(--th-bg);
-}
-
-.prompt-header h2 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-/* The subtle 'X' exit button */
-.prompt-close-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1.5rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    transition: all 0.2s;
-}
-
-.prompt-close-btn:hover {
-    background: var(--hover-bg);
-    color: var(--text-primary);
-}
-
-/* Prompt Content area */
-.prompt-content {
-    padding: 2.5rem 1.5rem;
-    color: var(--text-secondary);
-    flex: 1;
-    overflow-y: auto;
-}
-
-.prompt-placeholder {
-    font-size: 0.95rem;
-    font-style: italic;
-    text-align: center;
-}
-
-/* Status Pill Indicators */
 .status-badge {
     padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: normal;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
 }
 
-.status-badge.success {
-    background-color: rgba(46, 160, 67, 0.15);
-    color: #3fb950;
-    border: 1px solid rgba(46, 160, 67, 0.4);
-}
-
-.status-badge.warning {
-    background-color: rgba(210, 153, 34, 0.15);
-    color: #d29922;
-    border: 1px solid rgba(210, 153, 34, 0.4);
-}
+.status-badge.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.status-badge.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
 
 /* =========================================================================
-   8. FORM ELEMENTS (FOR PROMPT MODALS)
-   ========================================================================= */
-
-.prompt-form-row {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.prompt-form-row>div {
-    flex: 1;
-}
-
-.prompt-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.prompt-input,
-.prompt-select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    font-size: 0.95rem;
-    font-family: inherit;
-    transition: all 0.2s ease;
-}
-
-.prompt-input:focus,
-.prompt-select:focus {
-    border-color: var(--accent-color);
-    outline: none;
-    box-shadow: 0 0 0 2px var(--selected-bg);
-}
-
-.prompt-select {
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1em;
-    padding-right: 2.5rem;
-}
-
-/* =========================================================================
-   9. VIEW SWITCHER (Inventory Log Tabs)
+   6. CUSTOM COMPONENTS
    ========================================================================= */
 
 .view-switcher {
     display: flex;
-    align-items: center;
-    background-color: var(--hover-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
+    background: var(--hover-bg);
     padding: 3px;
-    gap: 0.5rem; /* Distinct spacing as seen in mockup */
+    border-radius: 10px;
+    gap: 2px;
 }
 
 .view-switcher-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
+    padding: 0.4rem 1.2rem;
     font-size: 0.85rem;
     font-weight: 600;
-    font-family: inherit;
-    padding: 0.48rem 1.25rem;
     border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.view-switcher-btn:hover {
-    color: var(--text-primary);
+    transition: all 0.2s;
 }
 
 .view-switcher-btn.active {
-    background-color: var(--card-bg);
+    background: var(--card-bg);
     color: var(--accent-color);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* =========================================================================
-   10. LOG QUANTITY BADGES
+   7. SETTINGS & SCROLLING
    ========================================================================= */
 
-.qty-badge {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-.qty-badge.qty-in {
-    background-color: rgba(46, 160, 67, 0.12);
-    color: #3fb950;
-    border: 1px solid rgba(46, 160, 67, 0.3);
-}
-
-.qty-badge.qty-out {
-    background-color: rgba(210, 153, 34, 0.12);
-    color: #d29922;
-    border: 1px solid rgba(210, 153, 34, 0.3);
-}
-
-/* =========================================================================
-   11. SORT BUTTON & DROPDOWN
-   ========================================================================= */
-
-/* Wrapper keeps the dropdown positioned relative to the button */
-.sort-wrapper {
-    position: relative;
-    flex-shrink: 0;
-}
-
-/* The pill button itself — height matches .search-bar */
-.sort-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    height: 100%;                        /* stretches to match sibling search-bar */
-    padding: 0.6rem 1rem;
-    background-color: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    font-weight: 500;
-    font-family: inherit;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
-}
-
-.sort-btn::before {
-    /* Filter funnel icon via a tiny SVG-as-background trick */
-    content: '';
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3h12M4 8h8M6 13h4'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-size: contain;
-    opacity: 0.8;
-}
-
-.sort-btn:hover {
-    border-color: var(--accent-color);
-    color: var(--text-primary);
-}
-
-/* Active state when a sort is applied */
-.sort-btn.sort-btn-active {
-    border-color: var(--accent-color);
-    background-color: var(--hover-bg);
-    color: var(--accent-color);
-    font-weight: 600;
-}
-
-/* Dropdown panel */
-.sort-dropdown {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    z-index: 100;
-    min-width: 210px;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 4px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    animation: sortDropFadeIn 0.15s ease;
-}
-
-@keyframes sortDropFadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(-10px) scale(0.97); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
-    }
-}
-
-/* Individual option rows */
-.sort-option {
-    display: block;
-    width: 100%;
-    text-align: left;
-    background: transparent;
-    border: none;
-    border-radius: 7px;
-    padding: 0.45rem 0.85rem;
-    font-size: 0.85rem;
-    font-family: inherit;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: background-color 0.12s ease, color 0.12s ease;
-    white-space: nowrap;
-}
-
-.sort-option:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
-}
-
-/* Currently selected sort */
-.sort-option.sort-option-selected {
-    color: var(--accent-color);
-    font-weight: 600;
-    background-color: var(--hover-bg);
-}
-
-/* Clear Sort special row */
-.sort-option.sort-option-clear {
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    border-bottom: 1px solid var(--border-color);
-    border-radius: 0;
-    margin-bottom: 3px;
-    padding-bottom: 0.55rem;
-}
-
-.sort-option.sort-option-clear:hover {
-    color: #e05c5c;
-    background-color: rgba(224, 92, 92, 0.08);
-}
-
-/* =========================================================================
-   12. MOBILE RESPONSIVENESS
-   ========================================================================= */
-
-@media screen and (max-width: 768px) {
-    body {
-        padding: 0;
-        height: auto;
-        min-height: 100vh;
-    }
-
-    .app-layout {
-        height: 100%;
-        padding: 2vh 4vw 4vh 4vw;
-        gap: 1rem;
-    }
-
-    /* Filter tweaks for mobile */
-    .filter-bar {
-        gap: 0.5rem;
-    }
-
-    .filter-card {
-        font-size: 0.85rem;
-        padding: 0.4rem 0.8rem;
-    }
-
-    .app-logo {
-        font-size: 1.1rem;
-    }
-
-    .nav-tabs-left {
-        gap: 0.25rem;
-        flex-wrap: wrap;
-    }
-
-    .nav-btn {
-        padding: 0.5rem 0.6rem;
-        font-size: 0.9rem;
-    }
-
-    .user-avatar-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-    }
-
-    /* User Settings tweaks */
-    .settings-tab {
-        padding: 1.5rem;
-    }
-
-    .setting-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.25rem;
-    }
-
-    .setting-item-inner {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.25rem;
-        width: 100%;
-    }
-
-    .setting-item>button,
-    .setting-item-inner>button {
-        width: 100% !important;
-    }
-
-    .threshold-controls {
-        display: flex;
-        width: 100%;
-        justify-content: space-between;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
-    .threshold-controls button {
-        flex: 1;
-        width: auto !important;
-    }
-
-    .threshold-controls input {
-        flex: 1;
-        width: 100% !important;
-    }
-
-    /* Prompt tweaks for vertical fit */
-    .prompt-form-row {
-        flex-direction: column;
-        gap: 1rem;
-    }
-}
-
-/* =========================================================================
-   13. CUSTOM DB CONFIGURATION ENHANCEMENTS
-   ========================================================================= */
-
-.db-config-row {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.db-config-label {
-    width: 160px;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    flex-shrink: 0;
-}
-
-.password-input-wrapper {
-    position: relative;
-    flex: 1;
-    display: flex;
-    align-items: center;
+.settings-tab {
+    padding: 4rem;
+    max-width: 900px;
+    margin: 0 auto;
     width: 100%;
 }
 
-.password-toggle-btn {
-    position: absolute;
-    right: 8px;
+.setting-item {
+    margin-bottom: 1.5rem;
+    padding: 2rem;
     background: var(--hover-bg);
+    border-radius: 20px;
     border: 1px solid var(--border-color);
-    color: var(--accent-color);
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.05em;
-    user-select: none;
 }
 
-.password-toggle-btn:hover {
+/* =========================================================================
+   8. PROMPT / MODAL
+   ========================================================================= */
+
+.prompt-box {
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px);
+    padding: 3.5rem; /* Significantly larger padding for spacious prompts */
+    width: 100%;
+}
+
+/* Scrollbar styling for elegance */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
     background: var(--border-color);
-    color: var(--accent-hover);
+    border-radius: 10px;
 }
 
-@media screen and (max-width: 650px) {
-    .db-config-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-        margin-bottom: 1.25rem;
-    }
-
-    .db-config-label {
-        width: 100%;
-        font-weight: 600;
-    }
-
-    .password-input-wrapper {
-        width: 100%;
-    }
+::-webkit-scrollbar-track {
+    background: transparent;
+}/* Item List Card System */
+.item-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
 }
 
-.settings-section-header {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin: 3rem 0 1rem 0;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    opacity: 0.9;
-}
-
-.settings-section-header::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border-color);
-}
-
-/* User Avatar Dropdown */
-.user-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    background-color: var(--card-bg);
+.item-card {
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 6px;
-    min-width: 220px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 5px 15px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    animation: sortDropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: top right;
 }
 
-.user-dropdown-item {
-    padding: 0.85rem 1rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
+.item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    border-color: var(--accent-color);
+}
+
+.item-image-wrapper {
+    height: 180px;
+    background: var(--hover-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.item-card:hover .item-image { transform: scale(1.05); }
+
+.item-status-overlay {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+}
+
+.item-details-box {
+    padding: 1.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.item-header h3 { margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary); }
+.item-code-tag { font-family: 'Outfit'; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.6; }
+
+.item-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 4px 0; min-height: 2.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+.item-stock-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: var(--hover-bg); padding: 1rem; border-radius: 14px; margin-top: auto; }
+.stock-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px; letter-spacing: 0.5px; }
+.stock-val { font-size: 1.15rem; font-weight: 800; color: var(--text-primary); }
+
+.status-badge.reorder { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+.status-badge.okay { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+
+/* Organised Navigation / Sort Styles */
+.sort-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+    min-width: 240px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    z-index: 2000;
+    padding: 0.6rem;
+    backdrop-filter: blur(20px);
+}
+
+.sort-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    border: none;
-    background: transparent;
-    width: 100%;
-    text-align: left;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
-.user-dropdown-item:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
-}
-
-.user-dropdown-item.active {
-    background-color: var(--hover-bg);
-    color: var(--accent-color);
-    font-weight: 600;
+.sort-item:hover { background: var(--hover-bg); color: var(--accent-color); transform: translateX(4px); }
+.sort-item.active { background: rgba(79, 70, 229, 0.1); color: var(--accent-color); font-weight: 600; border: 1px solid rgba(79, 70, 229, 0.2); }
+.prompt-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 2rem;
 }

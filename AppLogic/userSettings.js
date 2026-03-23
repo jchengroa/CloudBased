@@ -1,314 +1,329 @@
-/*
- * User Settings Component
- * Isolated tab for configuring app preferences like theme and stock thresholds.
+/**
+ * User Settings (Account & System Management)
+ * A visually stunning modal for managing profile, preferences, and data.
  */
 
-const UserSettings = ({ theme, toggleTheme, threshold, setThreshold, isThresholdEnabled, setIsThresholdEnabled, uoms = [], onSaveUOMs, warehouses = [], onSaveWarehouses, inventoryData = [] }) => {
+const UIIcons = {
+    User: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
+    Key: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>,
+    Palette: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.4-.5-.9-.5-1.4 0-1.1.9-2 2-2h1.5A5.5 5.5 0 0 0 22 10c0-4.4-4.5-8-10-8Z"></path></svg>,
+    Moon: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>,
+    Activity: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>,
+    Database: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>,
+    Download: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
+    Upload: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
+    Trash: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+    RefreshCw: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>,
+    Info: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>,
+    Heart: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>,
+    Book: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>,
+    Check: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="20 6 9 17 4 12"></polyline></svg>
+};
 
-    // local field states
-    const [inputValue, setInputValue] = React.useState(threshold.toString());
-    const [errorMsg, setErrorMsg] = React.useState("");
+const SettingsCard = ({ icon, title, children }) => (
+    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden', marginBottom: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
+        {title && (
+            <div style={{ padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)' }}>
+                <span style={{ color: 'var(--accent-color)', display: 'flex' }}>{icon}</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: '700' }}>{title}</span>
+            </div>
+        )}
+        <div style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
+            {children}
+        </div>
+    </div>
+);
 
-    const [newUom, setNewUom] = React.useState("");
-    const [uomError, setUomError] = React.useState("");
+const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
+    // Current States
+    const [name, setName] = React.useState(user.name || '');
+    const [pic, setPic] = React.useState(user.profilePicture || '');
+    const [theme, setTheme] = React.useState(user.settings?.theme || 'light');
+    const [themeColor, setThemeColor] = React.useState(user.settings?.themeColor || '#4f46e5');
+    const [threshold, setThreshold] = React.useState(user.settings?.lowStockThreshold || '');
+    
+    // Auth Edit Modal Overlay State
+    const [authAction, setAuthAction] = React.useState(null); // 'editProfile' or 'changePassword' or null
+    const [oldPass, setOldPass] = React.useState('');
+    const [newPass, setNewPass] = React.useState('');
+    const [confirmPass, setConfirmPass] = React.useState('');
 
-    const [newWarehouse, setNewWarehouse] = React.useState("");
-    const [warehouseError, setWarehouseError] = React.useState("");
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState('');
+    const [success, setSuccess] = React.useState('');
 
-    const [fbConfig, setFbConfig] = React.useState(() => window.AppDataHandler.getFirebaseConfig());
-    const [isApiKeyVisible, setIsApiKeyVisible] = React.useState(false);
-
-    const handleFbConfigChange = (e) => {
-        const { name, value } = e.target;
-        setFbConfig(prev => ({ ...prev, [name]: value }));
+    // Handlers
+    const showMessage = (msg, isErr = false) => {
+        isErr ? setError(msg) : setSuccess(msg);
+        setTimeout(() => { setError(''); setSuccess(''); }, 3000);
     };
 
-    const handleSaveFbConfig = () => {
-        window.AppDataHandler.saveFirebaseConfig(fbConfig);
-        window.location.reload();
+    const handleUpdateProfile = async () => {
+        setLoading(true);
+        try {
+            const updated = await window.AppDataHandler.updateProfile({ name, profilePicture: pic });
+            onUpdateUser(updated);
+            setAuthAction(null);
+            showMessage('Profile updated successfully!');
+        } catch (e) { showMessage(e.message, true); }
+        finally { setLoading(false); }
     };
 
-    const handleResetFbConfig = () => {
-        localStorage.removeItem('cloudbased_firebase_config');
-        window.location.reload();
+    const handleChangePassword = async () => {
+        setLoading(true);
+        if (newPass !== confirmPass) { showMessage("New passwords don't match.", true); setLoading(false); return; }
+        try {
+            await window.AppDataHandler.changePassword(oldPass, newPass);
+            setOldPass(''); setNewPass(''); setConfirmPass('');
+            setAuthAction(null);
+            showMessage('Password changed successfully!');
+        } catch (e) { showMessage(e.message, true); }
+        finally { setLoading(false); }
     };
 
-    // form event handlers
-    const handleThresholdChange = (e) => {
-        let val = e.target.value;
-        setInputValue(val); // Always update text field to let user verify
+    const handleSaveSystemSettings = async (mode = theme, color = themeColor) => {
+        setLoading(true);
+        try {
+            const newSettings = { ...user.settings, theme: mode, themeColor: color, lowStockThreshold: parseFloat(threshold) || '' };
+            await window.AppDataHandler.saveSettings(newSettings);
+            const updated = { ...user, settings: newSettings };
+            onUpdateUser(updated);
+            
+            document.documentElement.setAttribute('data-theme', mode);
+            document.documentElement.style.setProperty('--accent-color', color);
+            
+            showMessage('System preferences saved!');
+        } catch (e) { showMessage(e.message, true); }
+        finally { setLoading(false); }
+    };
 
-        // Allow empty field to be evaluated cleanly
-        if (val === '') {
-            setErrorMsg("");
-            return;
+    // Auto-save Theme/Color selections visually immediately (and backend persist)
+    const updateTheme = (newMode, newColor) => {
+        setTheme(newMode);
+        setThemeColor(newColor);
+        document.documentElement.setAttribute('data-theme', newMode);
+        document.documentElement.style.setProperty('--accent-color', newColor);
+        handleSaveSystemSettings(newMode, newColor);
+    };
+
+    const handleClearCache = () => {
+        if (confirm("This will clear your local session and force a resync with Firestore. Continue?")) {
+            localStorage.clear();
+            location.reload();
         }
-
-        let num = parseInt(val, 10);
-        if (isNaN(num)) return;
-
-        if (num < 0) {
-            num = 0;
-            setInputValue("0");
-            setErrorMsg("Threshold cannot be less than 0!");
-        } else if (num > 99999) {
-            num = 99999;
-            setInputValue("99999");
-            setErrorMsg(`Exceeded maximum threshold!`);
-        } else {
-            setErrorMsg("");
-        }
-
-        // Saves immediately upon passing checks
-        setThreshold(num);
     };
 
-    const handleThresholdBlur = () => {
-        if (inputValue === '') {
-            setInputValue("0");
-            setThreshold(0);
-            setErrorMsg("Please input a numerical value properly!");
-        }
-    };
-
-    const handleAddUom = () => {
-        const trimmed = newUom.trim();
-        if (!trimmed) { setUomError("Please enter a UOM name."); return; }
-        if (uoms.map(u => u.toLowerCase()).includes(trimmed.toLowerCase())) { setUomError(`"${trimmed}" already exists.`); return; }
-        onSaveUOMs([...uoms, trimmed]);
-        setNewUom(""); setUomError("");
-    };
-
-    const handleRemoveUom = (uomToRemove) => {
-        onSaveUOMs(uoms.filter(u => u !== uomToRemove));
-    };
-
-    const handleAddWarehouse = () => {
-        const trimmed = newWarehouse.trim();
-        if (!trimmed) { setWarehouseError("Please enter a warehouse name."); return; }
-        if (warehouses.map(w => w.toLowerCase()).includes(trimmed.toLowerCase())) { setWarehouseError(`"${trimmed}" already exists.`); return; }
-        onSaveWarehouses([...warehouses, trimmed]);
-        setNewWarehouse(""); setWarehouseError("");
-    };
-
-    const handleRemoveWarehouse = (whToRemove) => {
-        onSaveWarehouses(warehouses.filter(w => w !== whToRemove));
-    };
-
-    // view markup
     return (
-        <div className="list-box settings-tab">
-
-            <h2>User Settings</h2>
-
-            {/* --- Section 1: General Preferences --- */}
-            <div className="settings-section-header">Appearance</div>
-
-            <div className="setting-item">
-                <div className="setting-info">
-                    <h3>Themes</h3>
-                    <p>Switch between different light and dark themes.</p>
-                </div>
-                <button className="tool-btn edit-btn" onClick={toggleTheme} style={{ width: '200px' }}>
-                    {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-                </button>
-            </div>
-
-
-            {/* --- Section 2: Inventory Rules & Masters --- */}
-            <div className="settings-section-header">Inventory Framework</div>
-
-            <div className="setting-item setting-column">
-                <div className="setting-item-inner">
-                    <div className="setting-info">
-                        <h3>Global Stock Threshold</h3>
-                        <p>Items with quantities at or below this limit will automatically be flagged as "Low Stock".</p>
+        <div className="prompt-overlay" onClick={e => e.target.className === 'prompt-overlay' && onClose()}>
+            <div className="prompt-box" style={{ maxWidth: '800px', width: '90%', padding: '2rem 2.5rem', maxHeight: '90vh', overflowY: 'auto', background: 'var(--bg-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                    <div>
+                        <h2 style={{ fontSize: '2rem', fontWeight: '800', letterSpacing: '-0.5px' }}>User Settings</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginTop: '0.25rem' }}>Manage your profile, preferences, and application settings.</p>
                     </div>
-                    <div className="threshold-controls">
-                        <button
-                            className="tool-btn edit-btn"
-                            onClick={() => setIsThresholdEnabled(!isThresholdEnabled)}
-                            style={{ width: '100px' }}
-                        >
-                            {isThresholdEnabled ? 'Enabled' : 'Disabled'}
-                        </button>
-                        <input
-                            type="number"
-                            className="search-bar"
-                            style={{ width: '120px', textAlign: 'center', fontSize: '1.1rem', opacity: isThresholdEnabled ? 1 : 0.5 }}
-                            value={inputValue}
-                            onChange={handleThresholdChange}
-                            onBlur={handleThresholdBlur}
-                            disabled={!isThresholdEnabled}
-                        />
-                    </div>
+                    <button className="prompt-close-btn" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5 }} onMouseEnter={e => e.target.style.opacity = 1} onMouseLeave={e => e.target.style.opacity = 0.5}>
+                        <Icons.Close size={28} />
+                    </button>
                 </div>
-                {errorMsg && isThresholdEnabled && (
-                    <div style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                        {errorMsg}
-                    </div>
-                )}
-            </div>
 
-            <div className="setting-item setting-column" style={{ marginTop: '1rem' }}>
-                <div className="setting-item-inner">
-                    <div className="setting-info">
-                        <h3>Units of Measure (UOM)</h3>
-                        <p>Change the Units of Measure used in the application.</p>
-                    </div>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
-                    {uoms.map(uom => (
-                        <div key={uom} style={{
-                            display: 'flex', alignItems: 'center', gap: '0.4rem',
-                            padding: '0.3rem 0.75rem', borderRadius: '999px',
-                            background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-                            fontSize: '0.9rem', color: 'var(--text-primary)'
-                        }}>
-                            <span>{uom}</span>
-                            <button onClick={() => handleRemoveUom(uom)} title={`Remove ${uom}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}>
-                                &times;
-                            </button>
-                        </div>
-                    ))}
-                </div>
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', alignItems: 'center' }}>
-                    <input type="text" className="search-bar" style={{ width: '200px', fontSize: '0.95rem' }} placeholder="e.g. Liters" value={newUom} onChange={(e) => { setNewUom(e.target.value); setUomError(""); }} onKeyDown={(e) => e.key === 'Enter' && handleAddUom()} />
-                    <button className="tool-btn add-btn" onClick={handleAddUom}>+ Add</button>
-                </div>
-                {uomError && <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{uomError}</div>}
-            </div>
+                {error && <div style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--danger)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>{error}</div>}
+                {success && <div style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--success)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>{success}</div>}
 
-            <div className="setting-item setting-column" style={{ marginTop: '1rem' }}>
-                <div className="setting-item-inner">
-                    <div className="setting-info">
-                        <h3>Warehouses</h3>
-                        <p>Manage the warehouse locations available for filtering and item assignment.</p>
-                    </div>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
-                    {warehouses.map(wh => (
-                        <div key={wh} style={{
-                            display: 'flex', alignItems: 'center', gap: '0.4rem',
-                            padding: '0.3rem 0.75rem', borderRadius: '999px',
-                            background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-                            fontSize: '0.9rem', color: 'var(--text-primary)'
-                        }}>
-                            <span>{wh}</span>
-                            <button onClick={() => handleRemoveWarehouse(wh)} title={`Remove ${wh}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}>
-                                &times;
-                            </button>
-                        </div>
-                    ))}
-                </div>
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', alignItems: 'center' }}>
-                    <input type="text" className="search-bar" style={{ width: '200px', fontSize: '0.95rem' }} placeholder="e.g. North Warehouse" value={newWarehouse} onChange={(e) => { setNewWarehouse(e.target.value); setWarehouseError(""); }} onKeyDown={(e) => e.key === 'Enter' && handleAddWarehouse()} />
-                    <button className="tool-btn add-btn" onClick={handleAddWarehouse}>+ Add</button>
-                </div>
-                {warehouseError && <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{warehouseError}</div>}
-            </div>
-
-
-            {/* --- Section 3: Connectivity & Integrations --- */}
-            <div className="settings-section-header">Data &amp; Connectivity</div>
-
-            <div className="setting-item setting-column">
-                <div className="setting-item-inner">
-                    <div className="setting-info">
-                        <h3>Database Configuration</h3>
-                        <p>Update these fields to switch to a different Firebase Firestore database. </p>
-                        <p style={{ marginTop: '0.5rem' }}>Note: The default database values are stored in defaultDatabase.json and initially loaded from the system if no custom config is present.</p>
-                    </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '1rem' }}>
-                    {[
-                        { key: 'apiKey', label: 'API Key' },
-                        { key: 'authDomain', label: 'Auth Domain' },
-                        { key: 'projectId', label: 'Project ID' },
-                        { key: 'storageBucket', label: 'Storage Bucket' },
-                        { key: 'messagingSenderId', label: 'Messaging Sender ID' },
-                        { key: 'appId', label: 'App ID' },
-                    ].map(({ key, label }) => (
-                        <div key={key} className="db-config-row">
-                            <span className="db-config-label">{label}</span>
-                            <div className="password-input-wrapper">
-                                <input
-                                    type={key === 'apiKey' && !isApiKeyVisible ? 'password' : 'text'}
-                                    name={key}
-                                    className="search-bar"
-                                    style={{ width: '100%', fontSize: '0.85rem', fontFamily: 'monospace', paddingRight: key === 'apiKey' ? '50px' : '1.2rem' }}
-                                    value={fbConfig[key] || ''}
-                                    onChange={handleFbConfigChange}
-                                />
-                                {key === 'apiKey' && (
-                                    <button type="button" className="password-toggle-btn" onClick={() => setIsApiKeyVisible(!isApiKeyVisible)} title={isApiKeyVisible ? "Hide API Key" : "Show API Key"}>
-                                        {isApiKeyVisible ? 'HIDE' : 'SHOW'}
-                                    </button>
-                                )}
+                <SettingsCard icon={<UIIcons.User size={22} />} title="User Profile">
+                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                        {pic ? (
+                            <img src={pic} style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', background: '#e0e7ff', border: '3px solid white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
+                        ) : (
+                            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(79, 70, 229, 0.1)', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5rem', fontWeight: '800', border: '3px solid var(--card-bg)', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                               {name?.[0]?.toUpperCase() || 'U'}
                             </div>
-                        </div>
-                    ))}
-                </div>
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-                    <button className="tool-btn add-btn" onClick={handleSaveFbConfig} style={{ padding: '0.5rem 1.5rem' }}>Save &amp; Reload</button>
-                    <button className="tool-btn edit-btn" onClick={handleResetFbConfig} style={{ padding: '0.5rem 1.5rem' }}>Reset to Default</button>
-                </div>
-            </div>
-
-            <div className="setting-item setting-column" style={{ marginTop: '1rem' }}>
-                <div className="setting-item-inner">
-                    <div className="setting-info">
-                        <h3>Export Data</h3>
-                        <p>Download database data in ERPNext-compatible formats.</p>
-                    </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        )}
                         <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: '600', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Item Master</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Full Name</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.75rem' }}>{name}</div>
+                            
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Role</div>
+                            <div style={{ fontSize: '1rem', marginBottom: '1.25rem' }}>Administrator</div>
+                            
+                            <button onClick={() => setAuthAction('editProfile')} style={{ padding: '0.6rem 1.25rem', background: 'var(--hover-bg)', color: 'var(--text-primary)', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>
+                                <UIIcons.User size={16} /> Edit Profile
+                            </button>
                         </div>
-                        <button className="tool-btn add-btn" onClick={() => window.ExportTool.exportItemMaster(inventoryData)}>↓ Download .CSV</button>
                     </div>
-                    <div style={{ height: '1px', background: 'var(--border-color)', opacity: 0.3 }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: '600', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Stock Reconciliation</div>
+                    <div style={{ borderTop: '1px solid var(--border-color)', marginTop: '1.5rem', paddingTop: '1.5rem' }}>
+                        <button onClick={() => setAuthAction('changePassword')} style={{ background: '#0f172a', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
+                            <UIIcons.Key size={18} /> Change Password
+                        </button>
+                    </div>
+                </SettingsCard>
+
+                <SettingsCard icon={<UIIcons.Palette size={22} />} title="Appearance">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div>
+                            <div style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                <UIIcons.Moon size={18} /> Dark Mode
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Toggle dark mode styling across the application.</div>
                         </div>
-                        <button className="tool-btn add-btn" onClick={() => window.ExportTool.exportStockRecon(inventoryData)}>↓ Download .CSV</button>
+                        <div style={{ background: theme === 'dark' ? 'var(--accent-color)' : 'var(--border-color)', width: '48px', height: '26px', borderRadius: '24px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s' }} onClick={() => updateTheme(theme === 'dark' ? 'light' : 'dark', themeColor)}>
+                            <div style={{ width: '20px', height: '20px', background: 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: theme === 'dark' ? '25px' : '3px', transition: '0.3s' }}></div>
+                        </div>
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border-color)', margin: '1.5rem -1.5rem', marginBottom: '1.5rem' }} />
+                    <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Application Theme</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Choose your preferred color scheme for the interface.</div>
+                    
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                        {[
+                            { hex: '#4f46e5', label: 'Default Blue' },
+                            { hex: '#10b981', label: 'Emerald Green' },
+                            { hex: '#8b5cf6', label: 'Royal Purple' },
+                            { hex: '#ef4444', label: 'Rose Pink' },
+                            { hex: '#f59e0b', label: 'Amber Gold' }
+                        ].map(c => (
+                            <button key={c.hex} onClick={() => updateTheme(theme, c.hex)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', paddingRight: '1.5rem', borderRadius: '8px', border: `1px solid ${themeColor === c.hex ? 'var(--accent-color)' : 'var(--border-color)'}`, background: themeColor === c.hex ? 'var(--selected-bg)' : 'transparent', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: '500', minWidth: '160px', position: 'relative' }}>
+                                <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: c.hex }}></div>
+                                {c.label}
+                                {themeColor === c.hex && <UIIcons.Check size={16} color="var(--accent-color)" style={{ position: 'absolute', right: '10px' }} />}
+                            </button>
+                        ))}
+                    </div>
+                </SettingsCard>
+
+                <SettingsCard icon={<UIIcons.Activity size={22} />} title="Inventory Settings">
+                    <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Global Stock Threshold</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Override all individual minimum stock levels with a single global threshold. Leave empty to use individual MSL values.</div>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <input type="number" className="auth-input" placeholder="e.g., 1000" value={threshold} onChange={e => setThreshold(e.target.value)} style={{ maxWidth: '300px' }} />
+                        <button onClick={handleSaveSystemSettings} disabled={loading} style={{ background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '8px', padding: '0 1.5rem', fontWeight: '600', cursor: 'pointer' }}>Apply</button>
+                    </div>
+                </SettingsCard>
+
+                <SettingsCard icon={<UIIcons.Database size={22} />} title="Data Management">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ maxWidth: '65%' }}>
+                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Export Inventory Data</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Download your complete inventory database in CSV format (ERPNext compatible).</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                            <button onClick={() => window.ExportTool.exportItemMaster(inventoryData)} style={{ background: '#0f172a', color: 'white', padding: '0.6rem 1rem', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', fontSize: '0.85rem', width: '100%', justifyContent: 'center' }}>
+                                <UIIcons.Download size={16} /> Item Master
+                            </button>
+                            <button onClick={() => window.ExportTool.exportStockRecon(inventoryData)} style={{ background: '#0f172a', color: 'white', padding: '0.6rem 1rem', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', fontSize: '0.85rem', width: '100%', justifyContent: 'center' }}>
+                                <UIIcons.Download size={16} /> Stock Recon
+                            </button>
+                        </div>
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border-color)', margin: '0 -1.5rem', marginBottom: '1.5rem' }} />
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ maxWidth: '75%' }}>
+                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Import Inventory Data</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Import existing data and automatically format it to work with this system.</div>
+                        </div>
+                        <button disabled style={{ background: 'transparent', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '0.6rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', opacity: 0.5, cursor: 'not-allowed' }}>
+                            <UIIcons.Upload size={16} /> Import CSV
+                        </button>
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border-color)', margin: '0 -1.5rem', marginBottom: '1.5rem' }} />
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ maxWidth: '75%' }}>
+                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Clear Local Storage</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Reset all application settings and cached data stored locally.</div>
+                        </div>
+                        <button onClick={handleClearCache} style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.6rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
+                            <UIIcons.Trash size={16} /> Clear Storage
+                        </button>
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border-color)', margin: '0 -1.5rem', marginBottom: '1.5rem' }} />
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ maxWidth: '75%' }}>
+                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Force Database Resync</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Manually trigger a full synchronization with the cloud database.</div>
+                        </div>
+                        <button onClick={() => location.reload()} style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '0.6rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', transition: '0.2s' }} onMouseEnter={e => { e.target.style.color='var(--text-primary)' }} onMouseLeave={e => { e.target.style.color='var(--text-secondary)' }}>
+                            <UIIcons.RefreshCw size={16} /> Resync Now
+                        </button>
+                    </div>
+                </SettingsCard>
+
+                <SettingsCard icon={<UIIcons.Info size={22} />} title="About">
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                        <div style={{ background: 'var(--hover-bg)', padding: '1.5rem', borderRadius: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', marginBottom: '1rem', fontWeight: '700', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                <UIIcons.Info size={16} /> Version Info
+                            </div>
+                            <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontWeight: '500' }}>CloudBased IMS</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.7.0</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Date Modified: March 23, 2026</div>
+                        </div>
+                        <div style={{ background: 'var(--hover-bg)', padding: '1.5rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                            <img src="resources/icon.png" alt="Icon" style={{ width: '40px', height: '40px', marginBottom: '0.75rem', opacity: 0.9 }} onError={(e) => { e.target.style.display='none'; }} />
+                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>Made by Group 5</div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Created by: Cheng Roa & Tejada</div>
+                        </div>
+                    </div>
+                    <button style={{ background: 'var(--accent-color)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
+                        <UIIcons.Book size={18} /> Access User Manual
+                    </button>
+                </SettingsCard>
+            </div>
+
+            {/* In-Modal Overlay for profile/password editing so we don't navigate away */}
+            {authAction && (
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2rem', width: '400px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                        <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontWeight: '700' }}>{authAction === 'editProfile' ? 'Edit Profile' : 'Change Password'}</h3>
+                        
+                        {authAction === 'editProfile' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <FormInput label="Display Name" value={name} onChange={e => setName(e.target.value)} />
+                                <div className="auth-input-group">
+                                    <label className="auth-label">Profile Picture (Upload)</label>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <input type="file" accept="image/*" className="auth-input" style={{ padding: '0.65rem', height: 'auto', flex: 1 }} onChange={async (e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const resized = await window.resizeImage(file, 400);
+                                            setPic(resized);
+                                        }
+                                    }} />
+                                    {pic && (
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setPic('')}
+                                            style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.75rem 1rem', borderRadius: '10px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                                {pic && pic.length > 500 && <span style={{fontSize: '0.8rem', color: 'var(--success)', marginTop: '0.25rem'}}>✓ New image selected</span>}
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                                    <button onClick={() => setAuthAction(null)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: '600' }}>Cancel</button>
+                                    <button onClick={handleUpdateProfile} disabled={loading} style={{ background: 'var(--accent-color)', color: 'white', border: 'none', padding: '0.6rem 1.5rem', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Save Profile</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {authAction === 'changePassword' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <FormInput type="password" label="Current Password" value={oldPass} onChange={e => setOldPass(e.target.value)} />
+                                <FormInput type="password" label="New Password" value={newPass} onChange={e => setNewPass(e.target.value)} />
+                                <FormInput type="password" label="Confirm Password" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} />
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                                    <button onClick={() => setAuthAction(null)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: '600' }}>Cancel</button>
+                                    <button onClick={handleChangePassword} disabled={loading} style={{ background: 'var(--accent-color)', color: 'white', border: 'none', padding: '0.6rem 1.5rem', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Update Password</button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
-            </div>
-
-
-            {/* --- Section 4: System Management --- */}
-            <div className="settings-section-header">System Operations</div>
-
-            <div className="setting-item">
-                <div className="setting-info">
-                    <h3>Clear Local Storage</h3>
-                    <p>Wipe all local storage data stored in browser. This will NOT delete cloud database records.</p>
-                </div>
-                <button
-                    className="tool-btn remove-btn"
-                    style={{ width: '200px' }}
-                    onClick={() => {
-                        window.AppDataHandler.clearAllData();
-                        window.location.reload();
-                    }}
-                >
-                    Clear Local Storage
-                </button>
-            </div>
-
-
-            {/* --- Footer / Credits --- */}
-            <div style={{ marginTop: '5rem', padding: '2rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', opacity: 0.6 }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>CloudBased</div>
-                <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>  -ˋˏ ._. ˎˊ  </p>
-                <p style={{ fontSize: '0.85rem' }}>Version: 0.6.2  |  Last Updated: March 23, 2026</p>
-                <p style={{ fontSize: '0.85rem' }}>Created by: Cheng Roa and Tejada</p>
-            </div>
-
+            )}
         </div>
     );
 };
+window.UserSettings = UserSettings;

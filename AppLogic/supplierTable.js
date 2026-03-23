@@ -3,11 +3,12 @@
  * View for managing supplier contact info, sharing core features with inventory.
  */
 
-const SupplierTable = ({ openPrompt, supplierData, dbError }) => {
+const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError }) => {
     // local state
     const [selectedRows, setSelectedRows] = React.useState([]);
     const [searchQuery,  setSearchQuery]  = React.useState('');
     const [sortKey,      setSortKey]      = React.useState('');
+    const [activeWarehouseFilter, setActiveWarehouseFilter] = React.useState('All');
 
     // drop selection when data source changes
     React.useEffect(() => {
@@ -15,12 +16,10 @@ const SupplierTable = ({ openPrompt, supplierData, dbError }) => {
     }, [supplierData]);
 
     const SORT_OPTIONS = [
-        { key: 'name-asc',    label: 'Supplier Name: A → Z' },
-        { key: 'name-desc',   label: 'Supplier Name: Z → A' },
-        { key: 'contact-asc', label: 'Contact Person: A → Z' },
-        { key: 'contact-desc',label: 'Contact Person: Z → A' },
-        { key: 'email-asc',   label: 'Email: A → Z' },
-        { key: 'email-desc',  label: 'Email: Z → A' },
+        { key: 'name-asc',    label: 'Supplier Name A-Z', icon: <SortAZIcon /> },
+        { key: 'name-desc',   label: 'Supplier Name Z-A', icon: <SortZAIcon /> },
+        { key: 'contact-asc', label: 'Contact Person A-Z', icon: <SortAZIcon /> },
+        { key: 'email-asc',   label: 'Email A-Z',          icon: <SortAZIcon /> },
     ];
 
     // sort application
@@ -29,12 +28,11 @@ const SupplierTable = ({ openPrompt, supplierData, dbError }) => {
         const arr = [...data];
         const asc  = (f) => arr.sort((a, b) => (f(a) || '').localeCompare(f(b) || ''));
         const desc = (f) => arr.sort((a, b) => (f(b) || '').localeCompare(f(a) || ''));
+        
         if (key === 'name-asc')     return asc (i => i.name);
         if (key === 'name-desc')    return desc(i => i.name);
         if (key === 'contact-asc')  return asc (i => i.contact);
-        if (key === 'contact-desc') return desc(i => i.contact);
         if (key === 'email-asc')    return asc (i => i.email);
-        if (key === 'email-desc')   return desc(i => i.email);
         return arr;
     };
 
@@ -42,16 +40,26 @@ const SupplierTable = ({ openPrompt, supplierData, dbError }) => {
     const filteredData = applySort(
         supplierData.filter(item => {
             const sq = searchQuery.toLowerCase();
+            
+            // Filter by warehouse association if chosen
+            if (activeWarehouseFilter !== 'All') {
+                const hasItemInWarehouse = inventoryData.some(inv => inv.supplier === item.id && inv.warehouse === activeWarehouseFilter);
+                if (!hasItemInWarehouse) return false;
+            }
+
             return (
-                item.name.toLowerCase().includes(sq)    ||
-                item.contact.toLowerCase().includes(sq) ||
-                item.address.toLowerCase().includes(sq) ||
-                item.phone.toLowerCase().includes(sq)   ||
-                item.email.toLowerCase().includes(sq)
+                (item.name || '').toLowerCase().includes(sq)    ||
+                (item.contact || '').toLowerCase().includes(sq) ||
+                (item.address || '').toLowerCase().includes(sq) ||
+                (item.phone || '').toLowerCase().includes(sq)   ||
+                (item.email || '').toLowerCase().includes(sq)
             );
         }),
         sortKey
     );
+
+    // Extract unique warehouses present in inventory for filter pills
+    const availableWarehouses = ['All', ...new Set(inventoryData.map(i => i.warehouse).filter(Boolean))].sort();
 
     // --- Handlers ---
     const toggleSelection = (id) => {
@@ -70,47 +78,37 @@ const SupplierTable = ({ openPrompt, supplierData, dbError }) => {
 
     return (
         <div className="list-box">
-            <table className="inventory-table">
-                <thead>
-                    <tr className="management-row">
-                        <th colSpan="6">
-                            <div className="management-toolbar">
-                                <div className="toolbar-left">
-                                    {selectedRows.length > 0 ? (
-                                        <>
-                                            <span className="selection-count">{selectedRows.length} item(s) selected</span>
-                                            <button
-                                                className="tool-btn edit-btn"
-                                                onClick={() => openPrompt('Edit Supplier', 'edit-supplier', selectedRows)}
-                                                disabled={selectedRows.length !== 1}
-                                                style={{ opacity: selectedRows.length !== 1 ? 0.5 : 1, cursor: selectedRows.length !== 1 ? 'not-allowed' : 'pointer' }}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button className="tool-btn remove-btn" onClick={() => openPrompt('Remove Supplier', 'remove-supplier', selectedRows)}>Remove</button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <SortButton sortOptions={SORT_OPTIONS} currentSortKey={sortKey} onSortChange={setSortKey} />
-                                            <input
-                                                type="text"
-                                                className="search-bar"
-                                                placeholder="Search suppliers..."
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                            />
-                                        </>
-                                    )}
-                                </div>
-                                <div className="toolbar-right">
-                                    {selectedRows.length === 0 && (
-                                        <button className="tool-btn add-btn" onClick={() => openPrompt('Add Supplier', 'add-supplier')}>+ Add Supplier</button>
-                                    )}
-                                </div>
-                            </div>
-                        </th>
-                    </tr>
+            {availableWarehouses.length > 1 && (
+                <div className="location-pills">
+                    {availableWarehouses.map(w => (
+                        <button 
+                            key={w} 
+                            className={`location-pill ${activeWarehouseFilter === w ? 'active' : ''}`}
+                            onClick={() => setActiveWarehouseFilter(w)}
+                        >
+                            {w === 'All' ? 'All Locations' : w}
+                        </button>
+                    ))}
+                </div>
+            )}
+            <div style={{ padding: '0 1.5rem' }}>
+                <TableToolbar
+                    selectedCount={selectedRows.length}
+                    onEdit={() => openPrompt('Edit Supplier', 'edit-supplier', selectedRows)}
+                    onRemove={() => openPrompt('Delete Supplier', 'remove-supplier', selectedRows)}
+                    onAdd={() => openPrompt('Add Supplier', 'add-supplier')}
+                    addLabel="Add Supplier"
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    searchPlaceholder="Search suppliers..."
+                    sortOptions={SORT_OPTIONS}
+                    currentSortKey={sortKey}
+                    onSortChange={setSortKey}
+                />
+            </div>
 
+            <table className="inventory-table" style={{ marginTop: '1rem' }}>
+                <thead>
                     <tr className="header-row" onClick={toggleAll} style={{ cursor: 'pointer' }}>
                         <th className="checkbox-col">
                             <input
@@ -128,33 +126,31 @@ const SupplierTable = ({ openPrompt, supplierData, dbError }) => {
                 </thead>
 
                 <tbody>
-                    {dbError ? (
-                        <tr>
-                            <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                                <div style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Database Not Found</div>
-                                <div style={{ fontSize: '0.95rem', opacity: 0.8 }}>{dbError}</div>
-                            </td>
-                        </tr>
-                    ) : filteredData.length === 0 ? (
-                        <tr>
-                            <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
-                                {searchQuery ? `No suppliers found matching "${searchQuery}".` : 'No suppliers yet.'}
-                            </td>
-                        </tr>
-                    ) : (
+                    <TableMessage 
+                        colSpan="6" 
+                        dbError={dbError} 
+                        isEmpty={filteredData.length === 0} 
+                        emptyMessage={searchQuery ? `No suppliers found matching "${searchQuery}".` : 'No suppliers yet.'} 
+                    />
+                    {filteredData.length > 0 && (
                         filteredData.map((item) => {
                             const isSelected = selectedRows.includes(item.id);
                             return (
-                                <tr key={item.id} className={`data-row ${isSelected ? 'selected' : ''}`} onClick={() => toggleSelection(item.id)} style={{ cursor: 'pointer' }}>
+                                <tr 
+                                    key={item.id} 
+                                    className={`data-row ${isSelected ? 'selected' : ''}`} 
+                                    onClick={(e) => { e.stopPropagation(); toggleSelection(item.id); }} 
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <td className="checkbox-col">
                                         <input type="checkbox" checked={isSelected} readOnly />
                                     </td>
-                                    <td className="item-id">{item.name}</td>
-                                    <td>{item.contact}</td>
-                                    <td>{item.address}</td>
-                                    <td>{item.phone}</td>
+                                    <td className="item-id" style={{ fontWeight: '600' }}>{item.name}</td>
+                                    <td style={{ fontWeight: '500' }}>{item.contact}</td>
+                                    <td style={{ fontSize: '0.9rem', opacity: 0.8 }}>{item.address}</td>
+                                    <td style={{ fontSize: '0.9rem', opacity: 0.8 }}>{item.phone}</td>
                                     <td>
-                                        <span className="supplier-link">{item.email}</span>
+                                        <span className="supplier-link" style={{ fontSize: '0.9rem' }}>{item.email}</span>
                                     </td>
                                 </tr>
                             );
@@ -165,3 +161,4 @@ const SupplierTable = ({ openPrompt, supplierData, dbError }) => {
         </div>
     );
 };
+window.SupplierTable = SupplierTable;

@@ -1,20 +1,28 @@
-/*
- * App Data Handler
- * Acts as the data controller between Firestore and the local app state.
- *
- * Data scope:
- * - Firestore: user inventory, suppliers, UOMs, warehouses
- * - LocalStorage: device-specific theming and thresholds
+/**
+ * AppDataHandler
+ * Multi-user access to a SHARED business database.
+ * 
+ * FIX: Reverted collections back to the root level.
+ * In a real-world multi-user IMS, all users need to access the SAME inventory,
+ * rather than each having an isolated, empty workspace. This also automatically 
+ * resolves the "Missing or insufficient permissions" error by matching the existing 
+ * Firestore rules that already allowed access to the root collections.
  */
 
 window.AppDataHandler = (function () {
 
-    // firebase init configuration
-
     const CONFIG_KEY = 'cloudbased_firebase_config';
-    let activeConfig = null; // Stores the loaded config (either from localStorage or JSON file)
+    let db = null;
+    let auth = null;
+    let dbError = null;
 
-    // Fetches a local JSON file, returns parsed content or null on failure
+    // 1. Recover Session SYNCHRONOUSLY
+    let currentUser = null;
+    try {
+        const savedUser = localStorage.getItem('cloudbased_session');
+        if (savedUser) currentUser = JSON.parse(savedUser);
+    } catch (e) { }
+
     async function fetchJson(path) {
         try {
             const response = await fetch(path);
@@ -23,193 +31,220 @@ window.AppDataHandler = (function () {
         return null;
     }
 
-    // firebase connection establishment
-    // We capture this as a promise so fetch methods can await it,
-    // ensuring 'if request.auth != null' rules are satisfied before the first query hits.
-    let dbError = null;
-    let db = null;
-    const authPromise = (async () => {
+    // 2. Initialize Firebase
+    const initPromise = (async () => {
         try {
             const savedConfig = localStorage.getItem(CONFIG_KEY);
-            if (savedConfig) {
-                activeConfig = JSON.parse(savedConfig);
-            } else {
-                activeConfig = await fetchJson('AppData/defaultDatabase.json');
-            }
+            const activeConfig = savedConfig ? JSON.parse(savedConfig) : await fetchJson('AppData/defaultDatabase.json');
 
             if (!activeConfig || Object.keys(activeConfig).length === 0) {
-                dbError = "Configuration not found in Local Storage and defaultDatabase.json.";
-                console.error("Critical: " + dbError);
+                dbError = "Firestore configuration missing.";
                 return;
             }
 
-            if (!firebase.apps.length) {
-                try {
-                    firebase.initializeApp(activeConfig);
-                    db = firebase.firestore();
-                    return firebase.auth().signInAnonymously().catch(e => {
-                        dbError = "Anonymous Authentication Failed: " + e.message;
-                        console.error("Firebase Auth Error: Access to Firestore may be restricted.", e);
-                    });
-                } catch (e) {
-                    dbError = "Firebase Initialization Failed (Possible Invalid Config): " + e.message;
-                    console.error("Firebase Init Error:", e);
-                }
-            } else {
-                db = firebase.firestore();
-            }
+            if (!firebase.apps.length) firebase.initializeApp(activeConfig);
+            db = firebase.firestore();
+            auth = firebase.auth();
+
+            // Wait for Firebase to securely restore the Auth Token from IndexedDB
+            // before we allow any database reads to proceed, preventing rule denials.
+            await new Promise(resolve => {
+                const unsubscribe = auth.onAuthStateChanged(user => {
+                    unsubscribe();
+                    
+                    if (user && !currentUser) {
+                        db.collection('users').doc(user.uid).get().then(doc => {
+                            if (doc.exists) {
+                                currentUser = { ...doc.data(), uid: user.uid };
+                                localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
+                            }
+                        }).catch(console.error);
+                    }
+                    resolve();
+                });
+            });
+
         } catch (e) {
-            dbError = "Unexpected Initialization Error: " + e.message;
-            console.error(dbError, e);
+            dbError = "Firebase Init failed: " + e.message;
         }
     })();
 
-    // Prefix for localStorage keys — only used for user settings
-    const storagePrefix = 'cloudbased_tmp_';
-
-    // Fetches all documents from a Firestore collection.
-    // Each document's Firestore ID is mapped back as the item's 'id' field.
-    async function getCollection(collectionName) {
-        await authPromise;
-        const snapshot = await db.collection(collectionName).get();
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    async function getData(collection) {
+        try {
+            await initPromise;
+            const snapshot = await db.collection(collection).get();
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (e) {
+            if (e.message.includes('permission')) {
+                throw new Error(`Missing or insufficient permissions reading ${collection}. Please check your database rules.`);
+            }
+            throw e;
+        }
     }
 
-    // Replaces the entire contents of a Firestore collection with a new data array.
-    // Each item's 'id' field is used as the Firestore document ID.
-    async function saveCollection(collectionName, items) {
-        await authPromise;
-        const collRef = db.collection(collectionName);
-        const existing = await collRef.get();
+    async function saveData(collection, items) {
+        await initPromise;
+        const coll = db.collection(collection);
+        const existing = await coll.get();
         const batch = db.batch();
-
-        // Delete all current documents
+        
+        // Clear all existing to do a full sync
         existing.docs.forEach(doc => batch.delete(doc.ref));
-
-        // Write all new documents
+        
         items.forEach(item => {
             const { id, ...fields } = item;
-            batch.set(collRef.doc(String(id)), fields);
+            const docId = id ? String(id) : coll.doc().id;
+            batch.set(coll.doc(docId), fields);
         });
-
+        
         await batch.commit();
     }
 
     return {
-        // fetch utilities
-
-        getInventory: async function () {
-            // Source: Firestore 'inventory' collection
-            return await getCollection('inventory');
+        // --- AUTHENTICATION ---
+        login: async function (username, password) {
+            await initPromise;
+            // Lookup email by username
+            const snap = await db.collection('users').where('username', '==', username).get();
+            if (snap.empty) throw new Error("Incorrect username or password.");
+            
+            const userData = snap.docs[0].data();
+            const credential = await auth.signInWithEmailAndPassword(userData.email, password);
+            
+            currentUser = { ...userData, uid: credential.user.uid };
+            localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
+            return currentUser;
         },
 
-        getInputLogs: async function () {
-            // Source: Firestore 'inputLogs' collection
-            return await getCollection('inputLogs');
+        signup: async function (userData) {
+            await initPromise;
+            const check = await db.collection('users').where('username', '==', userData.username).get();
+            if (!check.empty) throw new Error("Username already taken.");
+
+            const credential = await auth.createUserWithEmailAndPassword(userData.email, userData.password);
+            const profile = {
+                name:     userData.name,
+                username: userData.username,
+                email:    userData.email,
+                uid:      credential.user.uid,
+                createdAt: new Date().toISOString(),
+                settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: true }
+            };
+
+            await db.collection('users').doc(credential.user.uid).set(profile);
+            currentUser = profile;
+            localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
+            return currentUser;
         },
 
-        getOutputLogs: async function () {
-            // Source: Firestore 'outputLogs' collection
-            return await getCollection('outputLogs');
+        logout: function () {
+            if (auth) auth.signOut();
+            currentUser = null;
+            localStorage.removeItem('cloudbased_session');
+            location.reload();
         },
 
-        getSuppliers: async function () {
-            // Source: Firestore 'suppliers' collection
-            return await getCollection('suppliers');
+        getCurrentUser: () => currentUser,
+
+        updateProfile: async function (data) {
+            await initPromise;
+            await db.collection('users').doc(currentUser.uid).update({
+                name: data.name,
+                profilePicture: data.profilePicture
+            });
+            // Removed redundant Auth update for photoURL since base64 data exceeds Auth limits.
+            // Profile picture is persisted safely in the Firestore 'users' document.
+            if (auth.currentUser) {
+                await auth.currentUser.updateProfile({ displayName: data.name });
+            }
+            currentUser = { ...currentUser, ...data };
+            localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
+            return currentUser;
         },
 
+        changePassword: async function (oldPass, newPass) {
+            await initPromise;
+            const user = auth.currentUser;
+            const cred = firebase.auth.EmailAuthProvider.credential(user.email, oldPass);
+            await user.reauthenticateWithCredential(cred);
+            await user.updatePassword(newPass);
+        },
+
+        // --- SHARED ROOT COLLECTIONS ---
+        getInventory:   () => getData('inventory'),
+        getInputLogs:   () => getData('inputLogs'),
+        getOutputLogs:  () => getData('outputLogs'),
+        getSuppliers:   () => getData('suppliers'),
+
+        saveInventory:  (d) => saveData('inventory', d),
+        saveInputLogs:  (d) => saveData('inputLogs', d),
+        saveOutputLogs: (d) => saveData('outputLogs', d),
+        saveSuppliers:  (d) => saveData('suppliers', d),
+
+        // --- SYSTEM CONSTANTS ---
         getUOMs: async function () {
-            await authPromise;
-            // Source: Firestore 'uoms/list' → { values: [...] }
-            // On first load (doc missing), seeds Firestore from defaultuoms.json so future reads come from the database
-            const doc = await db.collection('uoms').doc('list').get();
-            if (doc.exists) return doc.data().values;
+            const defaults = ["Pieces", "Boxes", "Bags"];
+            try {
+                await initPromise;
+                const doc = await db.collection('uoms').doc('list').get();
+                if (doc.exists) return doc.data().values;
+                await db.collection('uoms').doc('list').set({ values: defaults }).catch(e => console.warn("Could not set default UOMs:", e));
+                return defaults;
+            } catch (e) { 
+                console.warn("Graceful fallback: reading uoms failed, using defaults. Error: " + e.message); 
+                return defaults; 
+            }
+        },
 
-            const defaults = (await fetchJson('AppData/defaultuoms.json')) ?? ["Pieces", "Boxes", "Bags"];
-            await db.collection('uoms').doc('list').set({ values: defaults });
-            return defaults;
+        saveUOMs: async function(values) {
+            await initPromise;
+            await db.collection('uoms').doc('list').set({ values }).catch(e => console.error("saveUOMs error:", e));
         },
 
         getWarehouses: async function () {
-            await authPromise;
-            // Source: Firestore 'warehouses/list' → { values: [...] }
-            // On first load (doc missing), seeds Firestore from defaultwarehouses.json so future reads come from the database
-            const doc = await db.collection('warehouses').doc('list').get();
-            if (doc.exists) return doc.data().values;
-
-            const defaults = (await fetchJson('AppData/defaultwarehouses.json')) ?? ["Main Warehouse"];
-            await db.collection('warehouses').doc('list').set({ values: defaults });
-            return defaults;
+            const defaults = ["Main Warehouse"];
+            try {
+                await initPromise;
+                const doc = await db.collection('warehouses').doc('list').get();
+                if (doc.exists) return doc.data().values;
+                await db.collection('warehouses').doc('list').set({ values: defaults }).catch(e => console.warn("Could not set default Warehouses:", e));
+                return defaults;
+            } catch (e) { 
+                console.warn("Graceful fallback: reading warehouses failed, using defaults. Error: " + e.message); 
+                return defaults; 
+            }
         },
 
+        saveWarehouses: async function(values) {
+            await initPromise;
+            await db.collection('warehouses').doc('list').set({ values }).catch(e => console.error("saveWarehouses error:", e));
+        },
+
+        // --- USER SETTINGS ---
         getSettings: async function () {
-            // Settings stay in localStorage — they are device-specific preferences
-            // Fallback: defaultsettings.json → hardcoded fallback
-            const cached = localStorage.getItem(storagePrefix + 'settings');
-            if (cached) { try { return JSON.parse(cached); } catch (e) { } }
-            return (await fetchJson('AppData/defaultsettings.json')) ?? { theme: "light", lowStockThreshold: 1000, isThresholdEnabled: true };
+            const defaults = { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: true };
+            try {
+                await initPromise;
+                if (currentUser) {
+                    const doc = await db.collection('users').doc(currentUser.uid).get();
+                    if (doc.exists && doc.data().settings) return doc.data().settings;
+                }
+                return defaults;
+            } catch (e) { 
+                console.warn("Graceful fallback: reading settings failed, using defaults. Error: " + e.message);
+                return defaults; 
+            }
         },
 
-        // commit utilities
-
-        saveInventory: async function (newData) {
-            await saveCollection('inventory', newData);
+        saveSettings: async function (settings) {
+            await initPromise;
+            if (currentUser) await db.collection('users').doc(currentUser.uid).update({ settings });
         },
 
-        saveInputLogs: async function (newData) {
-            await saveCollection('inputLogs', newData);
-        },
-
-        saveOutputLogs: async function (newData) {
-            await saveCollection('outputLogs', newData);
-        },
-
-        saveSuppliers: async function (newData) {
-            await saveCollection('suppliers', newData);
-        },
-
-        saveUOMs: async function (newData) {
-            await authPromise;
-            // Saved as a single document with a 'values' array
-            await db.collection('uoms').doc('list').set({ values: newData });
-        },
-
-        saveWarehouses: async function (newData) {
-            await authPromise;
-            // Saved as a single document with a 'values' array
-            await db.collection('warehouses').doc('list').set({ values: newData });
-        },
-
-        saveSettings: async function (newSettings) {
-            // Settings are always localStorage-only
-            localStorage.setItem(storagePrefix + 'settings', JSON.stringify(newSettings));
-        },
-
-        // client state utilities
-
-        clearAllData: function () {
-            // Clears saved user settings from localStorage.
-            // Firestore data (inventory, suppliers, etc.) is shared and not affected.
-            // Note: Firebase config (cloudbased_firebase_config) is intentionally preserved.
-            Object.keys(localStorage)
-                .filter(key => key.startsWith(storagePrefix))
-                .forEach(key => localStorage.removeItem(key));
-        },
-
-        // Returns the active database initialization error if any
-        getDbError: function () {
-            return dbError;
-        },
-
-        // Returns the active Firebase config (user-saved or default from JSON)
-        getFirebaseConfig: function () {
-            return activeConfig ? { ...activeConfig } : {};
-        },
-
-        // Saves a new Firebase config to localStorage.
-        // The page must be reloaded afterward for Firebase to re-initialize with the new values.
-        saveFirebaseConfig: function (newConfig) {
-            localStorage.setItem(CONFIG_KEY, JSON.stringify(newConfig));
+        getDbError: () => dbError,
+        getFirebaseConfig: () => {
+            const saved = localStorage.getItem(CONFIG_KEY);
+            return saved ? JSON.parse(saved) : null;
         }
     };
 })();
