@@ -459,7 +459,7 @@ Snappier UI & Refined Interaction
 
 ===============================================================
 
-### Version 0.7.1 (March 23, 2026)
+### Version 0.8.0 (March 23, 2026)
 
 #### Executive Insights & Dashboard Logic
 - **Integrated Analytical Dashboard**: Launched a high-level executive dashboard featuring real-time data visualization across 8 specialized logic blocks.
@@ -478,5 +478,21 @@ Snappier UI & Refined Interaction
 - **Product Descriptions**: Expanded the Item Master schema to include a dedicated "Item Description" field.
 - **Metadata Visibility**: Updated Item List cards to display product descriptions, improving detail visibility without requiring a click.
 - **Prompt Integration**: Added a smart-resized description textarea to the Inventory Add/Edit modal.
+#### Data Management Cleanup
 - **Data Management Cleanup**: Temporarily retired the "Import Inventory Data" stub from User Settings to streamline the interface for upcoming large-scale migration features.
+
+===============================================================
+
+Version 0.9.0 (March 23, 2026)
+
+### Data Migration & Advanced Administration
+- **Power Import Engine**: Integrated the SheetJS library to support bulk data migration from Google Sheets and local Excel files.
+- **Automated Mapping**: Implemented intelligent header matching for 'Items', 'Inventory', 'Receive', and 'Out' worksheets.
+- **Smart Data Transformation**: Automatically extracts unique companies as Suppliers, generates randomized Transaction IDs, and maps all stock to the standard "Bulacan" warehouse.
+- **System Factory Reset (Nuke)**: Developed a high-security data clearing tool in Global Settings with double-confirmation (Standard dialog + Case-sensitive "NUKE" string challenge).
+- **Universal Scrolling Fix**: Refactored the global layout and `.list-box` CSS to enable smooth, high-density scrolling across Inventory, Suppliers, and Transaction Logs.
+- **Branding Architecture**: Fully synchronized the browser tab title and top-left dashboard branding with the user-defined Company Name field.
+- **Permission Layer Polish**: Resolved a critical UI crash for 'Auditor' roles by implementing null-safe permission handling in the User Management tab.
+- **Transition UI Glitch Fixed**: Corrected the absolute positioning of the active tab indicator bar in the Admin Dashboard navigation.
+
 

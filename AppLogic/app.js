@@ -12,7 +12,10 @@ const App = () => {
     // URL Routing Logic (Simulated for SPA)
     const getPathView = () => {
         const hash = window.location.hash.replace('#/', '') || 'dashboard';
-        return ['dashboard', 'inventory', 'suppliers', 'itemList'].includes(hash) ? hash : 'dashboard';
+        const allowedViews = ['dashboard', 'inventory', 'suppliers', 'itemList'];
+        if (user?.role === 'Administrator') allowedViews.push('adminDashboard');
+        
+        return allowedViews.includes(hash) ? hash : 'dashboard';
     };
     
     const [view, setView] = React.useState(getPathView());
@@ -36,6 +39,9 @@ const App = () => {
     const [inputLogs, setInputLogs] = React.useState([]);
     const [outputLogs, setOutputLogs] = React.useState([]);
     const [suppliers, setSuppliers] = React.useState([]);
+    const [selectedSupplier, setSelectedSupplier] = React.useState(null);
+    const [branding, setBranding] = React.useState({ companyName: 'CloudBased', logoUrl: '' });
+    const [globalSettings, setGlobalSettings] = React.useState({});
     const [uoms, setUoms] = React.useState([]);
     const [warehouses, setWarehouses] = React.useState([]);
 
@@ -59,22 +65,42 @@ const App = () => {
     const loadAllData = async () => {
         setDbLoading(true);
         try {
-            const [inv, inLogs, outLogs, sups, units, whs, settings] = await Promise.all([
+            const [inv, iLogs, oLogs, sups, units, whs, settings, brand, gSet] = await Promise.all([
                 window.AppDataHandler.getInventory(),
                 window.AppDataHandler.getInputLogs(),
                 window.AppDataHandler.getOutputLogs(),
                 window.AppDataHandler.getSuppliers(),
                 window.AppDataHandler.getUOMs(),
                 window.AppDataHandler.getWarehouses(),
-                window.AppDataHandler.getSettings()
+                window.AppDataHandler.getSettings(),
+                window.AppDataHandler.getBranding(),
+                window.AppDataHandler.getGlobalSettings()
             ]);
-            setInventory(inv); setInputLogs(inLogs); setOutputLogs(outLogs);
-            setSuppliers(sups); setUoms(units); setWarehouses(whs);
+            setInventory(inv);
+            setInputLogs(iLogs);
+            setOutputLogs(oLogs);
+            setSuppliers(sups);
+            setUoms(units);
+            setWarehouses(whs);
             setTheme(settings.theme || 'light');
+            setBranding(brand);
+            setGlobalSettings(gSet);
             setDbError(window.AppDataHandler.getDbError());
+            
+            // Initial title sync - full replace
+            if (brand.companyName) {
+                document.title = brand.companyName;
+            }
         } catch (e) {
             setDbError("System sync failed: " + e.message);
         } finally { setDbLoading(false); }
+    };
+
+    const handleBrandingChange = (newBranding) => {
+        setBranding(newBranding);
+        if (newBranding.companyName) {
+            document.title = newBranding.companyName;
+        }
     };
 
     const handlePromptConfirm = async (data) => {
@@ -122,8 +148,15 @@ const App = () => {
         <div className="app-wrapper">
             <header className="top-brand-bar">
                 <div className="brand-left">
-                    <div className="app-logo">CloudBased</div>
-                    <nav className="nav-tabs-left">
+                    {branding.logoUrl ? (
+                        <div style={{ height: '32px', display: 'flex', alignItems: 'center' }}>
+                            <img src={branding.logoUrl} alt="Logo" style={{ maxHeight: '100%', objectFit: 'contain' }} />
+                        </div>
+                    ) : (
+                        <div className="app-logo">{branding.companyName || 'CloudBased'}</div>
+                    )}
+                </div>
+                <nav className="nav-tabs-left">
                         <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => navigate('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <window.DashboardIcon width="16" height="16" /> Dashboard
                         </button>
@@ -133,16 +166,35 @@ const App = () => {
                         <button className={`nav-btn ${view === 'inventory' ? 'active' : ''}`} onClick={() => navigate('inventory')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <window.LayersIcon width="16" height="16" /> Inventory
                         </button>
-                        <button className={`nav-btn ${view === 'suppliers' ? 'active' : ''}`} onClick={() => navigate('suppliers')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <window.TruckIcon width="16" height="16" /> Suppliers
-                        </button>
+                        {(user.role === 'Administrator' || user.role === 'Manager') && (
+                            <button className={`nav-btn ${view === 'suppliers' ? 'active' : ''}`} onClick={() => navigate('suppliers')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <window.TruckIcon width="16" height="16" /> Suppliers
+                            </button>
+                        )}
+                        {user.role === 'Administrator' && (
+                            <button 
+                                className={`nav-btn ${view === 'adminDashboard' ? 'active' : ''}`} 
+                                onClick={() => navigate('adminDashboard')} 
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.4rem', 
+                                    color: view === 'adminDashboard' ? 'white' : 'var(--accent-color)', 
+                                    fontWeight: '700' 
+                                }}
+                            >
+                                <Icons.Settings width="16" height="16" /> Admin Dashboard
+                            </button>
+                        )}
                     </nav>
-                </div>
                 
                 <div className="brand-right" onClick={() => setIsProfileOpen(!isProfileOpen)} style={{ cursor: 'pointer' }}>
                     <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center', marginRight: '0.5rem' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: '700', lineHeight: 1.2 }}>{user.name}</span>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '600', opacity: 0.8 }}>@{user.username}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--accent-color)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.02em', background: 'var(--selected-bg)', padding: '1px 6px', borderRadius: '4px' }}>{user.role}</span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '600', opacity: 0.8 }}>@{user.username}</span>
+                        </div>
                     </div>
                     <img 
                         src={user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&size=40`} 
@@ -160,28 +212,36 @@ const App = () => {
                             <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '0.4rem' }}>
                                 <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>My Workspace</div>
                             </div>
-                            <button style={{ width: '100%', textAlign: 'left', padding: '0.8rem 1rem', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '12px', fontSize: '0.9rem', fontWeight: '500' /* Removed transition: 'background 0.2s' */, display: 'flex', gap: '0.75rem', alignItems: 'center' }} 
+                            <button style={{ width: '100%', textAlign: 'left', padding: '0.8rem 1rem', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '12px', fontSize: '0.9rem', fontWeight: '500', display: 'flex', gap: '0.75rem', alignItems: 'center' }} 
                                 onMouseEnter={e => e.target.style.background = 'var(--hover-bg)'}
                                 onMouseLeave={e => e.target.style.background = 'none'}
                                 onClick={() => { setIsAccountSettingsOpen(true); setIsProfileOpen(false); }}>
-                                <span style={{ opacity: 0.6 }}><Icons.Edit /></span> User Settings
+                                <Icons.Settings size={18} /> User Settings
                             </button>
                             <button style={{ width: '100%', textAlign: 'left', padding: '0.8rem 1rem', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', borderRadius: '12px', fontSize: '0.9rem', fontWeight: '600', transition: 'background 0.2s', display: 'flex', gap: '0.75rem', alignItems: 'center' }} 
                                 onMouseEnter={e => e.target.style.background = 'rgba(239, 68, 68, 0.08)'}
                                 onMouseLeave={e => e.target.style.background = 'none'}
                                 onClick={() => window.AppDataHandler.logout() || location.reload()}>
-                                <span style={{ opacity: 0.6 }}><Icons.Trash /></span> Sign Out
+                                <Icons.Trash size={18} /> Sign Out
                             </button>
                         </div>
                     </div>
                 </>
             )}
-
+ 
             <main className="app-layout">
-                {view === 'dashboard' && <window.Dashboard inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={user.settings || { lowStockThreshold: 1000 }} />}
+                {view === 'dashboard' && <window.Dashboard globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ theme, isThresholdEnabled: true }} />}
                 {view === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} />}
                 {view === 'itemList' && <ItemList inventoryData={inventory} openPrompt={openPrompt} />}
-                {view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} />}
+                {(user.role === 'Administrator' || user.role === 'Manager') && view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} />}
+                {user.role === 'Administrator' && view === 'adminDashboard' && (
+                    <window.AdminDashboard 
+                        currentUser={user} 
+                        inputLogs={inputLogs} 
+                        outputLogs={outputLogs} 
+                        onBrandingUpdate={handleBrandingChange}
+                    />
+                )}
             </main>
 
             <Prompt 

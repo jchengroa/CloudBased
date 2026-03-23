@@ -4,20 +4,20 @@
  */
 
 const UIIcons = {
-    User: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
-    Key: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>,
-    Palette: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.4-.5-.9-.5-1.4 0-1.1.9-2 2-2h1.5A5.5 5.5 0 0 0 22 10c0-4.4-4.5-8-10-8Z"></path></svg>,
-    Moon: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>,
-    Activity: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>,
-    Database: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>,
-    Download: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
-    Upload: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
-    Trash: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
-    RefreshCw: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>,
-    Info: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>,
-    Heart: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>,
-    Book: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>,
-    Check: (p) => <svg width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="20 6 9 17 4 12"></polyline></svg>
+    User: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
+    Key: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>,
+    Palette: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.4-.5-.9-.5-1.4 0-1.1.9-2 2-2h1.5A5.5 5.5 0 0 0 22 10c0-4.4-4.5-8-10-8Z"></path></svg>,
+    Moon: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>,
+    Activity: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>,
+    Database: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>,
+    Download: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
+    Upload: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
+    Trash: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+    RefreshCw: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>,
+    Info: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>,
+    Heart: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>,
+    Book: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>,
+    Check: (p) => <svg width={p.size || 20} height={p.size || 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="20 6 9 17 4 12"></polyline></svg>
 };
 
 const SettingsCard = ({ icon, title, children }) => (
@@ -41,7 +41,7 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
     const [theme, setTheme] = React.useState(user.settings?.theme || 'light');
     const [themeColor, setThemeColor] = React.useState(user.settings?.themeColor || '#4f46e5');
     const [threshold, setThreshold] = React.useState(user.settings?.lowStockThreshold || '');
-    
+
     // Auth Edit Modal Overlay State
     const [authAction, setAuthAction] = React.useState(null); // 'editProfile' or 'changePassword' or null
     const [oldPass, setOldPass] = React.useState('');
@@ -88,10 +88,10 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
             await window.AppDataHandler.saveSettings(newSettings);
             const updated = { ...user, settings: newSettings };
             onUpdateUser(updated);
-            
+
             document.documentElement.setAttribute('data-theme', mode);
             document.documentElement.style.setProperty('--accent-color', color);
-            
+
             showMessage('System preferences saved!');
         } catch (e) { showMessage(e.message, true); }
         finally { setLoading(false); }
@@ -135,16 +135,16 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                             <img src={pic} style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', background: '#e0e7ff', border: '3px solid white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
                         ) : (
                             <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(79, 70, 229, 0.1)', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5rem', fontWeight: '800', border: '3px solid var(--card-bg)', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-                               {name?.[0]?.toUpperCase() || 'U'}
+                                {name?.[0]?.toUpperCase() || 'U'}
                             </div>
                         )}
                         <div style={{ flex: 1 }}>
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Full Name</div>
                             <div style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.75rem' }}>{name}</div>
-                            
+
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Role</div>
-                            <div style={{ fontSize: '1rem', marginBottom: '1.25rem' }}>Administrator</div>
-                            
+                            <div style={{ fontSize: '1rem', marginBottom: '1.25rem' }}>{user.role || 'Administrator'}</div>
+
                             <button onClick={() => setAuthAction('editProfile')} style={{ padding: '0.6rem 1.25rem', background: 'var(--hover-bg)', color: 'var(--text-primary)', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>
                                 <UIIcons.User size={16} /> Edit Profile
                             </button>
@@ -172,7 +172,7 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                     <div style={{ borderTop: '1px solid var(--border-color)', margin: '1.5rem -1.5rem', marginBottom: '1.5rem' }} />
                     <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Application Theme</div>
                     <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Choose your preferred color scheme for the interface.</div>
-                    
+
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                         {[
                             { hex: '#4f46e5', label: 'Default Blue' },
@@ -230,7 +230,7 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                             <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Force Database Resync</div>
                             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Manually trigger a full synchronization with the cloud database.</div>
                         </div>
-                        <button onClick={() => location.reload()} style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '0.6rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', transition: '0.2s' }} onMouseEnter={e => { e.target.style.color='var(--text-primary)' }} onMouseLeave={e => { e.target.style.color='var(--text-secondary)' }}>
+                        <button onClick={() => location.reload()} style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '0.6rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', transition: '0.2s' }} onMouseEnter={e => { e.target.style.color = 'var(--text-primary)' }} onMouseLeave={e => { e.target.style.color = 'var(--text-secondary)' }}>
                             <UIIcons.RefreshCw size={16} /> Resync Now
                         </button>
                     </div>
@@ -243,11 +243,11 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                 <UIIcons.Info size={16} /> Version Info
                             </div>
                             <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontWeight: '500' }}>CloudBased IMS</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.7.0</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.9.0</div>
                             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Date Modified: March 23, 2026</div>
                         </div>
                         <div style={{ background: 'var(--hover-bg)', padding: '1.5rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                            <img src="resources/icon.png" alt="Icon" style={{ width: '40px', height: '40px', marginBottom: '0.75rem', opacity: 0.9 }} onError={(e) => { e.target.style.display='none'; }} />
+                            <img src="resources/icon.png" alt="Icon" style={{ width: '40px', height: '40px', marginBottom: '0.75rem', opacity: 0.9 }} onError={(e) => { e.target.style.display = 'none'; }} />
                             <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>Made by Group 5</div>
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Created by: Cheng Roa & Tejada</div>
                         </div>
@@ -263,31 +263,31 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                 <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                     <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2rem', width: '400px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
                         <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontWeight: '700' }}>{authAction === 'editProfile' ? 'Edit Profile' : 'Change Password'}</h3>
-                        
+
                         {authAction === 'editProfile' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <FormInput label="Display Name" value={name} onChange={e => setName(e.target.value)} />
                                 <div className="auth-input-group">
                                     <label className="auth-label">Profile Picture (Upload)</label>
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                    <input type="file" accept="image/*" className="auth-input" style={{ padding: '0.65rem', height: 'auto', flex: 1 }} onChange={async (e) => {
-                                        const file = e.target.files[0];
-                                        if (file) {
-                                            const resized = await window.resizeImage(file, 400);
-                                            setPic(resized);
-                                        }
-                                    }} />
-                                    {pic && (
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setPic('')}
-                                            style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.75rem 1rem', borderRadius: '10px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}
-                                        >
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-                                {pic && pic.length > 500 && <span style={{fontSize: '0.8rem', color: 'var(--success)', marginTop: '0.25rem'}}>✓ New image selected</span>}
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                        <input type="file" accept="image/*" className="auth-input" style={{ padding: '0.65rem', height: 'auto', flex: 1 }} onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                const resized = await window.resizeImage(file, 400);
+                                                setPic(resized);
+                                            }
+                                        }} />
+                                        {pic && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setPic('')}
+                                                style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.75rem 1rem', borderRadius: '10px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                    {pic && pic.length > 500 && <span style={{ fontSize: '0.8rem', color: 'var(--success)', marginTop: '0.25rem' }}>✓ New image selected</span>}
                                 </div>
                                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                                     <button onClick={() => setAuthAction(null)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: '600' }}>Cancel</button>
@@ -301,19 +301,19 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                 <FormInput type="password" label="Current Password" value={oldPass} onChange={e => setOldPass(e.target.value)} />
                                 <FormInput type="password" label="New Password" value={newPass} onChange={e => setNewPass(e.target.value)} />
                                 <FormInput type="password" label="Confirm Password" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} />
-                                
+
                                 <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                                    <button 
-                                        type="button" 
-                                        className="auth-btn-text" 
-                                        style={{ fontSize: '0.85rem' }} 
+                                    <button
+                                        type="button"
+                                        className="auth-btn-text"
+                                        style={{ fontSize: '0.85rem' }}
                                         onClick={async () => {
                                             if (confirm("Send a password reset email to " + user.email + "?")) {
                                                 try {
                                                     await window.AppDataHandler.sendPasswordResetEmail(user.email);
                                                     alert("Reset email sent!");
                                                     setAuthAction(null);
-                                                } catch(e) { alert(e.message); }
+                                                } catch (e) { alert(e.message); }
                                             }
                                         }}
                                     >

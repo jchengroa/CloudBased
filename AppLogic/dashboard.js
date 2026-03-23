@@ -1,5 +1,18 @@
-const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, settings }) => {
+const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, settings, globalSettings = {} }) => {
     const [activeWarehouseFilter, setActiveWarehouseFilter] = React.useState('All');
+    
+    // Default config assuming everything is ON if not specified
+    const gSet = {
+        showTotalItems: true,
+        showLowStock: true,
+        showSuppliersOnly: true,
+        showRecentArrivals: true,
+        showRecentShipments: true,
+        showCriticalReplenishment: false, 
+        showCategoryPerformance: true,
+        showWarehouseDistribution: true,
+        ...globalSettings
+    };
     
     // Extract unique warehouses for filter dropdown
     const availableWarehouses = ['All', ...new Set(inventoryData.map(i => i.warehouse).filter(Boolean))].sort();
@@ -45,28 +58,36 @@ const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, setting
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem' }}>
                 {/* Top Section */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
-                    <window.TotalItemsCard inventoryData={filteredInventory} />
-                    <window.LowStockCard inventoryData={filteredInventory} settings={settings} />
-                    <window.SuppliersOnlyCard supplierData={supplierData} />
-                </div>
+                {(gSet.showTotalItems || gSet.showLowStock || gSet.showSuppliersOnly) && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                        {gSet.showTotalItems && <window.TotalItemsCard inventoryData={filteredInventory} />}
+                        {gSet.showLowStock && <window.LowStockCard inventoryData={filteredInventory} settings={settings} />}
+                        {gSet.showSuppliersOnly && <window.SuppliersOnlyCard supplierData={supplierData} />}
+                    </div>
+                )}
 
                 {/* Arrivals / Shipments */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
-                    <window.RecentArrivalsList inputLogs={filteredInputs} inventoryData={inventoryData} />
-                    <window.RecentShipmentsList outputLogs={filteredOutputs} inventoryData={inventoryData} />
-                </div>
+                {(gSet.showRecentArrivals || gSet.showRecentShipments) && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
+                        {gSet.showRecentArrivals && <window.RecentArrivalsList inputLogs={filteredInputs} inventoryData={inventoryData} />}
+                        {gSet.showRecentShipments && <window.RecentShipmentsList outputLogs={filteredOutputs} inventoryData={inventoryData} />}
+                    </div>
+                )}
 
                 {/* Critical Replenishment */}
-                <div>
-                    <window.CriticalReplenishment inventoryData={filteredInventory} settings={settings} />
-                </div>
+                {gSet.showCriticalReplenishment && (
+                    <div>
+                        <window.CriticalReplenishment inventoryData={filteredInventory} settings={settings} />
+                    </div>
+                )}
 
                 {/* Performance & Distribution */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
-                    <window.CategoryPerformance inventoryData={filteredInventory} settings={settings} />
-                    <window.WarehouseDistribution inventoryData={filteredInventory} settings={settings} />
-                </div>
+                {(gSet.showCategoryPerformance || gSet.showWarehouseDistribution) && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
+                        {gSet.showCategoryPerformance && <window.CategoryPerformance inventoryData={filteredInventory} settings={settings} />}
+                        {gSet.showWarehouseDistribution && <window.WarehouseDistribution inventoryData={filteredInventory} settings={settings} />}
+                    </div>
+                )}
             </div>
         </div>
     );

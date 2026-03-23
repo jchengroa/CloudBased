@@ -237,7 +237,7 @@ Snappier UI & Refined Interaction
 - Catalog Interactivity: Transformed Item List cards into fully clickable surfaces, allowing for instant 'tap-to-edit' inventory management.
 - Remove Image Logic: Integrated "Remove Photo" buttons across both Profile and Item forms to allow for instant asset resetting.
 
-Version 0.7.1 (March 23, 2026)
+Version 0.8.0 (March 23, 2026)
 
 Executive Insights & Dashboard Logic
 - Integrated Analytical Dashboard: Launched a high-level executive dashboard featuring real-time data visualization across 8 specialized logic blocks.
@@ -257,3 +257,17 @@ Catalog & Property Enhancements
 - Metadata Visibility: Updated Item List cards to display product descriptions, improving detail visibility without requiring a click.
 - Prompt Integration: Added a smart-resized description textarea to the Inventory Add/Edit modal.
 - Data Management Cleanup: Temporarily retired the "Import Inventory Data" stub from User Settings to streamline the interface for upcoming large-scale migration features.
+
+===============================================================
+
+Version 0.9.0 (March 23, 2026)
+
+Data Migration & Advanced Administration
+- Power Import Engine: Integrated the SheetJS library into the Admin Dashboard to support high-velocity bulk data migration from Google Sheets URLs and local Excel files.
+- Automated Data Mapping: Implemented specialized parsers for 'Items', 'Inventory', 'Receive', and 'Out' worksheets, which intelligently map spreadsheet headers to the system's Firestore schema.
+- SMART Data Transformation: Automatically derives unique companies as Suppliers (with blank contact record placeholders), auto-generates randomized transactional IDs (IN/OUT prefixes), and forces all mapped stock to the "Bulacan" warehouse as per organizational requirements.
+- System Factory Reset (Nuke): Developed a destructive data clearing feature in Global Settings. Protected by a mandatory "NUKE" string challenge and dual confirmations to prevent accidental erasing of inventory, suppliers, and transactional logs.
+- Universal Scrolling Architecture: Overhauled the layout-engine CSS to allow for seamless vertical scrolling across the entire application, specifically improving navigation in high-density areas like Inventory Overview, Arrivals, and Shipments.
+- Branding & Identity Synchronization: Fully decoupled the "CloudBased" branding from the dashboard, ensuring the document title bar and top-left header update in real-time to match the user's custom Company Name settings.
+- Permission Resilience: Implemented null-safe guards in the User Management permissions toggle to resolve a UI crash triggered by the Auditor role's limited access scope.
+- UI Layout Patch: Fixed the navigation indicator bar in the Admin Dashboard which was previously floating incorrectly due to a lack of relative positioning context.

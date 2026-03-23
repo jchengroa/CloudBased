@@ -55,8 +55,17 @@ window.AppDataHandler = (function () {
                     if (user && !currentUser) {
                         db.collection('users').doc(user.uid).get().then(doc => {
                             if (doc.exists) {
-                                currentUser = { ...doc.data(), uid: user.uid };
+                                let data = doc.data();
+                                // MIGRATION: Treat as Auditor if no role exists
+                                if (!data.role) data.role = 'Auditor';
+                                
+                                currentUser = { ...data, uid: user.uid };
                                 localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
+                                
+                                // Optional background update, fail silently if rules block it
+                                if (doc.data() && !doc.data().role) {
+                                    db.collection('users').doc(user.uid).set({ role: 'Auditor' }, { merge: true }).catch(() => {});
+                                }
                             }
                         }).catch(console.error);
                     }
@@ -111,7 +120,21 @@ window.AppDataHandler = (function () {
             const userData = snap.docs[0].data();
             const credential = await auth.signInWithEmailAndPassword(userData.email, password);
             
-            currentUser = { ...userData, uid: credential.user.uid };
+            // Standardizing role data for the session
+            const userProfile = { 
+                id: snap.docs[0].id,
+                ...userData, 
+                role: userData.role || 'Auditor', 
+                uid: credential.user.uid 
+            };
+            
+            // Background update to persist role only if missing - avoid failing if rules block it
+            if (!userData.role) {
+                db.collection('users').doc(userProfile.id).set({ role: 'Auditor' }, { merge: true })
+                  .catch(e => console.warn("Background role update blocked:", e.message));
+            }
+
+            currentUser = userProfile;
             localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
             return currentUser;
         },
@@ -123,15 +146,17 @@ window.AppDataHandler = (function () {
 
             const credential = await auth.createUserWithEmailAndPassword(userData.email, userData.password);
             const profile = {
+                uid:      credential.user.uid,
                 name:     userData.name,
                 username: userData.username,
                 email:    userData.email,
-                uid:      credential.user.uid,
+                role:     'Auditor', // Standardizing default role for new signups
                 createdAt: new Date().toISOString(),
                 settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: true }
             };
 
             await db.collection('users').doc(credential.user.uid).set(profile);
+            
             currentUser = profile;
             localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
             return currentUser;
@@ -199,6 +224,45 @@ window.AppDataHandler = (function () {
         saveSuppliers:  (d) => saveData('suppliers', d),
 
         // --- SYSTEM CONSTANTS ---
+        getUsers: async function() {
+            await initPromise;
+            // Only admins should call this in a secure environment; if rules block, it will throw
+            const usersRef = await db.collection('users').get();
+            return usersRef.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+
+        updateUserAccess: async function(uid, role, permissions) {
+            await initPromise;
+            await db.collection('users').doc(uid).update({ role, permissions });
+        },
+
+        getBranding: async function() {
+            await initPromise;
+            try {
+                const doc = await db.collection('settings').doc('branding').get();
+                if (doc.exists) return doc.data();
+            } catch(e) {}
+            return { companyName: 'CloudBased', logoUrl: '' };
+        },
+
+        saveBranding: async function(data) {
+            await initPromise;
+            await db.collection('settings').doc('branding').set(data, { merge: true });
+        },
+
+        getGlobalSettings: async function() {
+            await initPromise;
+            try {
+                const doc = await db.collection('settings').doc('global').get();
+                if (doc.exists) return doc.data();
+            } catch(e) {}
+            return { showTotalItems: true, showLowStock: true, showSuppliersOnly: true, showRecentArrivals: true, showRecentShipments: true, showCategoryPerformance: true, showWarehouseDistribution: true };
+        },
+
+        saveGlobalSettings: async function(data) {
+            await initPromise;
+            await db.collection('settings').doc('global').set(data, { merge: true });
+        },
         getUOMs: async function () {
             const defaults = ["Pieces", "Boxes", "Bags"];
             try {
