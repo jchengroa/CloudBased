@@ -31,10 +31,14 @@ const Icons = {
     UploadCloud: (p) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><polyline points="16 16 12 12 8 16"></polyline></svg>,
     Image: (p) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>,
     Link: (p) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>,
-    Globe: (p) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+    Globe: (p) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>,
+    AlertCircle: (p) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
+    Download: (p) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
 };
 
 // Global Exposure for components
+window.PlusIcon = Icons.Plus;
+window.TrashIcon = Icons.Trash;
 window.SearchIcon = Icons.Search;
 window.SortAZIcon = Icons.SortAZ;
 window.SortZAIcon = Icons.SortZA;
@@ -46,6 +50,8 @@ window.BoxIcon = Icons.Box;
 window.UsersIcon = Icons.Users;
 window.ArrowDownCircleIcon = Icons.ArrowDownCircle;
 window.ArrowUpCircleIcon = Icons.ArrowUpCircle;
+window.AlertIcon = Icons.Alert;
+window.AlertCircleIcon = Icons.AlertCircle;
 window.AlertTriangleIcon = Icons.AlertTriangle;
 window.PieChartIcon = Icons.PieChart;
 window.ActivityIcon = Icons.Activity;
@@ -53,12 +59,12 @@ window.DashboardIcon = Icons.Dashboard;
 window.ListIcon = Icons.List;
 window.LayersIcon = Icons.Layers;
 window.TruckIcon = Icons.Truck;
-window.TruckIcon = Icons.Truck;
 window.SettingsIcon = Icons.Settings;
 window.ShieldIcon = Icons.Shield;
 window.FileTextIcon = Icons.FileText;
 window.UploadCloudIcon = Icons.UploadCloud;
 window.ImageIcon = Icons.Image;
+window.DownloadIcon = Icons.Download;
 window.LinkIcon = Icons.Link;
 window.GlobeIcon = Icons.Globe;
 
@@ -66,6 +72,8 @@ window.GlobeIcon = Icons.Globe;
 const SortButton = ({ options = [], currentKey, onSort }) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const dropRef = React.useRef(null);
+
+    if (!options || options.length === 0) return null;
 
     React.useEffect(() => {
         const handleClickOutside = (e) => {
@@ -97,13 +105,13 @@ const SortButton = ({ options = [], currentKey, onSort }) => {
                 }}
             >
                 <Icons.Sort />
-                <span>{activeOption ? activeOption.label : 'Sort By'}</span>
+                <span>{activeOption ? activeOption.label : 'Sort Properties'}</span>
                 <Icons.ChevronDown />
             </button>
             
             {isOpen && (
                 <div className="sort-menu">
-                    <div style={{ padding: '0.5rem', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Organize Items</div>
+                    <div style={{ padding: '0.5rem', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Sort By Property</div>
                     {options.map(opt => (
                         <div
                             key={opt.key}
@@ -112,6 +120,7 @@ const SortButton = ({ options = [], currentKey, onSort }) => {
                         >
                             <span style={{ opacity: 0.7, display: 'flex' }}>{opt.icon || <Icons.Sort />}</span>
                             <span>{opt.label}</span>
+                            {currentKey === opt.key && <span style={{ marginLeft: 'auto', opacity: 0.5 }}>✓</span>}
                         </div>
                     ))}
                     {currentKey && (
@@ -121,7 +130,7 @@ const SortButton = ({ options = [], currentKey, onSort }) => {
                             style={{ color: 'var(--danger)', borderTop: '1px solid var(--border-color)', marginTop: '0.4rem', paddingTop: '0.6rem' }}
                         >
                             <Icons.Trash />
-                            <span>Reset Perspective</span>
+                            <span>Reset Sort</span>
                         </div>
                     )}
                 </div>
@@ -171,8 +180,19 @@ const TableToolbar = ({
     currentSortKey,
     onSortChange,
     viewSwitcher = null,
-    filterElement = null
+    filterElement = null,
+    user,
+    restrictionScope = "Items" // Items, Logs, Suppliers
 }) => {
+    const hasRes = (action) => {
+        if (!user || user.role === 'Administrator') return false;
+        return (user.restrictions || []).includes(`${action}${restrictionScope}`);
+    };
+
+    const canAdd    = !hasRes('Add');
+    const canEdit   = !hasRes('Edit');
+    const canRemove = !hasRes('Remove');
+
     return (
         <div className="management-toolbar">
             <div className="toolbar-left">
@@ -180,17 +200,24 @@ const TableToolbar = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <span className="selection-count">{selectedCount} row(s) selected</span>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button
-                                className="tool-btn edit-btn"
-                                onClick={onEdit}
-                                disabled={selectedCount !== 1}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: selectedCount !== 1 ? 0.4 : 1 }}
-                            >
-                                <Icons.Edit /> Edit
-                            </button>
-                            <button className="tool-btn remove-btn" onClick={onRemove} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Icons.Trash /> Remove
-                            </button>
+                            {canEdit && (
+                                <button
+                                    className="tool-btn edit-btn"
+                                    onClick={onEdit}
+                                    disabled={selectedCount !== 1}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: selectedCount !== 1 ? 0.4 : 1 }}
+                                >
+                                    <Icons.Edit /> Edit
+                                </button>
+                            )}
+                            {canRemove && (
+                                <button className="tool-btn remove-btn" onClick={onRemove} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Icons.Trash /> Remove
+                                </button>
+                            )}
+                            {!canEdit && !canRemove && (
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic', opacity: 0.6 }}>Modified access restricted</span>
+                            )}
                         </div>
                     </div>
                 ) : (
@@ -213,7 +240,7 @@ const TableToolbar = ({
                 )}
             </div>
             <div className="toolbar-right">
-                {selectedCount === 0 && (
+                {selectedCount === 0 && canAdd && (
                     <button className="tool-btn add-btn" onClick={onAdd} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Icons.Plus /> {addLabel}
                     </button>
@@ -288,6 +315,49 @@ const FormButtons = ({ confirmLabel = "Save Changes", isDanger = false, onClose,
     </div>
 );
 window.FormButtons = FormButtons;
+
+const StatusBadge = ({ type, value }) => {
+    let style = { padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '800' };
+    
+    if (type === 'role') {
+        if(value === 'Administrator') { style.background = 'rgba(16, 185, 129, 0.15)'; style.color = 'rgb(4, 120, 87)'; }
+        else if(value === 'Manager') { style.background = 'rgba(59, 130, 246, 0.15)'; style.color = 'rgb(29, 78, 216)'; }
+        else { style.background = 'rgba(245, 158, 11, 0.15)'; style.color = 'rgb(180, 83, 9)'; }
+    } else if (type === 'stock') {
+        const isReorder = value === 'Reorder' || value === 'To Restock';
+        const isInProcess = value === 'I' || value === 'In Progress' || value === 'Restocking (I)';
+        
+        if (isReorder) { style.background = 'rgba(239, 68, 68, 0.1)'; style.color = 'var(--danger)'; }
+        else if (isInProcess) { style.background = 'rgba(99, 102, 241, 0.1)'; style.color = 'var(--accent-color)'; }
+        else { style.background = 'rgba(16, 185, 129, 0.1)'; style.color = 'var(--success)'; }
+    } else if (type === 'simple') {
+        style.background = 'var(--hover-bg)';
+        style.color = 'var(--text-secondary)';
+    }
+
+    return <span style={style}>{value}</span>;
+};
+window.StatusBadge = StatusBadge;
+
+const GenericModal = ({ isOpen, onClose, title, children, width = "500px" }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="prompt-overlay" onClick={onClose}>
+            <div className="prompt-box" style={{ width, padding: '2.5rem', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <div>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0, color: 'var(--text-primary)' }}>{title}</h3>
+                    </div>
+                    <button onClick={onClose} style={{ background: 'var(--hover-bg)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', width: '32px', height: '32px', color: 'var(--text-secondary)' }}>
+                        <Icons.Close size={18} />
+                    </button>
+                </div>
+                {children}
+            </div>
+        </div>
+    );
+};
+window.GenericModal = GenericModal;
 
 // --- IMAGE UTILITY ---
 // Resizes and compresses images to fit within Firestore document limits (~1MB)

@@ -1,9 +1,13 @@
 /**
- * Aura AI: Cognitive Command Center
+ * InnoAssistant: Cognitive Command Center
  * Redesigned for elegance and high-end visual feedback.
  */
 
-const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onPerformAction }) => {
+const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onPerformAction, user }) => {
+    const hasRes = (action) => {
+        if (!user || user.role === 'Administrator') return false;
+        return (user.restrictions || []).includes(action);
+    };
     const [command, setCommand] = React.useState('');
     const [isThinking, setIsThinking] = React.useState(false);
     const [parsedResult, setParsedResult] = React.useState(null);
@@ -81,21 +85,69 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
     };
 
     return (
-        <div style={{ padding: '0 0 2rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '800', marginBottom: '0.5rem' }}>
-                    <span style={{
-                        background: 'var(--accent-color)',
-                        color: 'white',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        fontSize: '10px',
-                        letterSpacing: '0.05em'
-                    }}>AI</span>
-                    InnoAssistant
+        <div style={{ width: '100%', padding: '0 0 2rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+            {/* Top Section: Title (Centered) and Disclaimer (Right) */}
+            <div style={{
+                width: '100%',
+                maxWidth: '900px',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                marginBottom: '1.5rem',
+                paddingTop: '1rem'
+            }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '800', marginBottom: '0.4rem' }}>
+                        <span style={{
+                            background: 'var(--accent-color)',
+                            color: 'white',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            letterSpacing: '0.05em'
+                        }}>AI</span>
+                        InnoAssistant
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', opacity: 0.7, lineHeight: 1.4 }}>
+                        Neural Command Processing <br />
+                        via <strong>TensorFlow.js</strong> & <strong>Compromise.js</strong>
+                    </div>
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', opacity: 0.7 }}>
-                    Neural Command Processing via <strong>TensorFlow.js</strong> & <strong>Compromise.js</strong>
+
+                {/* The Disclaimer: Positioned to the right of the title on larger screens */}
+                <div className="innoassistant-disclaimer-box" style={{
+                    position: 'absolute',
+                    right: '-40px',
+                    top: '0',
+                    transform: 'translateX(100%)',
+                    width: '320px',
+                    background: 'rgba(99, 102, 241, 0.05)',
+                    padding: '1rem',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(99, 102, 241, 0.1)',
+                    textAlign: 'left'
+                }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.6rem' }}>
+                        <window.AlertTriangleIcon size={14} color="#6366f1" />
+                        <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: '#6366f1', letterSpacing: '0.05em' }}>Big Disclaimer</span>
+                    </div>
+                    <p style={{ fontSize: '0.75rem', margin: '0 0 0.6rem 0', color: 'var(--text-secondary)', fontWeight: '500' }}>
+                        This is NOT a Generative AI chatbot. It processes commands via local patterns and doesn't generate human like responses.
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem 0.6rem' }}>
+                        {[
+                            'Log Stock Arrivals',
+                            'Log Stock Shipments',
+                            'Query Low Stock',
+                            'Neural SKU Search'
+                        ].map(skill => (
+                            <div key={skill} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: 'var(--text-primary)', fontWeight: '600' }}>
+                                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#6366f1' }}></div>
+                                {skill}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -167,7 +219,7 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        animation: 'auraSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                        animation: 'innoAssistantSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards'
                     }}>
                         {parsedResult.error ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ef4444' }}>
@@ -196,9 +248,15 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                                         </div>
                                     </div>
                                 </div>
-                                <button className="auth-btn-primary" onClick={confirmAction} style={{ width: 'auto', padding: '0.5rem 1.5rem', fontWeight: '700', fontSize: '0.85rem' }}>
-                                    Execute Commit
-                                </button>
+                                {!hasRes('AddLogs') ? (
+                                    <button className="auth-btn-primary" onClick={confirmAction} style={{ width: 'auto', padding: '0.5rem 1.5rem', fontWeight: '700', fontSize: '0.85rem' }}>
+                                        Execute Commit
+                                    </button>
+                                ) : (
+                                    <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '700', fontStyle: 'italic', background: 'rgba(239, 68, 68, 0.05)', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                                        Action Restricted: Log Clearance Required
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>
@@ -206,7 +264,7 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
             </div>
 
             <style>{`
-                @keyframes auraSlideDown {
+                @keyframes innoAssistantSlideDown {
                     from { transform: translateY(-20px); opacity: 0; }
                     to { transform: translateY(0); opacity: 1; }
                 }

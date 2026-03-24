@@ -1,6 +1,9 @@
 const LowStockCard = ({ inventoryData, settings }) => {
-    const getMin = (item) => item.minLevel ? parseInt(item.minLevel) : (settings?.lowStockThreshold || 1000);
-    const lowCount = inventoryData.filter(i => parseInt(i.quantity) < getMin(i)).length;
+    const getMin = (item) => {
+        if (settings?.isThresholdEnabled && settings?.lowStockThreshold) return parseFloat(settings.lowStockThreshold);
+        return parseFloat(item.optimalStock) || 0;
+    };
+    const lowCount = inventoryData.filter(i => (parseFloat(i.quantity) || 0) < getMin(i)).length;
     
     return (
         <div className="dashboard-card">

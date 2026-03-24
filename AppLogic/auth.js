@@ -9,7 +9,7 @@ const Auth = ({ onLoginSuccess }) => {
     const oobCode = params.get('oobCode');
 
     // 'login', 'signup', 'forgot', 'change', 'resetNewPassword'
-    const [view, setView] = React.useState(queryMode === 'resetPassword' ? 'resetNewPassword' : 'login'); 
+    const [view, setView] = React.useState(queryMode === 'resetPassword' ? 'resetNewPassword' : 'login');
     const [branding, setBranding] = React.useState(window.AppDataHandler.getBrandingSync());
     const [showPassword, setShowPassword] = React.useState(false);
     const [oldPass, setOldPass] = React.useState('');
@@ -91,23 +91,51 @@ const Auth = ({ onLoginSuccess }) => {
         }
     };
 
+    const [confirmDialog, setConfirmDialog] = React.useState(null); // { title: '', message: '', onConfirm: fn }
+
     const handleForgotPassword = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         if (!formData.identifier) {
             setError("Please enter your username or email.");
             return;
         }
-        setLoading(true);
-        try {
-            await window.AppDataHandler.sendPasswordResetEmail(formData.identifier);
-            setError('');
-            alert("If the account exists, a password reset link has been sent to your email.");
-            setView('login');
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
+
+        setConfirmDialog({
+            title: 'Send Reset Link?',
+            message: (
+                <div style={{ textAlign: 'left', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                    <p>We will send a password reset link to your registered email address.</p>
+                    <div style={{ background: 'var(--hover-bg)', padding: '1rem', borderRadius: '12px', marginTop: '1rem', border: '1px solid var(--border-color)' }}>
+                        <p style={{ fontWeight: '700', color: 'var(--accent-color)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            Important Note:
+                        </p>
+                        <ul style={{ paddingLeft: '1.25rem', margin: 0 }}>
+                            <li>Please use this feature <strong>conservatively</strong>. Firebase limits free accounts to 10 emails per day.</li>
+                            <li>If you don't see the email, check your <strong>Spam or Junk</strong> folder.</li>
+                        </ul>
+                    </div>
+                </div>
+            ),
+            onConfirm: async () => {
+                setLoading(true);
+                try {
+                    await window.AppDataHandler.sendPasswordResetEmail(formData.identifier);
+                    setError('');
+                    setConfirmDialog({
+                        title: 'Link Sent!',
+                        message: 'If an account matches that identifier, a reset link is on its way. Please check your inbox (and spam folder).',
+                        onConfirm: () => setView('login'),
+                        confirmLabel: 'Back to Login',
+                        hideCancel: true
+                    });
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     const handleResetPassword = async (e) => {
@@ -123,8 +151,15 @@ const Auth = ({ onLoginSuccess }) => {
         setLoading(true);
         try {
             await window.AppDataHandler.confirmPasswordReset(oobCode, formData.password);
-            alert("Password has been reset successfully. You can now sign in.");
-            window.location.href = window.location.pathname; // strip query params
+            setConfirmDialog({
+                title: 'Password Reset!',
+                message: 'Your password has been successfully updated. You can now sign in with your new credentials.',
+                onConfirm: () => {
+                   window.location.href = window.location.pathname; 
+                },
+                confirmLabel: 'Proceed to Login',
+                hideCancel: true
+            });
         } catch (err) {
             setError(err.message);
         } finally {
@@ -183,7 +218,7 @@ const Auth = ({ onLoginSuccess }) => {
             <div className="auth-box">
                 <div className="auth-header">
                     {branding.logoUrl ? (
-                         <div style={{ height: '48px', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+                        <div style={{ height: '48px', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
                             <img src={branding.logoUrl} alt="Logo" style={{ maxHeight: '100%', objectFit: 'contain' }} />
                         </div>
                     ) : (
@@ -192,8 +227,6 @@ const Auth = ({ onLoginSuccess }) => {
                         </div>
                     )}
                     <div className="auth-subtitle">
-                        {view === 'login' && 'Welcome back to perfection.'}
-                        {view === 'signup' && 'Begin your journey with us.'}
                         {view === 'forgot' && 'Reset your password.'}
                         {view === 'change' && 'Change your password.'}
                         {view === 'resetNewPassword' && 'Create a new password.'}
@@ -201,12 +234,12 @@ const Auth = ({ onLoginSuccess }) => {
                 </div>
 
                 {error && (
-                    <div style={{ 
-                        background: 'rgba(239, 68, 68, 0.1)', 
-                        color: 'var(--danger)', 
-                        padding: '0.75rem 1rem', 
-                        borderRadius: '12px', 
-                        fontSize: '0.85rem', 
+                    <div style={{
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: 'var(--danger)',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '12px',
+                        fontSize: '0.85rem',
                         marginBottom: '1.5rem',
                         border: '1px solid rgba(239, 68, 68, 0.2)',
                         fontWeight: '500'
@@ -219,11 +252,11 @@ const Auth = ({ onLoginSuccess }) => {
                     {view === 'signup' && (
                         <div className="auth-input-group">
                             <label className="auth-label">Full Name</label>
-                            <input 
-                                type="text" 
-                                name="name" 
-                                className="auth-input" 
-                                placeholder="John Doe" 
+                            <input
+                                type="text"
+                                name="name"
+                                className="auth-input"
+                                placeholder="John Doe"
                                 value={formData.name}
                                 onChange={handleChange}
                                 required={view === 'signup'}
@@ -234,11 +267,11 @@ const Auth = ({ onLoginSuccess }) => {
                     {(view === 'login' || view === 'signup') && (
                         <div className="auth-input-group">
                             <label className="auth-label">Username</label>
-                            <input 
-                                type="text" 
-                                name="username" 
-                                className="auth-input" 
-                                placeholder="johndoe" 
+                            <input
+                                type="text"
+                                name="username"
+                                className="auth-input"
+                                placeholder="johndoe"
                                 value={formData.username}
                                 onChange={handleChange}
                                 required={view === 'login' || view === 'signup'}
@@ -249,11 +282,11 @@ const Auth = ({ onLoginSuccess }) => {
                     {view === 'signup' && (
                         <div className="auth-input-group">
                             <label className="auth-label">Email Address</label>
-                            <input 
-                                type="email" 
-                                name="email" 
-                                className="auth-input" 
-                                placeholder="john@example.com" 
+                            <input
+                                type="email"
+                                name="email"
+                                className="auth-input"
+                                placeholder="john@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
                                 required={view === 'signup'}
@@ -264,11 +297,11 @@ const Auth = ({ onLoginSuccess }) => {
                     {view === 'forgot' && (
                         <div className="auth-input-group">
                             <label className="auth-label">Username or Email</label>
-                            <input 
-                                type="text" 
-                                name="identifier" 
-                                className="auth-input" 
-                                placeholder="johndoe or john@example.com" 
+                            <input
+                                type="text"
+                                name="identifier"
+                                className="auth-input"
+                                placeholder="johndoe or john@example.com"
                                 value={formData.identifier}
                                 onChange={handleChange}
                                 required={view === 'forgot'}
@@ -277,7 +310,7 @@ const Auth = ({ onLoginSuccess }) => {
                     )}
                     {view === 'change' && (
                         <>
-                           <div className="auth-input-group">
+                            <div className="auth-input-group">
                                 <label className="auth-label">Username</label>
                                 <input type="text" name="username" className="auth-input" placeholder="johndoe" value={formData.username} onChange={handleChange} required />
                             </div>
@@ -306,11 +339,11 @@ const Auth = ({ onLoginSuccess }) => {
                                 )}
                             </div>
                             <div className="auth-input-wrapper">
-                                <input 
-                                    type={showPassword ? 'text' : 'password'} 
-                                    name="password" 
-                                    className="auth-input" 
-                                    placeholder="••••••••" 
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    name="password"
+                                    className="auth-input"
+                                    placeholder="••••••••"
                                     value={formData.password}
                                     onChange={handleChange}
                                     required={view === 'login' || view === 'signup' || view === 'resetNewPassword'}
@@ -325,11 +358,11 @@ const Auth = ({ onLoginSuccess }) => {
                     {(view === 'signup' || view === 'resetNewPassword') && (
                         <div className="auth-input-group">
                             <label className="auth-label">Confirm Password</label>
-                            <input 
-                                type="password" 
-                                name="confirmPassword" 
-                                className="auth-input" 
-                                placeholder="••••••••" 
+                            <input
+                                type="password"
+                                name="confirmPassword"
+                                className="auth-input"
+                                placeholder="••••••••"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required={view === 'signup' || view === 'resetNewPassword'}
@@ -349,9 +382,9 @@ const Auth = ({ onLoginSuccess }) => {
 
                 {view === 'forgot' && (
                     <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                         <button className="auth-btn-text" style={{ fontSize: '0.85rem' }} onClick={() => setView('change')}>
-                             Know your old password? Change it manually
-                         </button>
+                        <button className="auth-btn-text" style={{ fontSize: '0.85rem' }} onClick={() => setView('change')}>
+                            Know your old password? Change it manually
+                        </button>
                     </div>
                 )}
 
@@ -368,6 +401,23 @@ const Auth = ({ onLoginSuccess }) => {
                     )}
                 </div>
             </div>
+
+            {confirmDialog && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+                    <div className="fade-in" style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '2.5rem', width: '100%', maxWidth: '500px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '1rem', color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>{confirmDialog.title}</h3>
+                        <div style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', fontSize: '1rem' }}>{confirmDialog.message}</div>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            {!confirmDialog.hideCancel && (
+                                <button onClick={() => setConfirmDialog(null)} style={{ background: 'var(--hover-bg)', color: 'var(--text-primary)', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+                            )}
+                            <button onClick={() => { if (confirmDialog.onConfirm) confirmDialog.onConfirm(); setConfirmDialog(null); }} style={{ background: 'var(--accent-color)', color: 'white', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.3)' }}>
+                                {confirmDialog.confirmLabel || 'Confirm'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

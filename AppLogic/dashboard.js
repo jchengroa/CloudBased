@@ -1,6 +1,6 @@
-const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, settings, onPerformAction, openPrompt, globalSettings = {} }) => {
+const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, settings, onPerformAction, openPrompt, globalSettings = {}, user }) => {
     const [activeWarehouseFilter, setActiveWarehouseFilter] = React.useState('All');
-    const [activeView, setActiveView] = React.useState('statistics');
+    const [activeView, setActiveView] = React.useState('overview');
 
 
     // Default config assuming everything is ON if not specified
@@ -48,9 +48,8 @@ const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, setting
                         activeView={activeView}
                         setActiveView={setActiveView}
                         options={[
-                            { key: 'statistics', label: 'Statistics' },
                             { key: 'overview', label: 'Overview' },
-                            { key: 'aiAct', label: '(AI) Act' }
+                            { key: 'aiAct', label: 'Act' }
                         ]}
                     />
                 </div>
@@ -72,8 +71,8 @@ const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, setting
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem' }} className="fade-in">
-                {/* 1. Statistics View */}
-                {activeView === 'statistics' && (
+                {/* 1. Overview View */}
+                {activeView === 'overview' && (
                     <>
                         {(gSet.showTotalItems || gSet.showLowStock || gSet.showSuppliersOnly) && (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
@@ -88,18 +87,14 @@ const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, setting
                                 {gSet.showWarehouseDistribution && <window.WarehouseDistribution inventoryData={filteredInventory} settings={settings} />}
                             </div>
                         )}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
+                            {gSet.showRecentArrivals && <window.RecentArrivalsList inputLogs={filteredInputs} inventoryData={inventoryData} />}
+                            {gSet.showRecentShipments && <window.RecentShipmentsList outputLogs={filteredOutputs} inventoryData={inventoryData} />}
+                        </div>
                     </>
                 )}
 
-                {/* 2. Overview View */}
-                {activeView === 'overview' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
-                        {gSet.showRecentArrivals && <window.RecentArrivalsList inputLogs={filteredInputs} inventoryData={inventoryData} />}
-                        {gSet.showRecentShipments && <window.RecentShipmentsList outputLogs={filteredOutputs} inventoryData={inventoryData} />}
-                    </div>
-                )}
-
-                {/* 3. (AI) Act View */}
+                {/* 2. Act View */}
                 {activeView === 'aiAct' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         {gSet.showInnoAssistant && <window.InnoAssistant
@@ -108,6 +103,7 @@ const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, setting
                             inputLogs={filteredInputs}
                             supplierData={supplierData}
                             onPerformAction={onPerformAction}
+                            user={user}
                         />}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
                             {gSet.showPredictiveReplenish && <window.PredictiveReplenish inventoryData={filteredInventory} outputLogs={filteredOutputs} />}

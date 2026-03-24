@@ -9,43 +9,36 @@ const InventoryTable = ({
     inventoryData = [],
     inputLogs = [],
     outputLogs = [],
-    dbError
+    dbError,
+    user,
+    lowStockThreshold,
+    isThresholdEnabled
 }) => {
-
+    const { StatusBadge } = window;
     const [selectedRows, setSelectedRows]   = React.useState([]);
     const [searchQuery,  setSearchQuery]    = React.useState('');
     const [activeView,   setActiveView]     = React.useState('overview');
-    const [sortKey,      setSortKey]        = React.useState('');
     const [activeWarehouseFilter, setActiveWarehouseFilter] = React.useState('All');
 
     React.useEffect(() => {
         setSelectedRows([]);
         setSearchQuery('');
-        setSortKey('');
     }, [activeView, inventoryData]);
 
     const isOverview = activeView === 'overview';
     const isInput    = activeView === 'input';
 
-    const SORT_OPTIONS = isOverview ? [
-        { key: 'name-asc',  label: 'Name A-Z', icon: <window.SortAZIcon /> },
-        { key: 'name-desc', label: 'Name Z-A', icon: <window.SortZAIcon /> },
-        { key: 'qty-low',   label: 'Stock: Low → High', icon: <window.TrendingDownIcon /> },
-        { key: 'qty-high',  label: 'Stock: High → Low', icon: <window.TrendingUpIcon /> }
-    ] : [
-        { key: 'date-new',  label: 'Newest Log', icon: <window.ArrowDownCircleIcon /> },
-        { key: 'date-old',  label: 'Oldest Log', icon: <window.ArrowUpCircleIcon /> },
-        { key: 'qty-high',  label: 'Quantity: High', icon: <window.TrendingUpIcon /> },
-        { key: 'qty-low',   label: 'Quantity: Low', icon: <window.TrendingDownIcon /> }
-    ];
-
-    const processed = React.useMemo(() => {
+    const baseProcessed = React.useMemo(() => {
         let base = [];
         if (isOverview) {
-            base = inventoryData.map(i => ({
-                ...i,
-                status: (parseFloat(i.quantity) || 0) < (parseFloat(i.optimalStock) || 0) ? 'Reorder' : 'Okay'
-            }));
+            base = inventoryData.map(i => {
+                const stock = parseFloat(i.quantity) || 0;
+                const threshold = (isThresholdEnabled && lowStockThreshold) ? parseFloat(lowStockThreshold) : (parseFloat(i.optimalStock) || 0);
+                return {
+                    ...i,
+                    status: stock < threshold ? 'Reorder' : 'Okay'
+                };
+            });
         } else {
             // Logs don't have warehouse property natively, lookup from inventory
             const logs = isInput ? inputLogs : outputLogs;
@@ -57,24 +50,15 @@ const InventoryTable = ({
 
         const sq = searchQuery.toLowerCase();
         let filtered = base.filter(i => {
-            const matchesSearch = (i.name || i.itemName || '').toLowerCase().includes(sq) || (i.id || i.itemCode || '').toLowerCase().includes(sq);
+            const matchesSearch = (i.name || i.productName || i.itemName || '').toLowerCase().includes(sq) || (i.id || i.itemCode || '').toLowerCase().includes(sq);
             const matchesWarehouse = activeWarehouseFilter === 'All' || i.warehouse === activeWarehouseFilter;
             return matchesSearch && matchesWarehouse;
         });
 
-        if (sortKey) {
-            filtered.sort((a, b) => {
-                if (sortKey === 'name-asc') return (a.name || '').localeCompare(b.name || '');
-                if (sortKey === 'name-desc') return (b.name || '').localeCompare(a.name || '');
-                if (sortKey === 'qty-low') return (parseFloat(a.quantity) || 0) - (parseFloat(b.quantity) || 0);
-                if (sortKey === 'qty-high') return (parseFloat(b.quantity) || 0) - (parseFloat(a.quantity) || 0);
-                if (sortKey === 'date-new') return new Date(b.date || 0) - new Date(a.date || 0);
-                if (sortKey === 'date-old') return new Date(a.date || 0) - new Date(b.date || 0);
-                return 0;
-            });
-        }
         return filtered;
-    }, [isOverview, isInput, inventoryData, inputLogs, outputLogs, searchQuery, activeWarehouseFilter, sortKey]);
+    }, [isOverview, isInput, inventoryData, inputLogs, outputLogs, searchQuery, activeWarehouseFilter]);
+
+    const { sortedData: processed, requestSort, SortIndicator } = window.useSorting(baseProcessed, isOverview ? 'name' : 'date', isOverview ? 'asc' : 'desc');
 
     const toggleRow = (id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
     
@@ -104,10 +88,10 @@ const InventoryTable = ({
                 addLabel={isOverview ? 'Add Product' : 'Log Transaction'}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
-                sortOptions={SORT_OPTIONS}
-                currentSortKey={sortKey}
-                onSortChange={setSortKey}
+                sortOptions={[]}
                 filterElement={null}
+                user={user}
+                restrictionScope={isOverview ? 'Items' : 'Logs'}
                 viewSwitcher={(
                     <window.ViewSwitcher 
                         activeView={activeView} 
@@ -123,14 +107,14 @@ const InventoryTable = ({
 
             <table className="inventory-table">
                 <thead>
-                    <tr className="header-row" style={{ cursor: 'pointer' }} onClick={() => {
-                        if (selectedRows.length === processed.length && processed.length > 0) {
-                            setSelectedRows([]);
-                        } else {
-                            setSelectedRows(processed.map(p => p.id));
-                        }
-                    }}>
-                        <th className="checkbox-col" style={{ textAlign: 'center' }}>
+                    <tr className="header-row">
+                        <th className="checkbox-col" style={{ textAlign: 'center' }} onClick={() => {
+                            if (selectedRows.length === processed.length && processed.length > 0) {
+                                setSelectedRows([]);
+                            } else {
+                                setSelectedRows(processed.map(p => p.id));
+                            }
+                        }}>
                              <input 
                                 type="checkbox" 
                                 checked={selectedRows.length === processed.length && processed.length > 0} 
@@ -140,23 +124,23 @@ const InventoryTable = ({
                         </th>
                         {isOverview ? (
                             <>
-                                <th>Item Code</th>
-                                <th>Product Name</th>
-                                <th>Category</th>
-                                <th>Stock on Hand</th>
-                                <th>Optimal Stock</th>
-                                <th>Status</th>
-                                <th>Restocked?</th>
-                                <th>Warehouse</th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('id')}>Item Code <SortIndicator columnKey="id" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('name')}>Product Name <SortIndicator columnKey="name" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('category')}>Category <SortIndicator columnKey="category" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('quantity')}>Stock on Hand <SortIndicator columnKey="quantity" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('optimalStock')}>Optimal Stock <SortIndicator columnKey="optimalStock" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('status')}>Status <SortIndicator columnKey="status" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('isRestocked')}>Restocked? <SortIndicator columnKey="isRestocked" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('warehouse')}>Warehouse <SortIndicator columnKey="warehouse" /></th>
                             </>
                         ) : (
                             <>
-                                <th>TXN ID</th>
-                                <th>Item Code</th>
-                                <th>Qty Moved</th>
-                                <th>Date</th>
-                                <th>Handler / Supplier</th>
-                                <th>Batch / LOT</th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('transactionId')}>TXN ID <SortIndicator columnKey="transactionId" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('itemCode')}>Item Code <SortIndicator columnKey="itemCode" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('quantity')}>Qty Moved <SortIndicator columnKey="quantity" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('date')}>Date <SortIndicator columnKey="date" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('supplier')}>Handler / Supplier <SortIndicator columnKey="supplier" /></th>
+                                <th style={{ cursor: 'pointer' }} onClick={() => requestSort('batchLot')}>Batch / LOT <SortIndicator columnKey="batchLot" /></th>
                             </>
                         )}
                     </tr>
@@ -172,14 +156,14 @@ const InventoryTable = ({
                                     <>
                                         <td className="item-id">{item.id}</td>
                                         <td style={{ fontWeight: '600' }}>{item.name}</td>
-                                        <td><span className="status-badge" style={{ background: 'var(--hover-bg)' }}>{item.category}</span></td>
+                                        <td><StatusBadge type="simple" value={item.category} /></td>
                                         <td style={{ fontWeight: '700' }}>{item.quantity} <span style={{ fontSize: '0.7em', opacity: 0.6 }}>{item.uom}</span></td>
-                                        <td>{item.optimalStock || 0}</td>
-                                        <td><span className={`status-badge ${item.status === 'Reorder' ? 'reorder' : 'okay'}`}>{item.status}</span></td>
-                                        <td><span className="status-badge" style={{ 
-                                            background: item.isRestocked === 'Yes' ? 'rgba(16, 185, 129, 0.1)' : (item.isRestocked === 'I' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(239, 68, 68, 0.1)'), 
-                                            color: item.isRestocked === 'Yes' ? 'var(--success)' : (item.isRestocked === 'I' ? 'var(--accent-color)' : 'var(--danger)') 
-                                        }}>{item.isRestocked || 'No'}</span></td>
+                                        <td style={{ color: (isThresholdEnabled && lowStockThreshold) ? 'var(--accent-color)' : 'inherit' }}>
+                                            {(isThresholdEnabled && lowStockThreshold) ? lowStockThreshold : (item.optimalStock || 0)}
+                                            {(isThresholdEnabled && lowStockThreshold) && <span style={{ fontSize: '0.65rem', display: 'block', opacity: 0.7 }}>(Global)</span>}
+                                        </td>
+                                        <td><StatusBadge type="stock" value={item.status} /></td>
+                                        <td><StatusBadge type="stock" value={item.isRestocked === 'Yes' ? 'Restocked' : (item.isRestocked === 'I' ? 'Restock (I)' : 'To Restock')} /></td>
                                         <td>{item.warehouse}</td>
                                     </>
                                 ) : (

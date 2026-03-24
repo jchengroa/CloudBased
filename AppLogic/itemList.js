@@ -3,29 +3,46 @@
  * A premium card-based display for the product catalog.
  */
 
-const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresholdEnabled }) => {
+const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresholdEnabled, user }) => {
+    const { 
+        PlusIcon, 
+        SearchIcon, 
+        BoxIcon, 
+        ActivityIcon, 
+        AlertTriangleIcon, 
+        TruckIcon,
+        SortButton,
+        StatusBadge
+    } = window;
+
+    const hasRes = (action) => {
+        if (!user || user.role === 'Administrator') return false;
+        return (user.restrictions || []).includes(action);
+    };
     const [searchQuery, setSearchQuery] = React.useState('');
-    const [sortKey, setSortKey] = React.useState('name-asc');
     const [filterCategory, setFilterCategory] = React.useState('All');
 
     // Categories for filter
     const categories = ['All', ...new Set(inventoryData.map(i => i.category).filter(Boolean))].sort();
 
-    const applySort = (data) => {
-        const arr = [...data];
-        if (sortKey === 'name-asc') return arr.sort((a, b) => a.name.localeCompare(b.name));
-        if (sortKey === 'name-desc') return arr.sort((b, a) => a.name.localeCompare(b.name));
-        if (sortKey === 'stock-low') return arr.sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
-        if (sortKey === 'stock-high') return arr.sort((b, a) => (a.quantity || 0) - (b.quantity || 0));
-        return arr;
-    };
+    // Base filtered results (without sorting yet)
+    const baseFiltered = React.useMemo(() => {
+        return inventoryData.filter(item => {
+            const sq = searchQuery.toLowerCase();
+            const matchesSearch = item.name.toLowerCase().includes(sq) || (item.id || '').toLowerCase().includes(sq);
+            const matchesCat = filterCategory === 'All' || item.category === filterCategory;
+            return matchesSearch && matchesCat;
+        });
+    }, [inventoryData, searchQuery, filterCategory]);
 
-    const filtered = applySort(inventoryData.filter(item => {
-        const sq = searchQuery.toLowerCase();
-        const matchesSearch = item.name.toLowerCase().includes(sq) || (item.id || '').toLowerCase().includes(sq);
-        const matchesCat = filterCategory === 'All' || item.category === filterCategory;
-        return matchesSearch && matchesCat;
-    }));
+    const { sortedData: filtered, requestSort, sortConfig, SortIndicator } = window.useSorting(baseFiltered, 'name', 'asc');
+
+    const SORT_OPTIONS = [
+        { key: 'name', label: 'Product Name', icon: <BoxIcon style={{width:16, height:16}} /> },
+        { key: 'quantity', label: 'Stock on Hand', icon: <ActivityIcon style={{width:16, height:16}} /> },
+        { key: 'status', label: 'Stock Status', icon: <AlertTriangleIcon style={{width:16, height:16}} /> },
+        { key: 'isRestocked', label: 'Restock Progress', icon: <TruckIcon style={{width:16, height:16}} /> }
+    ];
 
     return (
         <div className="item-list-container">
@@ -52,15 +69,20 @@ const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresho
                 </select>
 
                 <SortButton 
-                    options={[
-                        { key: 'name-asc', label: 'Name A-Z', icon: <SortAZIcon /> },
-                        { key: 'name-desc', label: 'Name Z-A', icon: <SortZAIcon /> },
-                        { key: 'stock-low', label: 'Low Stock First', icon: <TrendingDownIcon /> },
-                        { key: 'stock-high', label: 'High Stock First', icon: <TrendingUpIcon /> }
-                    ]}
-                    currentKey={sortKey}
-                    onSort={setSortKey}
+                    options={SORT_OPTIONS}
+                    currentKey={sortConfig.key}
+                    onSort={requestSort}
                 />
+
+                {!hasRes('AddItems') && (
+                    <button 
+                        className="auth-btn-primary" 
+                        style={{ padding: '0.6rem 1.25rem', margin: 0, width: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }} 
+                        onClick={() => openPrompt('New Item', 'add-item')}
+                    >
+                        <PlusIcon size={18} /> Add Product
+                    </button>
+                )}
             </div>
 
             {filtered.length === 0 ? (
@@ -72,13 +94,13 @@ const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresho
                 <div className="item-card-grid">
                     {filtered.map(item => {
                         const stockOnHand = parseFloat(item.quantity) || 0;
-                        const optimalStock = parseFloat(item.optimalStock) || 0; 
-                        const isLow = stockOnHand < optimalStock;
+                        const effectiveOptimal = (isThresholdEnabled && lowStockThreshold) ? parseFloat(lowStockThreshold) : (parseFloat(item.optimalStock) || 0);
+                        const isLow = stockOnHand < effectiveOptimal;
                         const status = isLow ? 'Reorder' : 'Okay';
                         const statusClass = isLow ? 'reorder' : 'okay';
 
                         return (
-                            <div key={item.id} className="item-card" onClick={() => openPrompt('Edit Inventory Item', 'edit-item', [item.id])} style={{ cursor: 'pointer' }}>
+                            <div key={item.id} className="item-card" onClick={() => openPrompt('Product Insights', 'product-stats', [item.id])} style={{ cursor: 'pointer' }}>
                                 <div className="item-image-wrapper">
                                     <img 
                                         src={item.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=random&size=200`} 
@@ -86,13 +108,8 @@ const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresho
                                         className="item-image"
                                     />
                                     <div className="item-status-overlay" style={{ display: 'flex', gap: '0.4rem' }}>
-                                        <span className={`status-badge ${statusClass}`}>{status}</span>
-                                        <span className="status-badge" style={{ 
-                                            background: item.isRestocked === 'Yes' ? 'rgba(16, 185, 129, 0.8)' : (item.isRestocked === 'I' ? 'rgba(99, 102, 241, 0.8)' : 'rgba(239, 68, 68, 0.8)'), 
-                                            color: 'white' 
-                                        }}>
-                                            {item.isRestocked === 'Yes' ? 'Restocked' : (item.isRestocked === 'I' ? 'Restocking (I)' : 'To Restock')}
-                                        </span>
+                                        <StatusBadge type="stock" value={status} />
+                                        <StatusBadge type="stock" value={item.isRestocked === 'Yes' ? 'Restocked' : (item.isRestocked === 'I' ? 'Restocking (I)' : 'To Restock')} />
                                     </div>
                                 </div>
                                 <div className="item-details-box">
@@ -101,15 +118,17 @@ const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresho
                                             <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>{item.name}</h3>
                                             <div className="item-code-tag">{item.id || 'N/A'} • {item.category || 'Category'}</div>
                                         </div>
-                                        <button 
-                                            title="Edit Item"
-                                            onClick={() => openPrompt('Edit Inventory Item', 'edit-item', [item.id])} 
-                                            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', opacity: 0.5, padding: '0.2rem', display: 'flex' }}
-                                            onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.color = 'var(--accent-color)'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.opacity = 0.5; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                                        >
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
-                                        </button>
+                                        {!hasRes('EditItems') && (
+                                            <button 
+                                                title="Edit Item"
+                                                onClick={(e) => { e.stopPropagation(); openPrompt('Edit Inventory Item', 'edit-item', [item.id]); }} 
+                                                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', opacity: 0.5, padding: '0.2rem', display: 'flex' }}
+                                                onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.color = 'var(--accent-color)'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.opacity = 0.5; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                                            >
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                                            </button>
+                                        )}
                                     </div>
                                     <p className="item-desc">{item.description || 'No description available for this product.'}</p>
                                     
@@ -120,7 +139,10 @@ const ItemList = ({ inventoryData = [], openPrompt, lowStockThreshold, isThresho
                                         </div>
                                         <div style={{ borderLeft: '1px solid rgba(255,255,255,0.05)', paddingLeft: '0.75rem' }}>
                                             <div className="stock-label">Optimal Stock</div>
-                                            <div className="stock-val">{optimalStock}</div>
+                                            <div className="stock-val" style={{ color: (isThresholdEnabled && lowStockThreshold) ? 'var(--accent-color)' : 'inherit' }}>
+                                                {effectiveOptimal}
+                                                {(isThresholdEnabled && lowStockThreshold) && <span style={{ fontSize: '0.65rem', display: 'block', opacity: 0.7 }}>(Global)</span>}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

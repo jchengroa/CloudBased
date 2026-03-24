@@ -42,6 +42,7 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
     const [theme, setTheme] = React.useState(user.settings?.theme || 'light');
     const [themeColor, setThemeColor] = React.useState(user.settings?.themeColor || '#4f46e5');
     const [threshold, setThreshold] = React.useState(user.settings?.lowStockThreshold || '');
+    const [isThresholdEnabled, setIsThresholdEnabled] = React.useState(user.settings?.isThresholdEnabled ?? false);
 
     // Auth Edit Modal Overlay State
     const [authAction, setAuthAction] = React.useState(null); // 'editProfile' or 'changePassword' or null
@@ -52,6 +53,7 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
     const [success, setSuccess] = React.useState('');
+    const [confirmDialog, setConfirmDialog] = React.useState(null); // { title: '', message: '', onConfirm: fn }
 
     // Handlers
     const showMessage = (msg, isErr = false) => {
@@ -82,10 +84,10 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
         finally { setLoading(false); }
     };
 
-    const handleSaveSystemSettings = async (mode = theme, color = themeColor) => {
+    const handleSaveSystemSettings = async (mode = theme, color = themeColor, enabled = isThresholdEnabled, val = threshold) => {
         setLoading(true);
         try {
-            const newSettings = { ...user.settings, theme: mode, themeColor: color, lowStockThreshold: parseFloat(threshold) || '' };
+            const newSettings = { ...user.settings, theme: mode, themeColor: color, lowStockThreshold: parseFloat(val) || '', isThresholdEnabled: enabled };
             await window.AppDataHandler.saveSettings(newSettings);
             const updated = { ...user, settings: newSettings };
             onUpdateUser(updated);
@@ -104,14 +106,24 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
         setThemeColor(newColor);
         document.documentElement.setAttribute('data-theme', newMode);
         document.documentElement.style.setProperty('--accent-color', newColor);
-        handleSaveSystemSettings(newMode, newColor);
+        handleSaveSystemSettings(newMode, newColor, isThresholdEnabled, threshold);
+    };
+
+    const updateThresholdSettings = (enabled, val = threshold) => {
+        setIsThresholdEnabled(enabled);
+        setThreshold(val);
+        handleSaveSystemSettings(theme, themeColor, enabled, val);
     };
 
     const handleClearCache = () => {
-        if (confirm("This will clear your local session and force a resync with Firestore. Continue?")) {
-            localStorage.clear();
-            location.reload();
-        }
+        setConfirmDialog({
+            title: 'Clear Local Storage?',
+            message: 'This will remove your local session and cached preferences. You will need to log in again to resync with the cloud database. Continue?',
+            onConfirm: () => {
+                localStorage.clear();
+                location.reload();
+            }
+        });
     };
 
     return (
@@ -192,29 +204,46 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                 </SettingsCard>
 
                 <SettingsCard icon={<UIIcons.Activity size={22} />} title="Inventory Settings">
-                    <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Global Stock Threshold</div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Override all individual minimum stock levels with a single global threshold. Leave empty to use individual MSL values.</div>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <input type="number" className="auth-input" placeholder="e.g., 1000" value={threshold} onChange={e => setThreshold(e.target.value)} style={{ maxWidth: '300px' }} />
-                        <button onClick={handleSaveSystemSettings} disabled={loading} style={{ background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '8px', padding: '0 1.5rem', fontWeight: '600', cursor: 'pointer' }}>Apply</button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ maxWidth: '80%' }}>
+                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Global Stock Threshold</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Override all individual minimum stock levels with a single global threshold.</div>
+                        </div>
+                        <div style={{ background: isThresholdEnabled ? 'var(--accent-color)' : 'var(--border-color)', width: '48px', height: '26px', borderRadius: '24px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s' }} onClick={() => updateThresholdSettings(!isThresholdEnabled)}>
+                            <div style={{ width: '20px', height: '20px', background: 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: isThresholdEnabled ? '25px' : '3px', transition: '0.3s' }}></div>
+                        </div>
+                    </div>
+
+                    <div style={{
+                        opacity: isThresholdEnabled ? 1 : 0.5,
+                        pointerEvents: isThresholdEnabled ? 'auto' : 'none',
+                        transition: 'opacity 0.3s'
+                    }}>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <input
+                                type="number"
+                                className="auth-input"
+                                placeholder="e.g., 1000"
+                                value={threshold}
+                                onChange={e => setThreshold(e.target.value)}
+                                style={{ maxWidth: '300px', margin: 0 }}
+                            />
+                            <button
+                                onClick={() => handleSaveSystemSettings()}
+                                disabled={loading}
+                                style={{ background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '8px', padding: '0.8rem 1.5rem', fontWeight: '600', cursor: 'pointer' }}
+                            >
+                                Apply
+                            </button>
+                        </div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.75rem' }}>
+                            Note: This is a <strong>local override</strong> for your account only. It will not change the MSL values in the shared database.
+                        </p>
                     </div>
                 </SettingsCard>
 
                 <SettingsCard icon={<UIIcons.Database size={22} />} title="Data Management">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <div style={{ maxWidth: '65%' }}>
-                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Export Inventory Data</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Download your complete inventory database in CSV format (ERPNext compatible).</div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
-                            <button onClick={() => window.ExportTool.exportItemMaster(inventoryData)} style={{ background: '#0f172a', color: 'white', padding: '0.6rem 1rem', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', fontSize: '0.85rem', width: '100%', justifyContent: 'center' }}>
-                                <UIIcons.Download size={16} /> Item Master
-                            </button>
-                            <button onClick={() => window.ExportTool.exportStockRecon(inventoryData)} style={{ background: '#0f172a', color: 'white', padding: '0.6rem 1rem', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', fontSize: '0.85rem', width: '100%', justifyContent: 'center' }}>
-                                <UIIcons.Download size={16} /> Stock Recon
-                            </button>
-                        </div>
-                    </div>
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <div style={{ maxWidth: '75%' }}>
                             <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Clear Local Storage</div>
@@ -265,8 +294,8 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                 <UIIcons.Info size={16} /> Version Info
                             </div>
                             <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontWeight: '500' }}>CloudBased IMS</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.10.0</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Date Modified: March 23, 2026</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.11.0</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Date Modified: March 24, 2026</div>
                         </div>
                         <div style={{ background: 'var(--hover-bg)', padding: '1.5rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
                             <img src="Resources/icon.png" alt="Icon" style={{ width: '40px', height: '40px', marginBottom: '0.75rem', opacity: 0.9 }} onError={(e) => { e.target.style.display = 'none'; }} />
@@ -330,14 +359,42 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                         type="button"
                                         className="auth-btn-text"
                                         style={{ fontSize: '0.85rem' }}
-                                        onClick={async () => {
-                                            if (confirm("Send a password reset email to " + user.email + "?")) {
-                                                try {
-                                                    await window.AppDataHandler.sendPasswordResetEmail(user.email);
-                                                    alert("Reset email sent!");
-                                                    setAuthAction(null);
-                                                } catch (e) { alert(e.message); }
-                                            }
+                                        onClick={() => {
+                                            setConfirmDialog({
+                                                title: 'Send Reset Link?',
+                                                message: (
+                                                    <div style={{ textAlign: 'left', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                                                        <p>We will send a password reset link to <strong>{user.email}</strong>.</p>
+                                                        <div style={{ background: 'var(--hover-bg)', padding: '1rem', borderRadius: '12px', marginTop: '1rem', border: '1px solid var(--border-color)' }}>
+                                                            <p style={{ fontWeight: '700', color: 'var(--accent-color)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                                                Important Note:
+                                                            </p>
+                                                            <ul style={{ paddingLeft: '1.25rem', margin: 0 }}>
+                                                                <li>Please be <strong>conservative</strong> with this request. Firebase limits individual users to 10 emails per day.</li>
+                                                                <li>Check your <strong>Spam/Junk</strong> folder if the mail doesn't arrive within 2 minutes.</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                ),
+                                                onConfirm: async () => {
+                                                    setLoading(true);
+                                                    try {
+                                                        await window.AppDataHandler.sendPasswordResetEmail(user.email);
+                                                        setConfirmDialog({
+                                                            title: 'Email Sent!',
+                                                            message: 'The reset link has been dispatched. Please check your inbox and spam folder.',
+                                                            onConfirm: () => setAuthAction(null),
+                                                            confirmLabel: 'Close',
+                                                            hideCancel: true
+                                                        });
+                                                    } catch (e) {
+                                                        showMessage(e.message, true);
+                                                    } finally {
+                                                        setLoading(false);
+                                                    }
+                                                }
+                                            });
                                         }}
                                     >
                                         Forgot current password?
@@ -350,6 +407,23 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {confirmDialog && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem' }}>
+                    <div className="fade-in" style={{ background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '2.5rem', width: '100%', maxWidth: '500px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '1.25rem', color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>{confirmDialog.title}</h3>
+                        <div style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', fontSize: '1rem' }}>{confirmDialog.message}</div>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            {!confirmDialog.hideCancel && (
+                                <button onClick={() => setConfirmDialog(null)} style={{ background: 'var(--hover-bg)', color: 'var(--text-primary)', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+                            )}
+                            <button onClick={() => { if (confirmDialog.onConfirm) confirmDialog.onConfirm(); setConfirmDialog(null); }} style={{ background: 'var(--accent-color)', color: 'white', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.3)' }}>
+                                {confirmDialog.confirmLabel || 'Confirm'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

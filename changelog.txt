@@ -1,301 +1,200 @@
 CLOUD BASED
+===============================================================
 
 A SOFDESG and LBYCPD2 project, created by Cheng Roa and Tejada
 
 ===============================================================
 
 Version 0.1 (March 18, 2026)
-
-Project Architecture & Interface
-- Created core project files (HTML, CSS, JS) and established the working interface.
-- App.js: Built the main application files, implemented global state management, and created seamless tab navigation between app screens.
-- UI/UX Styling: Fully modularized index.css using modern design principles, flexbox layouts, CSS variables, and clean interactive elements (hover states, custom UI buttons).
-
-Components & Feature- InventoryTable.js: Implemented a dynamic interactive table displaying items and properties. Features include a management toolbar with Search/Add tools, individual/bulk row checkbox selection, and responsive state changes.
-- SupplierTable.js: Replicated and adapted core table functionalities to display suppliers and contact information, complete with unique column sizing and its own interactive toolbar.
-- UserSettings.js: Implemented a dedicated Settings dashboard populated with system configurations, featuring a working application-wide Light/Dark Mode theme switcher.
-
+- Project Architecture & Interface: Created core project files (HTML, CSS, JS) and established the working interface.
+- Project Architecture & Interface: App.js: Built the main application files, implemented global state management, and created seamless tab navigation between app screens.
+- Project Architecture & Interface: UI/UX Styling: Fully modularized index.css using modern design principles, flexbox layouts, CSS variables, and clean interactive elements (hover states, custom UI buttons).
+- Components & Features: InventoryTable.js: Implemented a dynamic interactive table displaying items and properties. Features include a management toolbar with Search/Add tools, individual/bulk row checkbox selection, and responsive state changes.
+- Components & Features: SupplierTable.js: Replicated and adapted core table functionalities to display suppliers and contact information, complete with unique column sizing and its own interactive toolbar.
+- Components & Features: UserSettings.js: Implemented a dedicated Settings dashboard populated with system configurations, featuring a working application-wide Light/Dark Mode theme switcher.
 
 Version 0.2 (March 18, 2026)
-
-Project Architecture & Interface
-- Re-architected project tree: separated logic files into /App Logic/ folder and CSS into /Resources/ for modular cleanliness.
-- Implemented real-time dynamic search bars across both Inventory and Supplier tables, filtering across multiple columns simultaneously on every keystroke.
-- Added smart visual safety-locks preventing erroneous multiple "Edits" when checking off bulk items.
-- Upgraded entire table rows to be seamlessly clickable instead of targeting just the checkbox.
-
-Components & Features
-- Prompt.js: Developed a reusable, animated floating modal overlay (pop-up box). It elegantly dims the main background to safely handle all specific interaction forms (e.g., Add Item, Edit Supplier) anywhere in the application.
-- Prompt Modals: Fully implemented detailed Add/Edit mock forms matching Figma layout, equipped with native dropdowns and linked dynamically to global supplier data.
-- UserSettings.js: Added "Global Stock Threshold" module (with Enable/Disable disable logic), providing real-time bounding limit validation for computing inventory statuses dynamically across the app.
-- Supplier Details: Added a dedicated "Supplier Details" contact card view in the Prompt overlay, dynamically opened directly by clicking on any linked supplier name in the Inventory Table.
+- Project Architecture & Interface: Re-architected project tree: separated logic files into /App Logic/ folder and CSS into /Resources/ for modular cleanliness.
+- Project Architecture & Interface: Implemented real-time dynamic search bars across both Inventory and Supplier tables, filtering across multiple columns simultaneously on every keystroke.
+- Project Architecture & Interface: Added smart visual safety-locks preventing erroneous multiple "Edits" when checking off bulk items.
+- Project Architecture & Interface: Upgraded entire table rows to be seamlessly clickable instead of targeting just the checkbox.
+- Components & Features: Prompt.js: Developed a reusable, animated floating modal overlay (pop-up box). It elegantly dims the main background to safely handle all specific interaction forms (e.g., Add Item, Edit Supplier) anywhere in the application.
+- Components & Features: Prompt Modals: Fully implemented detailed Add/Edit mock forms matching Figma layout, equipped with native dropdowns and linked dynamically to global supplier data.
+- Components & Features: UserSettings.js: Added "Global Stock Threshold" module (with Enable/Disable disable logic), providing real-time bounding limit validation for computing inventory statuses dynamically across the app.
+- Components & Features: Supplier Details: Added a dedicated "Supplier Details" contact card view in the Prompt overlay, dynamically opened directly by clicking on any linked supplier name in the Inventory Table.
 
 Version 0.2.1 (March 18, 2026)
-
-Git & Project Configuration
-- Removed spaces from `App Logic` folder (`AppLogic`) and updated paths in `index.html` to prevent URL encoding issues and cross-platform sync problems with Git and GitHub Pages.
-- Added `.gitignore` to safely prevent OS-level items like `.DS_Store` and generic config files from polluting the master branch.
-- Added `.gitattributes` to explicitly force LF line endings (`text=auto`) to avoid painful `CRLF` versus `LF` conversion issues on Windows when cloning or pushing.
-
-Mobile UI Fix 
-- UserSettings.js: Refactored hardcoded inline styles into dynamic CSS classes (`setting-item-inner`, `threshold-controls`) to allow for seamless mobile responsiveness.
+- Git & Project Configuration: Removed spaces from `App Logic` folder (`AppLogic`) and updated paths in `index.html` to prevent URL encoding issues and cross-platform sync problems with Git and GitHub Pages.
+- Git & Project Configuration: Added `.gitignore` to safely prevent OS-level items like `.DS_Store` and generic config files from polluting the master branch.
+- Git & Project Configuration: Added `.gitattributes` to explicitly force LF line endings (`text=auto`) to avoid painful `CRLF` versus `LF` conversion issues on Windows when cloning or pushing.
+- Mobile UI Fix: UserSettings.js: Refactored hardcoded inline styles into dynamic CSS classes (`setting-item-inner`, `threshold-controls`) to allow for seamless mobile responsiveness.
 
 Version 0.2.2 (March 18, 2026)
-
-Mobile & Desktop UI Polish
-- UserSettings.js: Refactored hardcoded inline styles into dynamic CSS classes to allow for seamless mobile responsiveness, while correctly restoring desktop-only flex gaps for the bounding threshold controls.
-- index.css: Added comprehensive `@media` queries for mobile screens (`max-width: 768px`).
-
-Header & Navigation Restructure
-- Favicon: Registered project branding `icon.png` as the official website favicon.
-- Topmost Brand Bar: Created a new absolute top-level edge-to-edge header matching the table highlight colors. Moved the "CloudBased" Logo, system tabs ("Inventory", "Suppliers"), and the User Avatar into this unified bar.
-- User Profile: Stripped redundant "Administrator" labels to clean up the profile dropdown layout.
-
-New Features & Functionality
-- Warehouse Filter Bar: Repurposed the previous sub-navigation space into a horizontal scrollable filter bar. Automatically computes unique Warehouses and renders them as clickable "pill" cards that actively pre-filter the Inventory table data.
-- Table "Select All" Headers: Upgraded the main column definition row (`header-row`) in both the Inventory and Supplier tables so that clicking anywhere on the header dynamically selects or deselects all visible items instantly.
+- Mobile & Desktop UI Polish: UserSettings.js: Refactored hardcoded inline styles into dynamic CSS classes to allow for seamless mobile responsiveness, while correctly restoring desktop-only flex gaps for the bounding threshold controls.
+- Mobile & Desktop UI Polish: index.css: Added comprehensive `@media` queries for mobile screens (`max-width: 768px`).
+- Header & Navigation Restructure: Favicon: Registered project branding `icon.png` as the official website favicon.
+- Header & Navigation Restructure: Topmost Brand Bar: Created a new absolute top-level edge-to-edge header matching the table highlight colors. Moved the "CloudBased" Logo, system tabs ("Inventory", "Suppliers"), and the User Avatar into this unified bar.
+- Header & Navigation Restructure: User Profile: Stripped redundant "Administrator" labels to clean up the profile dropdown layout.
+- New Features & Functionality: Warehouse Filter Bar: Repurposed the previous sub-navigation space into a horizontal scrollable filter bar. Automatically computes unique Warehouses and renders them as clickable "pill" cards that actively pre-filter the Inventory table data.
+- New Features & Functionality: Table "Select All" Headers: Upgraded the main column definition row (`header-row`) in both the Inventory and Supplier tables so that clicking anywhere on the header dynamically selects or deselects all visible items instantly.
 
 Version 0.3 (March 18, 2026)
- 
-Data Persistence & Creation of Backend System
-- AppDataHandler.js: Implemented a robust data loading system that prioritizes: Session Cache (localStorage) -> Modified Files (settings.json, uoms.json) -> Constant Defaults (defaultsettings.json, defaultuoms.json).
-- Default Logic: Added support for `defaultsettings.json` and `defaultuoms.json` as permanent constant fallbacks for initial application startup.
-- Temporary Files: Created `settings.json` and `uoms.json` to store user-defined overrides, ensuring defaults remain untouched.
-- Local Persistence: Configured the application to automatically record all modifications into temporary browser storage, providing a seamless bridge until a cloud database is established.
-
-App Logic & CRUD Operations
-- Inventory Management: Fully implemented Create, Read, Update, and Delete (CRUD) operations for the Inventory table.
-- Supplier Management: Fully implemented Create, Read, Update, and Delete (CRUD) operations for the Supplier table.
-- Prompt.js: Transformed the static Prompt modal into a dynamic, state-driven form handler with controlled inputs and intelligent pre-filling for edit operations.
-- UI Polish: Removed all development console logs and mockup simulation notes to provide a cleaner, production-ready user experience.
-- Selection Logic: Added automatic selection clearing across tables whenever data is modified, ensuring a seamless and error-free bulk action workflow.
-- UX Stability: Fixed React ReferenceErrors (useState/useEffect) caused by script-based Babel scoping.
-- Field Editing: Updated Quantity and Min Level fields to support empty inputs, allowing for easier clearing and precise data entry.
-- Supplier Assignment Fix: Added a dynamic placeholder and improved selection logic to ensure correct mapping of suppliers to inventory items, even when added after the item.
-- Visual Clarity: Updated the Inventory Table to display "N/A" for empty supplier fields, ensuring clear visibility of data gaps.
+- Data Persistence & Creation of Backend System: AppDataHandler.js: Implemented a robust data loading system that prioritizes: Session Cache (localStorage) -> Modified Files (settings.json, uoms.json) -> Constant Defaults (defaultsettings.json, defaultuoms.json).
+- Data Persistence & Creation of Backend System: Default Logic: Added support for `defaultsettings.json` and `defaultuoms.json` as permanent constant fallbacks for initial application startup.
+- Data Persistence & Creation of Backend System: Temporary Files: Created `settings.json` and `uoms.json` to store user-defined overrides, ensuring defaults remain untouched.
+- Data Persistence & Creation of Backend System: Local Persistence: Configured the application to automatically record all modifications into temporary browser storage, providing a seamless bridge until a cloud database is established.
+- App Logic & CRUD Operations: Inventory Management: Fully implemented Create, Read, Update, and Delete (CRUD) operations for the Inventory table.
+- App Logic & CRUD Operations: Supplier Management: Fully implemented Create, Read, Update, and Delete (CRUD) operations for the Supplier table.
+- App Logic & CRUD Operations: Prompt.js: Transformed the static Prompt modal into a dynamic, state-driven form handler with controlled inputs and intelligent pre-filling for edit operations.
+- App Logic & CRUD Operations: UI Polish: Removed all development console logs and mockup simulation notes to provide a cleaner, production-ready user experience.
+- App Logic & CRUD Operations: Selection Logic: Added automatic selection clearing across tables whenever data is modified, ensuring a seamless and error-free bulk action workflow.
+- App Logic & CRUD Operations: UX Stability: Fixed React ReferenceErrors (useState/useEffect) caused by script-based Babel scoping.
+- App Logic & CRUD Operations: Field Editing: Updated Quantity and Min Level fields to support empty inputs, allowing for easier clearing and precise data entry.
+- App Logic & CRUD Operations: Supplier Assignment Fix: Added a dynamic placeholder and improved selection logic to ensure correct mapping of suppliers to inventory items, even when added after the item.
+- App Logic & CRUD Operations: Visual Clarity: Updated the Inventory Table to display "N/A" for empty supplier fields, ensuring clear visibility of data gaps.
 
 Version 0.4 (March 19, 2026)
-
-Cloud Database Integration (Firebase Firestore)
-- Integrated Google Firebase Firestore as the cloud database backend. All inventory, supplier, UOM, and warehouse data is now stored in and retrieved from Firestore, making it accessible across all devices and browsers.
-- index.html: Added Firebase App and Firestore compat SDK scripts (loaded via CDN, no bundler required).
-- AppDataHandler.js: Fully rewrote all fetch and save methods to communicate with Firestore. Settings remain in localStorage as they are device-specific user preferences.
-- Data split: Firestore handles shared application data (inventory, suppliers, UOMs, warehouses); localStorage handles personal settings (theme, threshold) and the Firebase config override.
-- Seeding Logic: On first load, if a Firestore collection (UOMs, warehouses) has no document, the app automatically seeds it from the corresponding default JSON file and writes it to Firestore, so all future reads come from the database.
-
-AppDataHandler Architecture Overhaul
-- AppDataHandler.js: Refactored the data loading system so that `defaultsettings.json` is the authoritative source of startup defaults, with localStorage as the primary store for user-modified preferences. Removed `settings.json` from the priority chain entirely.
-- Removed redundant save-file stubs (`inventory.json`, `suppliers.json`, `uoms.json`, `settings.json`) that were unused now that localStorage handles all runtime storage.
-- Renamed `warehouses.json` to `defaultwarehouses.json`, aligning it with the established `default*.json` naming convention for constant fallback files.
-- Replaced the old `fetchData`/`saveData` generic helpers with explicit, self-documenting methods per data type. Each method is now transparent about exactly what it reads and writes.
-- Added `clearAllData()` utility method that removes all app-scoped localStorage keys (prefixed `cloudbased_tmp_`) without affecting Firestore data or the Firebase config override.
-- Added `getFirebaseConfig()` and `saveFirebaseConfig()` public methods, enabling the Settings UI to read and update the active Firebase project config at runtime.
-- Firebase initialization now reads from a user-saved config in localStorage first, falling back to the hardcoded `DEFAULT_CONFIG`. This allows switching Firebase projects without modifying source code.
-
-Settings Enhancements
-- UserSettings.js: Added a "Units of Measure (UOM)" settings block allowing users to add or remove UOM entries. Changes are immediately persisted and reflected in the item form dropdowns.
-- UserSettings.js: Added a "Reset App Data" settings block with a dedicated button that clears all localStorage entries scoped to this application and reloads the page, reverting to default values.
-- UserSettings.js: Added a "Warehouses" settings block, mirroring the UOM settings block. Users can add or remove warehouse locations; changes are immediately saved to Firestore and reflected in the filter bar.
-- UserSettings.js: Added a "Database Configuration" settings block displaying all active Firebase config fields (API Key, Project ID, etc.) as editable inputs. "Save & Reload" applies a new config; "Reset to Default" restores the hardcoded values.
-
-Loading Screen Overhaul
-- app.js: Replaced the inline loading placeholder (which rendered inside the full app shell) with an early return that shows a clean, bare full-screen loading view. The navigation bar and filter bar no longer appear while data is loading.
-- index.html: Added a synchronous inline script in `<head>` that reads the saved theme from localStorage before React renders, eliminating the brief dark/light theme flash on initial page load.
-- Loading text simplified to "Loading Resources" with no subtitle.
-
-UI/UX Polish
-- index.css: Fixed Settings tab overflow — content now scrolls within the bounding box instead of pushing beyond the viewport.
-- index.css: Added `.setting-info` flex constraints to prevent long description text from crowding adjacent buttons in setting rows.
+- Cloud Database Integration (Firebase Firestore): Integrated Google Firebase Firestore as the cloud database backend. All inventory, supplier, UOM, and warehouse data is now stored in and retrieved from Firestore, making it accessible across all devices and browsers.
+- Cloud Database Integration (Firebase Firestore): index.html: Added Firebase App and Firestore compat SDK scripts (loaded via CDN, no bundler required).
+- Cloud Database Integration (Firebase Firestore): AppDataHandler.js: Fully rewrote all fetch and save methods to communicate with Firestore. Settings remain in localStorage as they are device-specific user preferences.
+- Cloud Database Integration (Firebase Firestore): Data split: Firestore handles shared application data (inventory, suppliers, UOMs, warehouses); localStorage handles personal settings (theme, threshold) and the Firebase config override.
+- Cloud Database Integration (Firebase Firestore): Seeding Logic: On first load, if a Firestore collection (UOMs, warehouses) has no document, the app automatically seeds it from the corresponding default JSON file and writes it to Firestore, so all future reads come from the database.
+- AppDataHandler Architecture Overhaul: AppDataHandler.js: Refactored the data loading system so that `defaultsettings.json` is the authoritative source of startup defaults, with localStorage as the primary store for user-modified preferences. Removed `settings.json` from the priority chain entirely.
+- AppDataHandler Architecture Overhaul: Removed redundant save-file stubs (`inventory.json`, `suppliers.json`, `uoms.json`, `settings.json`) that were unused now that localStorage handles all runtime storage.
+- AppDataHandler Architecture Overhaul: Renamed `warehouses.json` to `defaultwarehouses.json`, aligning it with the established `default*.json` naming convention for constant fallback files.
+- AppDataHandler Architecture Overhaul: Replaced the old `fetchData`/`saveData` generic helpers with explicit, self-documenting methods per data type. Each method is now transparent about exactly what it reads and writes.
+- AppDataHandler Architecture Overhaul: Added `clearAllData()` utility method that removes all app-scoped localStorage keys (prefixed `cloudbased_tmp_`) without affecting Firestore data or the Firebase config override.
+- AppDataHandler Architecture Overhaul: Added `getFirebaseConfig()` and `saveFirebaseConfig()` public methods, enabling the Settings UI to read and update the active Firebase project config at runtime.
+- AppDataHandler Architecture Overhaul: Firebase initialization now reads from a user-saved config in localStorage first, falling back to the hardcoded `DEFAULT_CONFIG`. This allows switching Firebase projects without modifying source code.
+- Settings Enhancements: UserSettings.js: Added a "Units of Measure (UOM)" settings block allowing users to add or remove UOM entries. Changes are immediately persisted and reflected in the item form dropdowns.
+- Settings Enhancements: UserSettings.js: Added a "Reset App Data" settings block with a dedicated button that clears all localStorage entries scoped to this application and reloads the page, reverting to default values.
+- Settings Enhancements: UserSettings.js: Added a "Warehouses" settings block, mirroring the UOM settings block. Users can add or remove warehouse locations; changes are immediately saved to Firestore and reflected in the filter bar.
+- Settings Enhancements: UserSettings.js: Added a "Database Configuration" settings block displaying all active Firebase config fields (API Key, Project ID, etc.) as editable inputs. "Save & Reload" applies a new config; "Reset to Default" restores the hardcoded values.
+- Loading Screen Overhaul: app.js: Replaced the inline loading placeholder (which rendered inside the full app shell) with an early return that shows a clean, bare full-screen loading view. The navigation bar and filter bar no longer appear while data is loading.
+- Loading Screen Overhaul: index.html: Added a synchronous inline script in `<head>` that reads the saved theme from localStorage before React renders, eliminating the brief dark/light theme flash on initial page load.
+- Loading Screen Overhaul: Loading text simplified to "Loading Resources" with no subtitle.
+- UI/UX Polish: index.css: Fixed Settings tab overflow — content now scrolls within the bounding box instead of pushing beyond the viewport.
+- UI/UX Polish: index.css: Added `.setting-info` flex constraints to prevent long description text from crowding adjacent buttons in setting rows.
 
 Version 0.4.1 (March 19, 2026)
-
-UI/UX Polish
-- index.css: Added scrolling to the prompts lmao. Added display 'flex' for auto stretch, and set 'overflow-y: auto' to automatically add a scrollbar once the prompt is taller than the viewport.
+- UI/UX Polish: index.css: Added scrolling to the prompts. Added display 'flex' for auto stretch, and set 'overflow-y: auto' to automatically add a scrollbar once the prompt is taller than the viewport.
 
 Version 0.4.2 (March 19, 2026)
-
-Security & Authentication
-- index.html: Added Firebase Authentication compat SDK to the project headers.
-- AppDataHandler.js: Implemented automatic anonymous authentication (`signInAnonymously`). This provides a secure layer for Firestore, allowing the transition from open "Test Mode" rules to authenticated-only access (`if request.auth != null`).
-- Security Patch: Addressed automated secret scanning alerts from GitHub and Google by securing the database logic against unauthorized external access.
+- Security & Authentication: index.html: Added Firebase Authentication compat SDK to the project headers.
+- Security & Authentication: AppDataHandler.js: Implemented automatic anonymous authentication (`signInAnonymously`). This provides a secure layer for Firestore, allowing the transition from open "Test Mode" rules to authenticated-only access (`if request.auth != null`).
+- Security & Authentication: Security Patch: Addressed automated secret scanning alerts from GitHub and Google by securing the database logic against unauthorized external access.
 
 Version 0.4.3 (March 19, 2026)
-
-Security & Data Load Fixes
-- AppDataHandler.js: Resolved a race condition where data fetches would fire before authentication was established. Implemented a global `authPromise` that all Firestore methods await to ensure database queries only execute once signed in.
-- app.js: Wrapped the initial startup sequence in a `try...finally` block to prevent the application from hanging on the "Loading Resources" screen if a network error or authentication delay occurs.
-
+- Security & Data Load Fixes: AppDataHandler.js: Resolved a race condition where data fetches would fire before authentication was established. Implemented a global `authPromise` that all Firestore methods await to ensure database queries only execute once signed in.
+- Security & Data Load Fixes: app.js: Wrapped the initial startup sequence in a `try...finally` block to prevent the application from hanging on the "Loading Resources" screen if a network error or authentication delay occurs.
 
 Version 0.5 (March 19, 2026)
-
-UI & Layout Finalization
-- InventoryTable.js: Fixed "Status" bubble text wrapping. Added `white-space: nowrap` and `inline-flex` styling to ensure badges remain readable and maintain their pill shape on smaller screens.
-
-Inventory Transaction Logs
-- InventoryTable.js: Added a three-way View Switcher (Overview / Input Log / Output Log) rendered as a styled pill group next to the search bar. The switcher is automatically hidden when bulk rows are selected to avoid UI conflicts.
-- Unified Architecture: Integrated the same selection, checkbox, and click-to-row logic from the Overview table into the log views.
-- Input Log: New table view tracking incoming stock. Each entry records: Transaction ID, Item Code, Item Name (auto-filled), Input Quantity/UOM, Date, Supplier, and Batch/LOT.
-- Output Log: Symmetric table view for outgoing stock.
-- Quantity Sync Logic: Logging an Input entry automatically increments the matching inventory item's quantity; logging an Output entry decrements it.
-- Edit & Remove Logs: Implemented full CRUD for log entries. Editing a log recalculates the quantity delta; removing a log automatically reverses its quantity impact on the inventory.
-- Warehouse filtering: Integrated log views with the warehouse filter bar, which cross-references item codes to show logs from specific locations.
-- Decimal Support: All quantity fields now use `parseFloat`, enabling high-precision fractional quantity tracking.
-
-Advanced Sorting System
-- Sort Filter Button: Designed a custom interactive sort button that sits before the search bar in all table views.
-- Sort Dropdown: Features a sleek, animated dropdown with A-Z, Z-A, Numeric (Low/High), Date (Oldest/Newest), and Status/Warehouse priority sorting.
-- Persistent Logic: Applied sorting across all tables (Inventory Overview, Input/Output Logs, and Suppliers).
-- Style: Integrated new `.sort-btn` and `.sort-dropdown` CSS with hover and active states.
-
-Prompt & UX Refinements
-- Prompt.js: Standardized all form buttons to use the consistent "Save Changes" style throughout the app.
-- UX Polish: Re-filling logic for Edit Log forms now pulls data directly from the selected log record.
-- AppDataHandler.js: Expanded Firestore sync methods to include Input and Output logs.
-
-Codebase Architecture & Simplification
-- Shared Components: Extracted the complex SortButton and ViewSwitcher into a new generalized `AppLogic/Shared.js` utility class to adhere to DRY (Don't Repeat Yourself) principles.
-- InventoryTable Refactoring: Consolidated the duplicate 100+ line table structures into a single unified render loop that switches row contents based on activeView.
-- app.js Simplification: Re-wrote the massive `if-else` cascade in `handlePromptConfirm` into a cleanly delineated `switch` statement for improved maintainability.
-
-Comment Naturalization
-- Removed overly robotic AI-generated block comments (`// =======================`, `// --- Local State ---`) across all major files (`UserSettings.js`, `Prompt.js`, `InventoryTable.js`, `SupplierTable.js`, `AppDataHandler.js`).
-- Replaced structural comments with concise, functional developer notes.
-
-File System & Coding Style
-- Unified all JavaScript filenames to `lowerCamelCase` style for project consistency.
-- Renamed `Shared.js` to `sharedComponents.js` to more clearly describe its purpose.
-- Updated `index.html` script references to match the new file structure.
+- Inventory Transaction Logs: Triple-View Switcher: Seamlessly toggle between Overview (Live Stock), Input Log (Incoming), and Output Log (Outgoing).
+- Inventory Transaction Logs: Unified Table Architecture: All views share the same high-density interface with bulk selection, checkbox controls, and smart search.
+- Inventory Transaction Logs: Bi-Directional Quantity Sync: Input logs automatically increase inventory (+), while output logs subtract (-), with robust decimal precision.
+- Inventory Transaction Logs: Full History Editing: Edit or remove log entries with automatic quantity reversal.
+- Inventory Transaction Logs: Location-Aware Logs: The Warehouse filter bar now dynamically filters logs based on the linked item's storage location.
+- Advanced Sorting System: Intelligent Sort Button: A new interactive pill-button matching the search bar height.
+- Advanced Sorting System: Custom Sort Logic: Alphabetical (A-Z/Z-A), Numerical (High/Low), and Time-based (Newest/Oldest) sorting across all tables.
+- Advanced Sorting System: Smart Priority: "Status" sorting places Low Stock items at the top; Warehouse sorting allows prioritizing specific locations.
+- Advanced Sorting System: Visual Feedback: The button highlights in accent color and displays the active sort choice for quick reference.
+- UI/UX Finalization: "Save Changes" Standardization: Synchronized button styles across all administrative forms for a consistent premium feel.
+- UI/UX Finalization: Status Badge Polish: Fixed badge wrapping to maintain a clean pill shape on mobile and high-density screens.
+- UI/UX Finalization: Animated Dropdowns: Implemented smooth fade-in animations for the new sorting controls.
+- Codebase Architecture & Simplification: Shared Components: Extracted the complex SortButton and ViewSwitcher into a generalized `AppLogic/Shared.js` utility module.
+- Codebase Architecture & Simplification: InventoryTable Refactoring: Consolidated the duplicate 100+ line table template structures into a single unified render loop that switches row contents based on activeView.
+- Codebase Architecture & Simplification: app.js Simplification: Rewrote the massive `if-else` cascade in `handlePromptConfirm` into a cleanly delineated `switch` statement for improved maintainability.
+- Comment Naturalization: Removed overly robotic AI-generated block comments. Replaced rigid structural markers with concise, functional developer notes.
+- File System & Coding Style: Unified all JavaScript filenames to `lowerCamelCase` style for project consistency. Updated index.html script references.
 
 Version 0.6 (March 19, 2026)
-
-ERPNext Integration & Data Exporting
-- ERPNext Export Tool: Developed a brand new `exportTool.js` module that generates CSV files pre-configured for ERPNext's multi-row import system.
-- 4-Row Header Mapping: Implemented the mandatory ERPNext structure (Entry Type, Field Label, Field Name/Db Key, and Metadata) to ensure zero-config auto-mapping during imports.
-- New Record Creation: Configured exports to leave the ID column blank by default, allowing ERPNext to automatically create new records rather than updating existing ones.
-- Export Modules: Added support for "Item List" (formerly Item Master) and "Stock Reconciliation" (Current Inventory Levels) DocTypes.
-- Precise Data Encoding: Utilized UTF-8 with BOM (Byte Order Mark) encoding to guarantee that high-precision quantity data and special characters are correctly displayed in Excel.
-- Human Commenting: Refactored internal code documentation in the export tool to follow the project's natural, developer-centric commenting style.
-
-Settings UI Enhancements
-- Export Block: Integrated a new "Export to ERPNext" section into the User Settings dashboard, featuring one-click download buttons for inventory and stock data.
-- User Context Support: Connected the export engine to the live application state, ensuring CSVs always reflect the most recent Firestore data.
+- ERPNext Integration & Data Exporting: ERPNext Export Tool: Developed a brand new `exportTool.js` module that generates CSV files for ERPNext.
+- ERPNext Integration & Data Exporting: 4-Row Header Mapping: Implemented the mandatory ERPNext structure for zero-config auto-mapping.
+- ERPNext Integration & Data Exporting: New Record Creation: Configured exports to leave the ID column blank by default for new record auto-creation.
+- ERPNext Integration & Data Exporting: Export Modules: Added support for "Item List" and "Stock Reconciliation" DocTypes.
+- ERPNext Integration & Data Exporting: Precise Data Encoding: Utilized UTF-8 with BOM for correct Excel display.
+- Settings UI Enhancements: Export Block: Integrated a new "Export to ERPNext" section into the User Settings dashboard.
+- Settings UI Enhancements: User Context Support: Connected export engine to live application state for most recent data.
 
 Version 0.6.1 (March 20, 2026)
-
-Database Configuration & Resilience
-- Default Configuration: Separated the hardcoded Firebase configuration into a standalone `AppData/defaultDatabase.json` file. The application now dynamically loads these defaults, allowing for cleaner code and easier environment management.
-- AppDataHandler Lifecycle: Refactored the initialization sequence to be fully asynchronous. It now automatically attempts to load configuration from: User Saved Settings (localStorage) -> Default Database File (defaultDatabase.json).
-- Error Handling & Recovery: Implemented a robust "Database Not Found" state. If the configuration is missing, empty, or invalid, the Inventory and Supplier tables will now clearly display the specific reason for the failure (e.g., config fetch errors, Firebase init issues, or auth failures) instead of remaining blank or crashing.
-
-Settings UI & Security Polish
-- API Key Toggle: Added a "SHOW/HIDE" visibility toggle for the Firebase API Key in the Database Configuration block. The key is now masked by default to improve security during presentations or shared screen usage.
-- Mobile Layout Fix: Resolved a layout bug in the Database Configuration module where long input fields would overflow the settings box on mobile screens. Labels and inputs now intelligently stack on narrower viewports.
-- Settings Reorganization: Completely restructured the User Settings dashboard into logical, high-level categories (Appearance, Inventory Framework, Data & Connectivity, System Operations).
-- Section Headers: Integrated a new `.settings-section-header` style featuring accent-colored text and divider lines for a more premium and organized user experience.
-- User Avatar Dropdown: Replaced the direct settings shortcut with a sleek dropdown menu accessible from the user avatar. It currently provides links to "User Settings" and a "Database Help" documentation guide.
-- Refined Animations: Implemented a smooth chevron rotation on the user avatar and upgraded the global `sortDropFadeIn` animation with a subtle scaling effect for a more polished UI.
-- Versioning: Updated the internal version to 0.6.1 and refreshed the "Last Updated" metadata in the Settings dashboard.
+- Database Configuration & Resilience: Default Configuration: Separated hardcoded Firebase config into a standalone `AppData/defaultDatabase.json` file.
+- Database Configuration & Resilience: AppDataHandler Lifecycle: Refactored initialization to handle User Settings -> Default Database File.
+- Database Configuration & Resilience: Error Handling & Recovery: Implemented robust "Database Not Found" states with clear reason reporting.
+- Settings UI & Security Polish: API Key Toggle: Added visibility toggle for masking the Firebase API Key.
+- Settings UI & Security Polish: Mobile Layout Fix: Stacking labels and inputs on narrower viewports to prevent overflow.
+- Settings UI & Security Polish: Settings Reorganization: Structured dashboard into logical categories (Appearance, Inventory Framework, Data & Connectivity, System Operations).
+- Settings UI & Security Polish: User Avatar Dropdown: Sleek menu for "User Settings" and "Database Help".
+- Settings UI & Security Polish: Refined Animations: Smooth chevron rotation and scaling effects.
 
 Version 0.6.2 (March 23, 2026)
-
-Data Integrity & Validation
-- Robust Validation: Implemented duplicate entry guards for Item IDs, Supplier Name/IDs, and Transaction IDs within the Prompt modal to prevent database collisions.
-- Error Feedback: Integrated a persistent error notification banner at the top of the Prompt overlay to provide real-time validation feedback during form submission.
-- Supplier Management: Explicitly exposed the Supplier ID field in Add/Edit forms, enabling manual control over unique identifiers for contact records.
-
-Component Bug Fixes & Refinements
-- Prompt Initialization: Resolved a bug in the dynamic form handler where `edit-input-log` would incorrectly attempt to source data from the output log collection.
-- Logic Coverage: Added missing initialization support for `edit-output-log` to ensure consistent CRUD behavior across all transaction types.
-- Field Resetting: Configured the validation error state to automatically clear upon form re-opening or whenever any input field is edited, improving UI fluidity.
-===============================================================
+- Data Integrity & Validation: Robust Validation: Implemented duplicate entry guards for Item IDs, Supplier Name/IDs, and Transaction IDs.
+- Data Integrity & Validation: Error Feedback: Persistent notification banner for real-time validation feedback.
+- Data Integrity & Validation: Supplier Management: Exposed Supplier ID field for manual record control.
+- Component Bug Fixes & Refinements: Prompt Initialization: Resolved log sourcing bugs.
+- Component Bug Fixes & Refinements: Logic Coverage: Added initialization support for all transaction types.
+- Component Bug Fixes & Refinements: Field Resetting: Auto-cleared validation errors upon form interactions.
 
 Version 0.7.0 (March 23, 2026)
-
-Authentication & Access Control
-- Dedicated Login Gateway: Launched `login.html`, a high-security entry point that cleanly separates the authentication flow from the main workspace.
-- Modern Auth UI: Developed an elegant, high-contrast Login/Signup interface with real-time field validation and secure credential handling.
-- Multi-User Identity: Implemented a robust profile system supporting unique display names and custom bio pictures per user.
-- Persistent Session Management: Engineered secure token-based redirects that intelligently route logged-out users to the entry gateway.
-
-Redesigned User Settings Dashboard
-- Category-First Layout: Completely rebuilt the settings menu to follow a modern modular layout (User Profile, System Operations, Version Info).
-- Profile Management: Added "Edit Profile" capabilities including one-click username updates and bio-picture clearing.
-- Credits & Origin: Implemented the official "Who Made This" section featuring Group 5 branding and the project's iconic heart-themed resources.
-- Version Tracking: Formalized the application's build info (v0.7.0, March 23, 2026) within the system dashboard.
-
-Core Architecture & Shared Logic
-- Component Abstraction: Performed a massive refactoring of redundant buttons, inputs, headers, and UI controls into `AppLogic/sharedComponents.js`, significantly improving codebase maintainability.
-- Multi-Purpose Form Components: Standardized `FormInput`, `FormSelect`, and `FormButtons` across all administrative prompts for pixel-perfect consistency.
-- Unified Media Engine: Developed a shared client-side image resizing utility that optimizes all incoming assets on-the-fly to ensure lightning-fast database performance.
-
-Advanced Navigation & Filtering
-- Dynamic Pill-Style Interface: Converted the entire application navigation (Main Tabs, View Switchers, and Location Filters) into a consistent, premium pill-tab design.
-- True Multi-Warehouse Filtering: Extended location pills to Arrivals, Shipments, and Suppliers. Logs now use "V-Lookup" logic to derive locations from inventory masters, while Suppliers are intelligently filtered based on their site-specific item associations.
-
-Snappier UI & Refined Interaction
-- Snap-to-View Transitions: Eliminated aggressive 'pop-up' and movement animations. All components now appear instantly or via subtle, business-grade opacity fades.
-- Catalog Interactivity: Transformed Item List cards into fully clickable surfaces, allowing for instant 'tap-to-edit' inventory management.
-- Remove Image Logic: Integrated "Remove Photo" buttons across both Profile and Item forms to allow for instant asset resetting.
+- Authentication & Access Control: Dedicated Login Gateway: Launched `login.html` for secure auth flow isolation.
+- Authentication & Access Control: Modern Auth UI: Elegant interface with real-time validation.
+- Authentication & Access Control: Multi-User Identity: Profile system with display names and bio pictures.
+- Authentication & Access Control: Persistent Session Management: Engineered secure redirects for logged-out users.
+- Redesigned User Settings Dashboard: Category-First Layout: Modern modular layout for profile, operations, and info.
+- Redesigned User Settings Dashboard: Profile Management: Username updates and bio-picture clearing.
+- Redesigned User Settings Dashboard: Credits & Origin: Official branding and resources section.
+- Redesigned User Settings Dashboard: Version Tracking: Formalized build info (v0.7.0, March 23, 2026).
+- Core Architecture & Shared Logic: Component Abstraction: Refactored redundant UI controls into `sharedComponents.js`.
+- Core Architecture & Shared Logic: Form Components: Standardized `FormInput`, `FormSelect`, and `FormButtons`.
+- Core Architecture & Shared Logic: Unified Media Engine: Shared client-side image resizing utility.
+- Advanced Navigation & Filtering: Dynamic Pill-Style Interface: Consistent premium gill-tab design.
+- Advanced Navigation & Filtering: True Multi-Warehouse Filtering: Location pills extended across all logs and sites.
+- Snappier UI & Refined Interaction: Snap-to-View Transitions: Instant transitions in favor of opacity fades.
+- Snappier UI & Refined Interaction: Catalog Interactivity: Clickable Item List cards for instant editing.
+- Snappier UI & Refined Interaction: Remove Image Logic: Simple asset resetting for profile and items.
 
 Version 0.8.0 (March 23, 2026)
-
-Executive Insights & Dashboard Logic
-- Integrated Analytical Dashboard: Launched a high-level executive dashboard featuring real-time data visualization across 8 specialized logic blocks.
-- Smart KPI Cards: Created dedicated modules for "Total Items", "Low Stock", and "Suppliers Only" for instant operational visibility.
-- Inventory Velocity: Implemented side-by-side specialized tables for "Recent Arrivals" and "Recent Shipments" with automated record fetching.
-- Risk Mitigation: Added a "Critical Replenishment Required" module that automatically flags items below safety stock levels.
-- Geographic & Category Distribution: Developed "Warehouse Distribution" and "Category Performance" modules to visualize stock concentration and product variety.
-
-Security & Authentication Refinement
-- Enhanced Password Recovery: Integrated a "Forgot Password" flow directly into the login portal and cross-linked it within the User Settings "Change Password" section.
-- Manual Credential Updates: Added a high-security manual password change view to the login gateway, allowing users to update credentials securely using current password verification.
-- Navigation Fluidity: Added "Back to Sign in" buttons and improved secondary navigation layout, increasing vertical spacing for a more modern, centered UI aesthetic.
-- Logic Patch: Resolved a Babel transpilation race condition in `login.html` that caused intermittent blank screens on initialization.
-
-Catalog & Property Enhancements
-- Product Descriptions: Expanded the Item Master schema to include a dedicated "Item Description" field.
-- Metadata Visibility: Updated Item List cards to display product descriptions, improving detail visibility without requiring a click.
-- Prompt Integration: Added a smart-resized description textarea to the Inventory Add/Edit modal.
-- Data Management Cleanup: Temporarily retired the "Import Inventory Data" stub from User Settings to streamline the interface for upcoming large-scale migration features.
-
-===============================================================
+- Executive Insights & Dashboard Logic: Integrated Analytical Dashboard with 8 specialized logic blocks.
+- Executive Insights & Dashboard Logic: Smart KPI Cards for Items, Low Stock, and Suppliers.
+- Executive Insights & Dashboard Logic: Inventory Velocity tracking with specialized tables.
+- Executive Insights & Dashboard Logic: Risk Mitigation: Automated flagging for replenishment required.
+- Executive Insights & Dashboard Logic: Geographic & Category Distribution: Warehouse and performance visualizations.
+- Security & Authentication Refinement: Enhanced Password Recovery with inter-linked flows.
+- Security & Authentication Refinement: Manual Credential Updates with current password verification.
+- Security & Authentication Refinement: Navigation Fluidity: Centered UI aesthetic and layout centering.
+- Security & Authentication Refinement: Logic Patch: Resolved Babel race conditions in login.
+- Catalog & Property Enhancements: Product Descriptions field added to Item Master.
+- Catalog & Property Enhancements: Metadata Visibility: Updated cards to display descriptions.
+- Catalog & Property Enhancements: Prompt Integration: Smart-resized textarea for items.
+- Data Management Cleanup: Retired import stub to focus on migration features.
 
 Version 0.9.0 (March 23, 2026)
-
-Data Migration & Advanced Administration
-- Power Import Engine: Integrated the SheetJS library into the Admin Dashboard to support high-velocity bulk data migration from Google Sheets URLs and local Excel files.
-- Automated Data Mapping: Implemented specialized parsers for 'Items', 'Inventory', 'Receive', and 'Out' worksheets, which intelligently map spreadsheet headers to the system's Firestore schema.
-- SMART Data Transformation: Automatically derives unique companies as Suppliers (with blank contact record placeholders), auto-generates randomized transactional IDs (IN/OUT prefixes), and forces all mapped stock to the "Bulacan" warehouse as per organizational requirements.
-- System Factory Reset (Nuke): Developed a destructive data clearing feature in Global Settings. Protected by a mandatory "NUKE" string challenge and dual confirmations to prevent accidental erasing of inventory, suppliers, and transactional logs.
-- Universal Scrolling Architecture: Overhauled the layout-engine CSS to allow for seamless vertical scrolling across the entire application, specifically improving navigation in high-density areas like Inventory Overview, Arrivals, and Shipments.
-- Branding & Identity Synchronization: Fully decoupled the "CloudBased" branding from the dashboard, ensuring the document title bar and top-left header update in real-time to match the user's custom Company Name settings.
-- Permission Resilience: Implemented null-safe guards in the User Management permissions toggle to resolve a UI crash triggered by the Auditor role's limited access scope.
-- UI Layout Patch: Fixed the navigation indicator bar in the Admin Dashboard which was previously floating incorrectly due to a lack of relative positioning context.
-- Transition UI Glitch Fixed: Corrected the absolute positioning of the active tab indicator bar in the Admin Dashboard navigation.
-- System Operations Cleanup: Removed redundant configuration stubs to focus on live cloud integrations.
-
-===============================================================
+- Data Migration & Advanced Administration: Power Import Engine supporting SheetJS integration.
+- Data Migration & Advanced Administration: Automated Mapping for worksheets to Firestore schema.
+- Data Migration & Advanced Administration: Smart Data Transformation: Unique companies as Suppliers.
+- Data Migration & Advanced Administration: System Factory Reset (Nuke): High-security clearing challenge.
+- Data Migration & Advanced Administration: Universal Scrolling Fix for high-density navigation.
+- Data Migration & Advanced Administration: Branding & Identity Sync: decoupled header reflecting company name.
 
 Version 0.10.0 (March 23, 2026)
+- UI/UX Branding & Customization: Logo Persistence Engine for real-time asset management.
+- UI/UX Branding & Customization: Global Accent Picker for synchronized corporate identity.
+- UI/UX Branding & Customization: Unified Brand Header reflecting company unit.
+- UI/UX Branding & Customization: Header Visibility Fix for dark theme transparency.
+- Inventory Lifecycle Tracking: Restocked? Indicator for Addressing low-stock alerts.
+- Inventory Lifecycle Tracking: In-Process (I) Status for in-flight replenishment.
+- Inventory Lifecycle Tracking: Import Mapping Logic for replenishment statuses.
+- Inventory Lifecycle Tracking: Real-Time Badge UI (Green, Red, Indigo).
+- Interactive "Fat-Finger" Accessibility: Full-Row Selection for mobile usability.
+- Interactive "Fat-Finger" Accessibility: Master Selection Guard for bulk capture.
+- Interactive "Fat-Finger" Accessibility: Standardized Hit Areas with hover feedback.
+- Intelligent Dashboard Filtering & AI: Alert Suppression for addressed items.
+- Intelligent Dashboard Filtering & AI: InnoAssistant (AI) Cognitive Sync for smarter advice.
+- Intelligent Dashboard Filtering & AI: Stock Reconciliation Guard for database resilience.
 
-UI/UX Branding & Customization
-- Logo Persistence Engine: Launched a new branding module in the Admin Dashboard that supports real-time Company Logo uploads and removal. Integrated automated client-side resizing to ensure brand assets are optimized for cloud storage.
-- Global Accent Picker: Re-enabled the corporate identity color picker. This allows admins to define a singular accent color that synchronizes across all users, while specifically ensuring color values persist correctly through page refreshes.
-- Unified Brand Header: Overhauled the top-left edge of the application to display the Company Logo and Name as a single, cohesive brand unit, improving professional aesthetic.
-- Header Visibility Fix: Corrected a CSS transparency bug that rendered the company name invisible on certain dark themes by resetting `background-clip` and `text-fill` properties.
-
-Inventory Lifecycle Tracking
-- Restocked? Indicator: Introduced a new "Restocked?" data point across the entire inventory masters. This allows teams to track whether low-stock alerts have been addressed even before the physical count arrives at the warehouse.
-- In-Process (I) Status: Added support for a specialized "I" code. This triggers a unique Indigo badge indicating that replenishment is currently "In-Flight," distinguishing it from both "To Restock" (No) and "Handled" (Yes).
-- Import Mapping Logic: Upgraded the Google Sheets and Excel import engines to intelligently parse replenishment status. Maps `y` to "Yes", `i` to "I", and blank cells to "No".
-- Real-Time Badge UI: Integrated high-contrast status badges (Green, Red, Indigo) into both the Inventory Table and the card-based Item List overview.
-
-Interactive "Fat-Finger" Accessibility
-- Full-Row Selection: Transformed every data row into a high-precision interactive surface. Clicking anywhere on a row now toggles its selection state, significantly improving usability on mobile and touch devices.
-- Master Selection Guard: Implemented a "Select All" toggle directly into the header row. Clicking the header text now instantly captures all visible records for bulk operations.
-- Standardized Hit Areas: Increased vertical padding and hover feedback across all table views while maintaining standard-sized checkboxes to preserve visual balance.
-
-Intelligent Dashboard Filtering & AI
-- Alert Suppression: Refined the "Critical Replenishment Required" and "Predictive Oracle" logic blocks. They now automatically suppress alerts for items marked as "Restocked" or "In-Process," ensuring that dashboards only display actionable tasks.
-- InnoAssistant (AI) Cognitive Sync: Upgraded the AI's neural processing to exclude restocked or in-transit items when generating restock suggestions. The assistant now provides smarter, more relevant operational advice based on live replenishing status.
-- Stock Reconciliation Guard: Restored the `getDbError` handler to ensure that database connectivity issues are reported gracefully within the main inventory view.
+Version 0.11.0 (March 24, 2026)
+- Security & System Resilience: High-Fidelity Password Recovery with custom confirmation dialogs.
+- Security & System Resilience: Quota Education: Firebase email quota and spam warnings.
+- Security & System Resilience: Stock Threshold Defaults: Disabled by default for new accounts.
+- Rebranding & Identity: Predictive Replenish Integration (Renamed from Oracle).
+- Rebranding & Identity: InnoAssistant Cognitive Sync (Renamed from Aura AI).
+- Rebranding & Identity: Unified Branding: Synchronized documentation and historical logs.

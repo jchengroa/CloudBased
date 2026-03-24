@@ -3,11 +3,10 @@
  * View for managing supplier contact info, sharing core features with inventory.
  */
 
-const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError }) => {
+const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError, user }) => {
     // local state
     const [selectedRows, setSelectedRows] = React.useState([]);
     const [searchQuery,  setSearchQuery]  = React.useState('');
-    const [sortKey,      setSortKey]      = React.useState('');
     const [activeWarehouseFilter, setActiveWarehouseFilter] = React.useState('All');
 
     // drop selection when data source changes
@@ -15,30 +14,8 @@ const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError }
         setSelectedRows([]);
     }, [supplierData]);
 
-    const SORT_OPTIONS = [
-        { key: 'name-asc',    label: 'Supplier Name A-Z', icon: <SortAZIcon /> },
-        { key: 'name-desc',   label: 'Supplier Name Z-A', icon: <SortZAIcon /> },
-        { key: 'contact-asc', label: 'Contact Person A-Z', icon: <SortAZIcon /> },
-        { key: 'email-asc',   label: 'Email A-Z',          icon: <SortAZIcon /> },
-    ];
-
-    // sort application
-    const applySort = (data, key) => {
-        if (!key) return data;
-        const arr = [...data];
-        const asc  = (f) => arr.sort((a, b) => (f(a) || '').localeCompare(f(b) || ''));
-        const desc = (f) => arr.sort((a, b) => (f(b) || '').localeCompare(f(a) || ''));
-        
-        if (key === 'name-asc')     return asc (i => i.name);
-        if (key === 'name-desc')    return desc(i => i.name);
-        if (key === 'contact-asc')  return asc (i => i.contact);
-        if (key === 'email-asc')    return asc (i => i.email);
-        return arr;
-    };
-
-    // calculate final display list
-    const filteredData = applySort(
-        supplierData.filter(item => {
+    const baseFiltered = React.useMemo(() => {
+        return supplierData.filter(item => {
             const sq = searchQuery.toLowerCase();
             
             // Filter by warehouse association if chosen
@@ -54,9 +31,10 @@ const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError }
                 (item.phone || '').toLowerCase().includes(sq)   ||
                 (item.email || '').toLowerCase().includes(sq)
             );
-        }),
-        sortKey
-    );
+        });
+    }, [supplierData, searchQuery, activeWarehouseFilter, inventoryData]);
+
+    const { sortedData: filteredData, requestSort, SortIndicator } = window.useSorting(baseFiltered, 'name', 'asc');
 
     // Extract unique warehouses present in inventory for filter pills
     const availableWarehouses = ['All', ...new Set(inventoryData.map(i => i.warehouse).filter(Boolean))].sort();
@@ -101,27 +79,27 @@ const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError }
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     searchPlaceholder="Search suppliers..."
-                    sortOptions={SORT_OPTIONS}
-                    currentSortKey={sortKey}
-                    onSortChange={setSortKey}
+                    sortOptions={[]}
+                    user={user}
+                    restrictionScope="Suppliers"
                 />
             </div>
 
             <table className="inventory-table" style={{ marginTop: '1rem' }}>
                 <thead>
-                    <tr className="header-row" onClick={toggleAll} style={{ cursor: 'pointer' }}>
-                        <th className="checkbox-col">
+                    <tr className="header-row">
+                        <th className="checkbox-col" onClick={toggleAll}>
                             <input
                                 type="checkbox"
                                 checked={selectedRows.length === filteredData.length && filteredData.length > 0}
-                                onChange={toggleAll}
+                                readOnly
                             />
                         </th>
-                        <th style={{ width: '20%' }}>Supplier Name</th>
-                        <th style={{ width: '20%' }}>Contact Person</th>
+                        <th style={{ width: '20%', cursor: 'pointer' }} onClick={() => requestSort('name')}>Supplier Name <SortIndicator columnKey="name" /></th>
+                        <th style={{ width: '20%', cursor: 'pointer' }} onClick={() => requestSort('contact')}>Contact Person <SortIndicator columnKey="contact" /></th>
                         <th style={{ width: '25%' }}>Address</th>
                         <th style={{ width: '15%' }}>Phone Number</th>
-                        <th style={{ width: '20%' }}>Email Address</th>
+                        <th style={{ width: '20%', cursor: 'pointer' }} onClick={() => requestSort('email')}>Email Address <SortIndicator columnKey="email" /></th>
                     </tr>
                 </thead>
 

@@ -51,6 +51,7 @@ const App = () => {
     const [promptState, setPromptState] = React.useState({ isOpen: false, title: '', type: '', items: [] });
 
     const openPrompt = (title, type, items = []) => setPromptState({ isOpen: true, title, type, items });
+    window.openPrompt = openPrompt; // Expose globally for sub-components
     const closePrompt = () => setPromptState({ ...promptState, isOpen: false });
 
     // Initial load
@@ -111,6 +112,20 @@ const App = () => {
     const handlePromptConfirm = async (data) => {
         try {
             const type = promptState.type;
+
+            // Security Validation: Secondary check for Auditor restrictions
+            if (user.role === 'Auditor') {
+                const res = user.restrictions || [];
+                const resMap = {
+                    'add-item': 'AddItems', 'edit-item': 'EditItems', 'remove-item': 'RemoveItems',
+                    'add-input-log': 'AddLogs', 'add-output-log': 'AddLogs', 'edit-log': 'EditLogs', 'remove-log': 'RemoveLogs',
+                    'add-supplier': 'AddSuppliers', 'edit-supplier': 'EditSuppliers', 'remove-supplier': 'RemoveSuppliers'
+                };
+                if (resMap[type] && res.includes(resMap[type])) {
+                    throw new Error(`Access Denied: You are restricted from performing ${resMap[type]}.`);
+                }
+            }
+
             if (type === 'add-item') {
                 const updated = [...inventory, data];
                 setInventory(updated);
@@ -130,6 +145,45 @@ const App = () => {
             } else if (type === 'add-output-log') {
                 const updated = [...outputLogs, data]; setOutputLogs(updated); await window.AppDataHandler.saveOutputLogs(updated);
                 const invUpdated = inventory.map(i => i.id === data.itemCode ? { ...i, quantity: (parseFloat(i.quantity) || 0) - parseFloat(data.quantity) } : i);
+                setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
+            } else if (type === 'add-supplier') {
+                const updated = [...suppliers, data]; setSuppliers(updated); await window.AppDataHandler.saveSuppliers(updated);
+            } else if (type === 'edit-supplier') {
+                const updated = suppliers.map(s => s.id === promptState.items[0] ? data : s); setSuppliers(updated); await window.AppDataHandler.saveSuppliers(updated);
+            } else if (type === 'remove-supplier') {
+                const updated = suppliers.filter(s => !promptState.items.includes(s.id)); setSuppliers(updated); await window.AppDataHandler.saveSuppliers(updated);
+            } else if (type === 'edit-log') {
+                const isInput = promptState.title.toLowerCase().includes('input');
+                const logs = isInput ? inputLogs : outputLogs;
+                const setLogs = isInput ? setInputLogs : setOutputLogs;
+                const saveFunc = isInput ? window.AppDataHandler.saveInputLogs : window.AppDataHandler.saveOutputLogs;
+
+                const oldLog = logs.find(l => l.transactionId === promptState.items[0]);
+                if (!oldLog) throw new Error("Original log record not found.");
+
+                const diff = (parseFloat(data.quantity) || 0) - (parseFloat(oldLog.quantity) || 0);
+                const updatedLogs = logs.map(l => l.transactionId === promptState.items[0] ? data : l);
+                
+                // Adjust inventory based on the quantity difference
+                const invUpdated = inventory.map(i => i.id === data.itemCode ? { 
+                    ...i, 
+                    quantity: isInput ? (parseFloat(i.quantity) || 0) + diff : (parseFloat(i.quantity) || 0) - diff 
+                } : i);
+
+                setLogs(updatedLogs); await saveFunc(updatedLogs);
+                setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
+            } else if (type === 'remove-log') {
+                const isInput = promptState.title.toLowerCase().includes('input');
+                const logs = isInput ? inputLogs : outputLogs;
+                const setLogs = isInput ? setInputLogs : setOutputLogs;
+                const saveFunc = isInput ? window.AppDataHandler.saveInputLogs : window.AppDataHandler.saveOutputLogs;
+                const toRemove = logs.filter(l => promptState.items.includes(l.transactionId));
+                const updatedLogs = logs.filter(l => !promptState.items.includes(l.transactionId));
+                let invUpdated = [...inventory];
+                toRemove.forEach(log => {
+                    invUpdated = invUpdated.map(i => i.id === log.itemCode ? { ...i, quantity: isInput ? (parseFloat(i.quantity)||0) - parseFloat(log.quantity) : (parseFloat(i.quantity)||0) + parseFloat(log.quantity) } : i);
+                });
+                setLogs(updatedLogs); await saveFunc(updatedLogs);
                 setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
             }
             closePrompt();
@@ -166,7 +220,7 @@ const App = () => {
                             <img src={branding.logoUrl} alt="Logo" style={{ maxHeight: '100%', objectFit: 'contain' }} />
                         </div>
                     )}
-                    <div className="app-logo" style={{ fontSize: '1.25rem', fontWeight: '800', border: 'none', background: 'none', padding: 0, webkitTextFillColor: 'initial', color: 'var(--text-primary)' }}>
+                    <div className="app-logo" style={{ fontSize: '1.25rem', fontWeight: '800', border: 'none', background: 'none', padding: 0, WebkitTextFillColor: 'initial', color: 'var(--text-primary)' }}>
                         {branding.companyName || 'CloudBased'}
                     </div>
                 </div>
@@ -242,16 +296,17 @@ const App = () => {
             )}
  
             <main className="app-layout">
-                {view === 'dashboard' && <window.Dashboard onPerformAction={handlePromptConfirm} openPrompt={openPrompt} globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ theme, isThresholdEnabled: true }} />}
-                {view === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} />}
-                {view === 'itemList' && <ItemList inventoryData={inventory} openPrompt={openPrompt} />}
-                {view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} />}
+                {view === 'dashboard' && <window.Dashboard onPerformAction={handlePromptConfirm} openPrompt={openPrompt} globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ theme, isThresholdEnabled: user.settings?.isThresholdEnabled ?? false, lowStockThreshold: user.settings?.lowStockThreshold }} user={user} />}
+                {view === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} user={user} lowStockThreshold={user.settings?.lowStockThreshold} isThresholdEnabled={user.settings?.isThresholdEnabled ?? false} />}
+                {view === 'itemList' && <ItemList inventoryData={inventory} openPrompt={openPrompt} user={user} lowStockThreshold={user.settings?.lowStockThreshold} isThresholdEnabled={user.settings?.isThresholdEnabled ?? false} />}
+                {view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} user={user} />}
                 {user.role === 'Administrator' && view === 'adminDashboard' && (
                     <window.AdminDashboard 
                         currentUser={user} 
                         inputLogs={inputLogs} 
                         outputLogs={outputLogs} 
                         onBrandingUpdate={handleBrandingChange}
+                        inventoryData={inventory}
                     />
                 )}
             </main>
@@ -265,8 +320,11 @@ const App = () => {
                 items={promptState.items}
                 inventoryData={inventory}
                 supplierData={suppliers}
+                inputLogs={inputLogs}
+                outputLogs={outputLogs}
                 uoms={uoms}
                 warehouses={warehouses}
+                user={user}
             />
 
             {isAccountSettingsOpen && (

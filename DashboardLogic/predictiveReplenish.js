@@ -1,5 +1,5 @@
 /**
- * The Oracle - Predictive Analytics Engine
+ * Predictive Replenish Engine
  * Calculates inventory velocity and projects run-out dates.
  * Combines forecasting with Google Calendar scheduling.
  */
@@ -45,12 +45,12 @@ const PredictiveReplenish = ({ inventoryData, outputLogs }) => {
         const dateRange = `${dateStr}/${dateStr}`;
 
         const details = encodeURIComponent(
-            `THE ORACLE PREDICTION:\n` +
+            `PREDICTIVE REPLENISH:\n` +
             `Item: ${item.name} (${item.id})\n` +
             `Current Stock: ${item.quantity} ${item.uom}\n` +
             `Consumption Rate: ${item.dailyBurn} ${item.uom}/day\n` +
             `Predicted Stock-Out: ${dateObj.toLocaleDateString()}\n\n` +
-            `Scheduled via CloudBased Oracle Engine.`
+            `Scheduled via CloudBased Predictive Replenish Engine.`
         );
 
         const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateRange}&details=${details}`;

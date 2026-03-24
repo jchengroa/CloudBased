@@ -16,7 +16,8 @@ const Prompt = ({
     inputLogs     = [],
     outputLogs    = [],
     uoms          = [],
-    warehouses    = []
+    warehouses    = [],
+    user          = {}
 }) => {
     const [formData, setFormData] = React.useState({});
     const [error, setError] = React.useState('');
@@ -88,7 +89,7 @@ const Prompt = ({
 
     return (
         <div className="prompt-overlay" onClick={e => e.target.className === 'prompt-overlay' && onClose()}>
-            <div className="prompt-box" style={{ maxWidth: type.includes('details') ? '500px' : '650px' }}>
+            <div className="prompt-box" style={{ maxWidth: type.includes('details') ? '500px' : '650px', maxHeight: '90vh', overflowY: 'auto' }}>
                 <div className="prompt-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
                     <h2 style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-0.5px' }}>{title}</h2>
                     <button className="prompt-close-btn" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5, padding: '0.4rem' }} onMouseEnter={e => e.target.style.opacity = 1} onMouseLeave={e => e.target.style.opacity = 0.5}>
@@ -149,13 +150,13 @@ const Prompt = ({
                                 />
                             </div>
                             <div className="auth-input-group">
-                                <label className="auth-label">Product Image (Upload)</label>
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <label className="auth-label">Product Image (Upload or URL)</label>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.75rem' }}>
                                     <input 
                                         type="file" 
                                         accept="image/*" 
                                         className="auth-input" 
-                                        style={{ padding: '0.65rem', height: 'auto', flex: 1 }} 
+                                        style={{ padding: '0.65rem', height: 'auto', flex: 1, margin: 0 }} 
                                         onChange={async (e) => {
                                             const file = e.target.files[0];
                                             if (file) {
@@ -174,7 +175,18 @@ const Prompt = ({
                                         </button>
                                     )}
                                 </div>
-                                {formData.imageUrl && formData.imageUrl.length > 500 && <span style={{fontSize: '0.8rem', color: 'var(--success)', marginTop: '0.25rem'}}>✓ Product image attached</span>}
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <input 
+                                        type="text" 
+                                        name="imageUrl"
+                                        className="auth-input" 
+                                        placeholder="Or paste external image URL (https://...)" 
+                                        style={{ flex: 1, marginBottom: 0 }} 
+                                        value={formData.imageUrl && !formData.imageUrl.startsWith('data:') ? formData.imageUrl : ''} 
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                {formData.imageUrl && <span style={{fontSize: '0.8rem', color: 'var(--success)', marginTop: '0.5rem', display: 'block', fontWeight: '500'}}>✓ Image source detected</span>}
                             </div>
                             <FormButtons confirmLabel={type === 'add-item' ? "Add Item" : "Save Changes"} onClose={onClose} onConfirm={handleConfirm} isSaving={isSaving} />
                         </div>
@@ -213,6 +225,21 @@ const Prompt = ({
                         </div>
                     )}
 
+                    {type === 'product-stats' && (() => {
+                        const item = inventoryData.find(i => i.id === items[0]) || {};
+                        return (
+                            <window.ProductStatSummary 
+                                item={item}
+                                inputLogs={inputLogs}
+                                outputLogs={outputLogs}
+                                onEdit={(it) => {
+                                    onClose();
+                                    setTimeout(() => window.openPrompt('Edit Inventory Item', 'edit-item', [it.id]), 300);
+                                }}
+                                user={user}
+                            />
+                        );
+                    })()}
                     {type === 'supplier-details' && (() => {
                         const sup = supplierData.find(s => s.name === items[0]) || { name: items[0], contact: '—', email: '—', phone: '—', address: '—' };
                         return (

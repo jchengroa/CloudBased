@@ -17,6 +17,7 @@ window.AppDataHandler = (function () {
     let auth = null;
     let dbError = null;
     let currentUser = null;
+    let activeConfig = null;
 
     try {
         const savedUser = localStorage.getItem('cloudbased_session');
@@ -42,7 +43,7 @@ window.AppDataHandler = (function () {
     const initPromise = (async () => {
         try {
             const savedConfig = localStorage.getItem(CONFIG_KEY);
-            const activeConfig = savedConfig ? JSON.parse(savedConfig) : await fetchJson('AppData/defaultDatabase.json');
+            activeConfig = savedConfig ? JSON.parse(savedConfig) : await fetchJson('AppData/defaultDatabase.json');
 
             if (!activeConfig || Object.keys(activeConfig).length === 0) {
                 dbError = "Firestore configuration missing.";
@@ -158,8 +159,9 @@ window.AppDataHandler = (function () {
                 username: userData.username,
                 email:    userData.email,
                 role:     'Auditor', // Standardizing default role for new signups
+                restrictions: [], // Default to no restrictions
                 createdAt: new Date().toISOString(),
-                settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: true }
+                settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: false }
             };
 
             await db.collection('users').doc(credential.user.uid).set(profile);
@@ -258,9 +260,49 @@ window.AppDataHandler = (function () {
             return usersRef.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
 
-        updateUserAccess: async function(uid, role, permissions) {
+        updateUserAccess: async function(uid, role, restrictions) {
             await initPromise;
-            await db.collection('users').doc(uid).update({ role, permissions });
+            await db.collection('users').doc(uid).update({ role, restrictions });
+        },
+
+        adminCreateUser: async function(userData) {
+            await initPromise;
+            // 1. Check if username exists globally
+            const check = await db.collection('users').where('username', '==', userData.username).get();
+            if (!check.empty) throw new Error("Username already taken.");
+
+            // 2. Initialize a secondary Firebase instance to create the user without logging out the admin
+            // This is a secure client-side pattern for administrative account creation.
+            const secondaryAppName = "adminAction_" + Date.now();
+            const secondaryApp = firebase.initializeApp(activeConfig, secondaryAppName);
+            
+            try {
+                const credential = await secondaryApp.auth().createUserWithEmailAndPassword(userData.email, userData.password);
+                const profile = {
+                    uid:       credential.user.uid,
+                    name:      userData.name,
+                    username:  userData.username,
+                    email:     userData.email,
+                    role:      userData.role || 'Auditor',
+                    restrictions: userData.role === 'Auditor' ? (userData.restrictions || []) : [],
+                    createdAt: new Date().toISOString(),
+                    settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: false }
+                };
+
+                await db.collection('users').doc(credential.user.uid).set(profile);
+                await secondaryApp.delete(); // Cleanup secondary instance
+                return profile;
+            } catch(e) {
+                if (secondaryApp) await secondaryApp.delete();
+                throw e;
+            }
+        },
+
+        deleteSharedUser: async function(uid) {
+            await initPromise;
+            // This removes the user's IMS profile. 
+            // In a production env with Firebase Admin SDK, we'd also delete the Auth record.
+            await db.collection('users').doc(uid).delete();
         },
 
         getBranding: async function() {
@@ -347,7 +389,7 @@ window.AppDataHandler = (function () {
 
         // --- USER SETTINGS ---
         getSettings: async function () {
-            const defaults = { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: true };
+            const defaults = { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: false };
             try {
                 await initPromise;
                 if (currentUser) {

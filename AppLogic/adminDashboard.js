@@ -2,7 +2,7 @@
  * Admin Dashboard - Container
  * Ties together all administrative configuration tabs.
  */
-const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate }) => {
+const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate, inventoryData }) => {
     const [activeTab, setActiveTab] = React.useState('overview');
     const [users, setUsers] = React.useState([]);
     const [activityLogs, setActivityLogs] = React.useState([]);
@@ -63,7 +63,7 @@ const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate }
         { id: 'overview', label: 'Overview', icon: <Icons.Shield size={16} /> },
         { id: 'users', label: 'User Management', icon: <Icons.Users size={16} /> },
         { id: 'logs', label: 'Activity Logs', icon: <Icons.FileText size={16} /> },
-        { id: 'import', label: 'Import Data', icon: <Icons.UploadCloud size={16} /> },
+        { id: 'manage', label: 'Manage Data', icon: <Icons.ArrowDownCircle size={16} /> },
         { id: 'branding', label: 'Branding', icon: <Icons.Image size={16} /> },
         { id: 'settings', label: 'Global Settings', icon: <Icons.Settings size={16} /> }
     ];
@@ -114,7 +114,7 @@ const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate }
             {activeTab === 'overview' && <window.AdminOverviewTab users={users} activityLogs={activityLogs} />}
             {activeTab === 'users' && <window.AdminUserManagementTab users={users} onUpdateUser={loadData} currentUser={currentUser} />}
             {activeTab === 'logs' && <window.AdminActivityLogsTab activityLogs={activityLogs} />}
-            {activeTab === 'import' && <window.AdminImportDataTab />}
+            {activeTab === 'manage' && <window.AdminManageDataTab inventoryData={inventoryData} />}
             {activeTab === 'branding' && <window.AdminBrandingTab branding={branding} onUpdateBranding={(b) => { setBranding(b); onBrandingUpdate(b); }} />}
             {activeTab === 'settings' && <window.AdminGlobalSettingsTab globalSettings={globalSettings} onUpdateGlobalSettings={setGlobalSettings} />}
 
