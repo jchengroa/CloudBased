@@ -34,7 +34,7 @@ const Validation = {
         if (!formData.transactionId) return 'Transaction ID is required.';
         
         const allLogs = [...inputLogs, ...outputLogs];
-        const isDuplicate = allLogs.some(l => l.transactionId === formData.transactionId && (!isEdit || l.id !== originalId));
+        const isDuplicate = allLogs.some(l => l.transactionId === formData.transactionId && (!isEdit || l.transactionId !== originalId));
         if (isDuplicate) return `Transaction ID "${formData.transactionId}" already exists.`;
         
         return null; // Valid

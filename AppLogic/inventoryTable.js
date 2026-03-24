@@ -112,7 +112,7 @@ const InventoryTable = ({
                             if (selectedRows.length === processed.length && processed.length > 0) {
                                 setSelectedRows([]);
                             } else {
-                                setSelectedRows(processed.map(p => p.id));
+                                setSelectedRows(processed.map(p => isOverview ? p.id : p.transactionId));
                             }
                         }}>
                              <input 
@@ -148,9 +148,10 @@ const InventoryTable = ({
                 <tbody>
                     <TableMessage colSpan="10" dbError={dbError} isEmpty={processed.length === 0} emptyMessage="No matching records found." />
                     {processed.map(item => {
-                        const isSelected = selectedRows.includes(item.id);
+                        const rowId = isOverview ? item.id : item.transactionId;
+                        const isSelected = selectedRows.includes(rowId);
                         return (
-                            <tr key={item.id} className={`data-row ${isSelected ? 'selected' : ''}`} onClick={() => toggleRow(item.id)}>
+                            <tr key={rowId} className={`data-row ${isSelected ? 'selected' : ''}`} onClick={() => toggleRow(rowId)}>
                                 <td className="checkbox-col"><input type="checkbox" checked={isSelected} readOnly /></td>
                                 {isOverview ? (
                                     <>

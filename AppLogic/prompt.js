@@ -45,6 +45,9 @@ const Prompt = ({
         } else if (type === 'edit-supplier' && items.length === 1) {
             const found = supplierData.find(s => s.id === items[0]);
             if (found) setFormData({ ...found });
+        } else if (type === 'edit-log' && items.length === 1) {
+            const found = [...inputLogs, ...outputLogs].find(l => l.transactionId === items[0]);
+            if (found) setFormData({ ...found });
         } else if (type === 'add-input-log' || type === 'add-output-log') {
             const first = inventoryData[0];
             setFormData({
@@ -221,7 +224,11 @@ const Prompt = ({
                                 }} options={[{label: '-- Select Item --', value: ''}, ...inventoryData.map(i => ({label: `${i.id} - ${i.name}`, value: i.id}))]} />
                                 <FormInput type="number" label="Quantity" name="quantity" value={formData.quantity ?? ''} onChange={handleChange} />
                             </div>
-                            <FormButtons confirmLabel="Log Transaction" onClose={onClose} onConfirm={handleConfirm} isSaving={isSaving} />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <FormInput label="Supplier / Handler" name="supplier" value={formData.supplier || ''} onChange={handleChange} />
+                                <FormInput label="Batch / Lot Number" name="batchLot" value={formData.batchLot || ''} onChange={handleChange} />
+                            </div>
+                            <FormButtons confirmLabel={type === 'edit-log' ? "Save Changes" : "Log Transaction"} onClose={onClose} onConfirm={handleConfirm} isSaving={isSaving} />
                         </div>
                     )}
 
