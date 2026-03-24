@@ -133,7 +133,7 @@ const ManageDataTab = ({ inventoryData }) => {
                     supplier: compName,
                     batchLot: row[cBatch] ? row[cBatch].toString().trim() : '',
                     timestamp: Date.now(),
-                    userName: 'System Import'
+                    userName: 'System'
                 });
             }
         }
@@ -164,7 +164,7 @@ const ManageDataTab = ({ inventoryData }) => {
                     supplier: compName,
                     batchLot: row[cBatch] ? row[cBatch].toString().trim() : '',
                     timestamp: Date.now(),
-                    userName: 'System Import'
+                    userName: 'System'
                 });
             }
         }
@@ -240,6 +240,13 @@ const ManageDataTab = ({ inventoryData }) => {
             if (diffData.newOutputs.length > 0) {
                 await window.AppDataHandler.saveOutputLogs([...currentOutputs, ...diffData.newOutputs]);
             }
+            
+            // Log the activity
+            await window.AppDataHandler.addActivityLog({
+                title: 'Data Sync Executed',
+                details: `Imported ${diffData.added.length} items, ${diffData.updated.length} updates, and ${diffData.deleted.length} deletions.`,
+                category: 'system'
+            });
 
             alert("Sync Complete! The inventory has been updated.");
             setDiffData(null);

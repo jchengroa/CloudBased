@@ -19,33 +19,42 @@ const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate, 
             const fetchedUsers = await window.AppDataHandler.getUsers();
             const fetchedBranding = await window.AppDataHandler.getBranding();
             const fetchedGlobalSettings = await window.AppDataHandler.getGlobalSettings();
+            const fetchedActivityLogs = await window.AppDataHandler.getActivityLogs();
             
-            // Generate unified activity logs from input/output logs + fake ones for the mockup
-            // Sort them by timestamp descending
-            const mergedLogs = [
+            // Generate unified activity logs from input/output logs (historical) 
+            // and the new dedicated activity logs.
+            const merged = [
+                ...fetchedActivityLogs,
                 ...inputLogs.map(log => ({
                     timestamp: log.timestamp,
                     user: log.userName || 'System',
-                    title: 'Logged Input Transaction',
+                    title: 'Stock In',
                     details: `IN-${log.id} - Processed input for ${log.itemCode}`,
-                    category: 'transaction',
-                    type: 'input'
+                    category: 'transaction'
                 })),
                 ...outputLogs.map(log => ({
                     timestamp: log.timestamp,
                     user: log.userName || 'System',
-                    title: 'Logged Output Transaction',
+                    title: 'Stock Out',
                     details: `OUT-${log.id} - Dispatched ${log.itemCode}`,
-                    category: 'transaction',
-                    type: 'output'
-                })),
-                // Mockup data
-                { timestamp: Date.now() - 3600000, user: 'Administrator', title: 'Updated Branding', details: 'Changed company name', category: 'system', type: 'system' },
-                { timestamp: Date.now() - 7200000, user: 'Administrator', title: 'Updated Supplier', details: 'Modified contact details for FastBolt', category: 'supplier', type: 'supplier' }
-            ].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    category: 'transaction'
+                }))
+            ];
+
+            // Deduplicate to avoid showing same transaction twice (once from logs, once from activityLogs)
+            const finalLogs = [];
+            const seen = new Set();
+            merged.sort((a,b) => b.timestamp - a.timestamp).forEach(log => {
+                // Approximate key for deduplication
+                const key = `${Math.floor(log.timestamp/1000)}-${log.user}-${log.title.substring(0,10)}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    finalLogs.push(log);
+                }
+            });
             
             setUsers(fetchedUsers);
-            setActivityLogs(mergedLogs);
+            setActivityLogs(finalLogs);
             setBranding(fetchedBranding);
             setGlobalSettings(fetchedGlobalSettings);
         } catch(e) {
@@ -113,7 +122,7 @@ const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate, 
             {/* Rendering matching Tab */}
             {activeTab === 'overview' && <window.AdminOverviewTab users={users} activityLogs={activityLogs} />}
             {activeTab === 'users' && <window.AdminUserManagementTab users={users} onUpdateUser={loadData} currentUser={currentUser} />}
-            {activeTab === 'logs' && <window.AdminActivityLogsTab activityLogs={activityLogs} />}
+            {activeTab === 'logs' && <window.AdminActivityLogsTab activityLogs={activityLogs} onClearLogs={loadData} />}
             {activeTab === 'manage' && <window.AdminManageDataTab inventoryData={inventoryData} />}
             {activeTab === 'branding' && <window.AdminBrandingTab branding={branding} onUpdateBranding={(b) => { setBranding(b); onBrandingUpdate(b); }} />}
             {activeTab === 'settings' && <window.AdminGlobalSettingsTab globalSettings={globalSettings} onUpdateGlobalSettings={setGlobalSettings} />}

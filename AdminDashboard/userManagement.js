@@ -32,6 +32,11 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
         setIsSaving(true);
         try {
             await window.AppDataHandler.updateUserAccess(editingUser.id, editRole, editRole === 'Auditor' ? editRestrictions : []);
+            await window.AppDataHandler.addActivityLog({
+                title: 'Updated User Access',
+                details: `Modified access level and restrictions for ${editingUser.name}.`,
+                category: 'user'
+            });
             onUpdateUser();
             setEditingUser(null);
         } catch(e) { alert(e.message); }
@@ -46,6 +51,11 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
         setIsSaving(true);
         try {
             await window.AppDataHandler.adminCreateUser(addForm);
+            await window.AppDataHandler.addActivityLog({
+                title: 'Registered New Member',
+                details: `Successfully created account for ${addForm.name} (@${addForm.username}).`,
+                category: 'user'
+            });
             onUpdateUser();
             setIsAddingUser(false);
             setAddForm({ name: '', username: '', email: '', password: '', role: 'Auditor', restrictions: [] });
@@ -59,6 +69,11 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
         setIsSaving(true);
         try {
             await window.AppDataHandler.deleteSharedUser(editingUser.id);
+            await window.AppDataHandler.addActivityLog({
+                title: 'Removed User',
+                details: `Permanently deleted user account for ${editingUser.name}.`,
+                category: 'user'
+            });
             onUpdateUser();
             setEditingUser(null);
         } catch(e) { alert(e.message); }

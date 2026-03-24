@@ -217,3 +217,11 @@ A SOFDESG and LBYCPD2 Project. Created by Cheng Roa and Tejada
 - **Natural Language Undo/Reverse**: Added support for correctional phrases like "reverse that", "mistake", or "wrong entry." The assistant instantly triggers a full database-wide revert of the last action.
 - **Executive Intelligence Dashboard**: Promoted "Critical Replenishment" to the primary Overview tab. The alert logic is now synchronized with global MSL thresholds and account-level overrides.
 - **Administrative Settings Polish**: Corrected confusing "Beta" labels in Global Settings to accurately reflect standard module features.
+
+### Version 0.11.3 (March 24, 2026)
+- **Admin Activity Logs (Persistent Collection)**: Launched a dedicated activity logging system stored in Firestore that tracks all administrative and user-driven changes across the platform beyond basic transactions.
+- **CSV Data Export (Activity Logs)**: Integrated a dynamic CSV export tool for activity logs, supporting filtered data views and proper field escaping for professional spreadsheet compatibility.
+- **Actor Branding & Normalization**: Standardized the default system actor name to "System" instead of "System Import" across all automated transaction and sync logs for a cleaner, prioritized audit trail.
+- **Multi-User Identity Tracking**: Implemented granular session and profile event logging, including manual logins, account signups, password resets, and profile-specific administrative events.
+- **Security & Auditor Enforcement**: Hardened the internal permission layer to ensure that all restricted Auditor actions are blocked and omitted from the log history, preventing unauthorized clutter.
+- **Administrative Maintenance**: Added a "Clear Activity Logs" utility for administrators to reset purely administrative history while preserving the core business transaction records.

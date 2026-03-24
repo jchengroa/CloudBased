@@ -215,3 +215,11 @@ Version 0.11.2 (March 24, 2026)
 - Executive Dashboard Promotion: Upgraded "Critical Replenishment Required" from a hidden tab to the primary Dashboard Overview for improved business intelligence.
 - System Logic Sync: Standardized all AI-driven stock warnings to respect global thresholds and MSL account overrides.
 - Global Administration: Fixed a labeling bug in the Admin Settings where Replenishment Alerts were incorrectly referred to as a Beta feature.
+
+Version 0.11.3 (March 24, 2026)
+- Admin Activity Logs (Persistent Collection): Launched a dedicated activity logging system stored in Firestore that tracks all administrative and user-driven changes across the platform beyond basic transactions.
+- CSV Data Export (Activity Logs): Integrated a dynamic CSV export tool for activity logs, supporting filtered data views and proper field escaping for professional spreadsheet compatibility.
+- Actor Branding & Normalization: Standardized the default system actor name to "System" instead of "System Import" across all automated transaction and sync logs for a cleaner, prioritized audit trail.
+- Multi-User Identity Tracking: Implemented granular session and profile event logging, including manual logins, account signups, password resets, and profile-specific administrative events.
+- Security & Auditor Enforcement: Hardened the internal permission layer to ensure that all restricted Auditor actions are blocked and omitted from the log history, preventing unauthorized clutter.
+- Administrative Maintenance: Added a "Clear Activity Logs" utility for administrators to reset purely administrative history while preserving the core business transaction records.

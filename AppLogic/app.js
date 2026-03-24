@@ -138,14 +138,29 @@ const App = () => {
                 const updated = [...inventory, data];
                 setInventory(updated);
                 await window.AppDataHandler.saveInventory(updated);
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Added New Item',
+                    details: `Created item master for ${data.name || data.id}.`,
+                    category: 'inventory'
+                });
             } else if (type === 'edit-item') {
                 const updated = inventory.map(i => i.id === promptState.items[0] ? data : i);
                 setInventory(updated);
                 await window.AppDataHandler.saveInventory(updated);
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Updated Item Details',
+                    details: `Modified configurations for ${data.name || data.id}.`,
+                    category: 'inventory'
+                });
             } else if (type === 'remove-item') {
                 const updated = inventory.filter(i => !promptState.items.includes(i.id));
                 setInventory(updated);
                 await window.AppDataHandler.saveInventory(updated);
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Removed Item(s)',
+                    details: `Deleted ${promptState.items.length} records from inventory master.`,
+                    category: 'inventory'
+                });
             } else if (type === 'add-input-log' || type === 'add-output-log') {
                 const isInput = type === 'add-input-log';
                 const currentLogs = isInput ? inputLogs : outputLogs;
@@ -173,12 +188,33 @@ const App = () => {
                     saveFunc(nextLogs),
                     window.AppDataHandler.saveInventory(nextInventory)
                 ]);
+
+                await window.AppDataHandler.addActivityLog({
+                    title: isInput ? 'Stock In Processed' : 'Stock Out Processed',
+                    details: `${isInput ? 'Received' : 'Dispatched'} ${data.quantity} of ${data.itemCode} (${data.transactionId}).`,
+                    category: 'transaction'
+                });
             } else if (type === 'add-supplier') {
                 const updated = [...suppliers, data]; setSuppliers(updated); await window.AppDataHandler.saveSuppliers(updated);
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Added Supplier',
+                    details: `Registered ${data.name} as a new business partner.`,
+                    category: 'supplier'
+                });
             } else if (type === 'edit-supplier') {
                 const updated = suppliers.map(s => s.id === promptState.items[0] ? data : s); setSuppliers(updated); await window.AppDataHandler.saveSuppliers(updated);
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Updated Supplier',
+                    details: `Modified contact or business details for ${data.name}.`,
+                    category: 'supplier'
+                });
             } else if (type === 'remove-supplier') {
                 const updated = suppliers.filter(s => !promptState.items.includes(s.id)); setSuppliers(updated); await window.AppDataHandler.saveSuppliers(updated);
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Removed Supplier',
+                    details: `Permanently deleted supplier record for ${promptState.items[0]}.`,
+                    category: 'supplier'
+                });
             } else if (type === 'edit-log') {
                 const isInput = promptState.title.toLowerCase().includes('input');
                 const logs = isInput ? inputLogs : outputLogs;
@@ -199,6 +235,11 @@ const App = () => {
 
                 setLogs(updatedLogs); await saveFunc(updatedLogs);
                 setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Edited Transaction Log',
+                    details: `Adjusted record for ${data.itemCode} (${promptState.items[0]}).`,
+                    category: 'transaction'
+                });
             } else if (type === 'remove-log') {
                 const isInput = promptState.title.toLowerCase().includes('input');
                 const logs = isInput ? inputLogs : outputLogs;
@@ -212,6 +253,11 @@ const App = () => {
                 });
                 setLogs(updatedLogs); await saveFunc(updatedLogs);
                 setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Removed Transaction Log(s)',
+                    details: `Deleted ${toRemove.length} log records from system history.`,
+                    category: 'transaction'
+                });
             }
             closePrompt();
         } catch (err) { alert("Error saving data: " + err.message); }
@@ -245,6 +291,12 @@ const App = () => {
                     window.AppDataHandler.saveInventory(nextInventory)
                 ]);
                 
+                await window.AppDataHandler.addActivityLog({
+                    title: 'Executed Undo',
+                    details: `Reversed transaction ${logId} and restored previous stock levels.`,
+                    category: 'transaction'
+                });
+
                 setLastAction(null);
                 return "Recent transaction has been reversed and stock levels restored.";
             }

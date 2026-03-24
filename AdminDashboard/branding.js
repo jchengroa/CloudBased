@@ -22,6 +22,11 @@ const BrandingTab = ({ branding, onUpdateBranding }) => {
             
             // Immediately apply global accent if no personal preference exists
             document.documentElement.style.setProperty('--accent-color', accentColor);
+            await window.AppDataHandler.addActivityLog({
+                title: 'Updated Branding',
+                details: `Changed company name to "${companyName || 'System'}" and updated visual assets.`,
+                category: 'system'
+            });
             
             setMessage('Branding updated successfully!');
             setTimeout(() => setMessage(''), 3000);

@@ -144,6 +144,14 @@ window.AppDataHandler = (function () {
 
             currentUser = userProfile;
             localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
+            
+            // Log the session activity
+            await this.addActivityLog({
+                title: 'User Login',
+                details: `Successfully signed in from ${navigator.platform || 'Web'}.`,
+                category: 'user'
+            }).catch(e => console.warn("Log failed:", e));
+
             return currentUser;
         },
 
@@ -168,6 +176,14 @@ window.AppDataHandler = (function () {
             
             currentUser = profile;
             localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
+            
+            // Log the signup activity
+            await this.addActivityLog({
+                title: 'New Account Created',
+                details: `Successful self-registration for ${userData.name} (@${userData.username}).`,
+                category: 'user'
+            }).catch(e => console.warn("Log failed:", e));
+
             return currentUser;
         },
 
@@ -201,6 +217,14 @@ window.AppDataHandler = (function () {
             }
             currentUser = { ...currentUser, ...data };
             localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
+            
+            // Log the profile activity
+            await this.addActivityLog({
+                title: 'Profile Updated',
+                details: `Modified personal account details and/or display name.`,
+                category: 'user'
+            });
+
             return currentUser;
         },
 
@@ -210,6 +234,13 @@ window.AppDataHandler = (function () {
             const cred = firebase.auth.EmailAuthProvider.credential(user.email, oldPass);
             await user.reauthenticateWithCredential(cred);
             await user.updatePassword(newPass);
+
+            // Log the security activity
+            await this.addActivityLog({
+                title: 'Security Sync',
+                details: 'User successfully updated their account password.',
+                category: 'user'
+            });
         },
 
         deleteAccount: async function () {
@@ -251,6 +282,23 @@ window.AppDataHandler = (function () {
         saveInputLogs:  (d) => saveData('inputLogs', d),
         saveOutputLogs: (d) => saveData('outputLogs', d),
         saveSuppliers:  (d) => saveData('suppliers', d),
+        getActivityLogs: () => getData('activityLogs'),
+        addActivityLog: async function(log) {
+            await initPromise;
+            const logEntry = {
+                timestamp: Date.now(),
+                user: currentUser ? currentUser.name : 'System',
+                ...log
+            };
+            await db.collection('activityLogs').add(logEntry);
+        },
+        clearActivityLogs: async function() {
+            await initPromise;
+            const snapshot = await db.collection('activityLogs').get();
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+        },
 
         // --- SYSTEM CONSTANTS ---
         getUsers: async function() {

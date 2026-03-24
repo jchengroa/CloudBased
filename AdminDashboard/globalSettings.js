@@ -28,6 +28,11 @@ const GlobalSettingsTab = ({ globalSettings, onUpdateGlobalSettings }) => {
         try {
             await window.AppDataHandler.saveGlobalSettings(settings);
             onUpdateGlobalSettings(settings);
+            await window.AppDataHandler.addActivityLog({
+                title: 'Updated Global Settings',
+                details: 'Modified dashboard widget visibility and system configuration.',
+                category: 'system'
+            });
             setMessage('Global Settings saved successfully!');
             setTimeout(() => setMessage(''), 3000);
         } catch(e) {
@@ -54,6 +59,11 @@ const GlobalSettingsTab = ({ globalSettings, onUpdateGlobalSettings }) => {
                 window.AppDataHandler.saveSuppliers([])
             ]);
             
+            await window.AppDataHandler.addActivityLog({
+                title: 'System Factory Reset',
+                details: 'Successfully executed a full database wipe of inventory, logs, and suppliers.',
+                category: 'system'
+            });
             alert("SUCCESS: The database has been reset. All inventory codes, transaction logs, and supplier profiles have been permanently removed.");
             location.reload(); // Refresh to ensure app state is clean
         } catch (e) {

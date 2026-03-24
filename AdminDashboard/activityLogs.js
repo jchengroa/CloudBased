@@ -1,8 +1,9 @@
 /**
  * Admin Dashboard - Activity Logs Tab
  */
-const ActivityLogsTab = ({ activityLogs }) => {
+const ActivityLogsTab = ({ activityLogs, onClearLogs }) => {
     const [filterCategory, setFilterCategory] = React.useState('All Categories');
+    const [isClearing, setIsClearing] = React.useState(false);
 
     const categories = ['All Categories', 'inventory', 'transaction', 'system', 'supplier', 'user'];
 
@@ -21,19 +22,73 @@ const ActivityLogsTab = ({ activityLogs }) => {
         }
     };
 
+    const handleDownload = () => {
+        const header = "Timestamp,User,Action,Details,Category\n";
+        const content = filteredLogs.map(log => {
+            const date = `"${new Date(log.timestamp).toLocaleString().replace(/"/g, '""')}"`;
+            const user = `"${(log.user || '').replace(/"/g, '""')}"`;
+            const action = `"${(log.title || '').replace(/"/g, '""')}"`;
+            const details = `"${(log.details || '').replace(/"/g, '""')}"`;
+            const category = `"${(log.category || 'misc').replace(/"/g, '""')}"`;
+            return `${date},${user},${action},${details},${category}`;
+        }).join('\n');
+        
+        const blob = new Blob([header + content], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `activity_logs_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleClear = async () => {
+        if (!confirm("Are you sure you want to PERMANENTLY clear all dedicated activity logs? (Transactions history will remain)")) return;
+        setIsClearing(true);
+        try {
+            await window.AppDataHandler.clearActivityLogs();
+            if (onClearLogs) onClearLogs();
+        } catch(e) {
+            alert("Failed to clear logs: " + e.message);
+        } finally {
+            setIsClearing(false);
+        }
+    };
+
     return (
         <div className="fade-in">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Filter by:</span>
-                <select 
-                    className="auth-input" 
-                    value={filterCategory} 
-                    onChange={e => setFilterCategory(e.target.value)}
-                    style={{ width: '200px', margin: 0, padding: '0.5rem 1rem' }}
-                >
-                    {categories.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
-                </select>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{filteredLogs.length} logs</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Filter by:</span>
+                    <select 
+                        className="auth-input" 
+                        value={filterCategory} 
+                        onChange={e => setFilterCategory(e.target.value)}
+                        style={{ width: '200px', margin: 0, padding: '0.5rem 1rem' }}
+                    >
+                        {categories.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                    </select>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{filteredLogs.length} logs</span>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button 
+                        onClick={handleDownload} 
+                        className="tool-btn" 
+                        style={{ padding: '0.6rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--hover-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer' }}
+                    >
+                        <Icons.Download size={16} /> Download .csv
+                    </button>
+                    <button 
+                        onClick={handleClear} 
+                        disabled={isClearing}
+                        style={{ padding: '0.6rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer' }}
+                    >
+                        {isClearing ? 'Clearing...' : <><Icons.Trash size={16} /> Clear Logs</>}
+                    </button>
+                </div>
             </div>
 
             <div className="data-table-container">
@@ -79,4 +134,5 @@ const ActivityLogsTab = ({ activityLogs }) => {
         </div>
     );
 };
+window.AdminActivityLogsTab = ActivityLogsTab;
 window.AdminActivityLogsTab = ActivityLogsTab;

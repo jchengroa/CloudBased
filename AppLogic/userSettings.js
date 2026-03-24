@@ -294,7 +294,7 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                 <UIIcons.Info size={16} /> Version Info
                             </div>
                             <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontWeight: '500' }}>CloudBased IMS</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.11.2</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.11.3</div>
                             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Date Modified: March 24, 2026</div>
                         </div>
                         <div style={{ background: 'var(--hover-bg)', padding: '1.5rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
