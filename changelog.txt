@@ -208,3 +208,10 @@ Version 0.11.1 (March 24, 2026)
 - InnoAssistant V2 (Neural Upgrade): Added Intelligent Property Queries allowing users to ask about item locations, categories, stock levels, and transaction history.
 - InnoAssistant V2 (Neural Upgrade): Integrated Smart Date Recognition for "Today" and "Yesterday" keywords in logging commands.
 - UI/UX Generalization: Replaced hardcoded placeholder examples (e.g., specific names/emails) with generic professional labels across all management prompts.
+
+Version 0.11.2 (March 24, 2026)
+- InnoAssistant Transaction Engine (Fix): Resolved a critical bug in the action handler where background commits would fail to resolve without an active UI modal.
+- InnoAssistant (Undo/Reverse): Implemented a new conversational "Undo" capability that recognizes keywords like "reverse that", "mistake", or "wrong entry" to instantly roll back the last transaction and restore stock levels.
+- Executive Dashboard Promotion: Upgraded "Critical Replenishment Required" from a hidden tab to the primary Dashboard Overview for improved business intelligence.
+- System Logic Sync: Standardized all AI-driven stock warnings to respect global thresholds and MSL account overrides.
+- Global Administration: Fixed a labeling bug in the Admin Settings where Replenishment Alerts were incorrectly referred to as a Beta feature.

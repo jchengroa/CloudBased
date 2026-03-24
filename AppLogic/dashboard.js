@@ -91,6 +91,11 @@ const Dashboard = ({ branding, inventoryData, inputLogs, outputLogs, supplierDat
                             {gSet.showRecentArrivals && <window.RecentArrivalsList inputLogs={filteredInputs} inventoryData={inventoryData} />}
                             {gSet.showRecentShipments && <window.RecentShipmentsList outputLogs={filteredOutputs} inventoryData={inventoryData} />}
                         </div>
+                        {gSet.showCriticalReplenishment && (
+                            <div style={{ marginTop: '0.5rem' }}>
+                                <window.CriticalReplenishment inventoryData={filteredInventory} settings={settings} supplierData={supplierData} openPrompt={openPrompt} />
+                            </div>
+                        )}
                     </>
                 )}
 

@@ -44,6 +44,7 @@ const App = () => {
     const [globalSettings, setGlobalSettings] = React.useState({});
     const [uoms, setUoms] = React.useState([]);
     const [warehouses, setWarehouses] = React.useState([]);
+    const [lastAction, setLastAction] = React.useState(null); // Tracks the last operation for Undo functionality
 
     // 3. UI state (Modals)
     const [isProfileOpen, setIsProfileOpen] = React.useState(false);
@@ -109,9 +110,16 @@ const App = () => {
         }
     };
 
-    const handlePromptConfirm = async (data) => {
+    const handlePromptConfirm = async (arg1, arg2) => {
         try {
-            const type = promptState.type;
+            // Support both (data) from Prompt and (type, data) from InnoAssistant
+            const type = typeof arg1 === 'string' ? arg1 : promptState.type;
+            const data = typeof arg1 === 'string' ? arg2 : arg1;
+
+            if (!type) {
+                console.warn("handlePromptConfirm called without a valid type.");
+                return;
+            }
 
             // Security Validation: Secondary check for Auditor restrictions
             if (user.role === 'Auditor') {
@@ -138,14 +146,33 @@ const App = () => {
                 const updated = inventory.filter(i => !promptState.items.includes(i.id));
                 setInventory(updated);
                 await window.AppDataHandler.saveInventory(updated);
-            } else if (type === 'add-input-log') {
-                const updated = [...inputLogs, data]; setInputLogs(updated); await window.AppDataHandler.saveInputLogs(updated);
-                const invUpdated = inventory.map(i => i.id === data.itemCode ? { ...i, quantity: (parseFloat(i.quantity) || 0) + parseFloat(data.quantity) } : i);
-                setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
-            } else if (type === 'add-output-log') {
-                const updated = [...outputLogs, data]; setOutputLogs(updated); await window.AppDataHandler.saveOutputLogs(updated);
-                const invUpdated = inventory.map(i => i.id === data.itemCode ? { ...i, quantity: (parseFloat(i.quantity) || 0) - parseFloat(data.quantity) } : i);
-                setInventory(invUpdated); await window.AppDataHandler.saveInventory(invUpdated);
+            } else if (type === 'add-input-log' || type === 'add-output-log') {
+                const isInput = type === 'add-input-log';
+                const currentLogs = isInput ? inputLogs : outputLogs;
+                const setLogs = isInput ? setInputLogs : setOutputLogs;
+                const saveFunc = isInput ? window.AppDataHandler.saveInputLogs : window.AppDataHandler.saveOutputLogs;
+
+                const nextLogs = [...currentLogs, data];
+                const nextInventory = inventory.map(i => i.id === data.itemCode ? { 
+                    ...i, 
+                    quantity: isInput ? (parseFloat(i.quantity) || 0) + parseFloat(data.quantity) : (parseFloat(i.quantity) || 0) - parseFloat(data.quantity) 
+                } : i);
+
+                setLogs(nextLogs);
+                setInventory(nextInventory);
+
+                // Set Undo Tracking
+                setLastAction({
+                    type: isInput ? 'undo-input' : 'undo-output',
+                    logId: data.id || data.transactionId,
+                    itemCode: data.itemCode,
+                    quantity: data.quantity
+                });
+
+                await Promise.all([
+                    saveFunc(nextLogs),
+                    window.AppDataHandler.saveInventory(nextInventory)
+                ]);
             } else if (type === 'add-supplier') {
                 const updated = [...suppliers, data]; setSuppliers(updated); await window.AppDataHandler.saveSuppliers(updated);
             } else if (type === 'edit-supplier') {
@@ -189,6 +216,43 @@ const App = () => {
             closePrompt();
         } catch (err) { alert("Error saving data: " + err.message); }
     };
+
+    const handleUndo = async () => {
+        if (!lastAction) {
+            alert("Nothing to undo.");
+            return;
+        }
+
+        try {
+            const { type, logId, itemCode, quantity } = lastAction;
+            
+            if (type === 'undo-input' || type === 'undo-output') {
+                const isInput = type === 'undo-input';
+                const logs = isInput ? inputLogs : outputLogs;
+                const setLogs = isInput ? setInputLogs : setOutputLogs;
+                const saveFunc = isInput ? window.AppDataHandler.saveInputLogs : window.AppDataHandler.saveOutputLogs;
+
+                const nextLogs = logs.filter(l => (l.id !== logId && l.transactionId !== logId));
+                const nextInventory = inventory.map(i => i.id === itemCode ? {
+                    ...i,
+                    quantity: isInput ? (parseFloat(i.quantity) || 0) - parseFloat(quantity) : (parseFloat(i.quantity) || 0) + parseFloat(quantity)
+                } : i);
+
+                setLogs(nextLogs);
+                setInventory(nextInventory);
+                await Promise.all([
+                    saveFunc(nextLogs),
+                    window.AppDataHandler.saveInventory(nextInventory)
+                ]);
+                
+                setLastAction(null);
+                return "Recent transaction has been reversed and stock levels restored.";
+            }
+        } catch (err) {
+            alert("Undo failed: " + err.message);
+        }
+    };
+    window.performUndo = handleUndo;
 
     if (!user) return null; // Redirect handled in useEffect
 

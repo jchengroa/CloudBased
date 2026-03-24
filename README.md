@@ -211,3 +211,9 @@ A SOFDESG and LBYCPD2 Project. Created by Cheng Roa and Tejada
 - **InnoAssistant V2 (Neural Upgrade)**: Added Intelligent Property Queries allowing users to ask about item locations, categories, stock levels, and transaction history.
 - **InnoAssistant V2 (Neural Upgrade)**: Integrated Smart Date Recognition for "Today" and "Yesterday" keywords in logging commands.
 - **UI/UX Generalization**: Replaced hardcoded placeholder examples (e.g., specific names/emails) with generic professional labels across all management prompts.
+
+### Version 0.11.2 (March 24, 2026)
+- **AI Transaction Engine (Major Fix)**: Resolved a critical communication bug where background AI commits would fail. "Execute Commit" now properly updates your inventory and logs.
+- **Natural Language Undo/Reverse**: Added support for correctional phrases like "reverse that", "mistake", or "wrong entry." The assistant instantly triggers a full database-wide revert of the last action.
+- **Executive Intelligence Dashboard**: Promoted "Critical Replenishment" to the primary Overview tab. The alert logic is now synchronized with global MSL thresholds and account-level overrides.
+- **Administrative Settings Polish**: Corrected confusing "Beta" labels in Global Settings to accurately reflect standard module features.

@@ -1,6 +1,13 @@
 const CriticalReplenishment = ({ inventoryData, settings, supplierData = [], openPrompt }) => {
-    const getMin = (item) => parseFloat(item.optimalStock) || (settings?.lowStockThreshold || 1000);
-    const criticalItems = inventoryData.filter(i => (parseFloat(i.quantity) || 0) < getMin(i) && (i.isRestocked !== 'Yes' && i.isRestocked !== 'I'));
+    const getMin = (item) => {
+        if (settings?.isThresholdEnabled && settings?.lowStockThreshold) return parseFloat(settings.lowStockThreshold);
+        return parseFloat(item.optimalStock) || 0;
+    };
+    const criticalItems = inventoryData.filter(i => {
+        const stock = parseFloat(i.quantity) || 0;
+        const min = getMin(i);
+        return stock < min && (i.isRestocked !== 'Yes' && i.isRestocked !== 'I');
+    });
 
     return (
         <div className="dashboard-card" style={{ padding: 0, overflow: 'hidden' }}>

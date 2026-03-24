@@ -37,7 +37,7 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
             selectedDate = d.toISOString().split('T')[0];
         }
 
-        setTimeout(() => {
+        setTimeout(async () => {
             if (isQuery) {
                 // Pre-identify common targets: Item, Supplier
                 const rawWords = lowerCmd.split(' ');
@@ -51,12 +51,18 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                 );
 
                 // 1. Handling Restock Queries
+                const getMin = (i) => {
+                    const settings = user?.settings || {};
+                    if (settings.isThresholdEnabled && settings.lowStockThreshold) return parseFloat(settings.lowStockThreshold);
+                    return parseFloat(i.optimalStock) || 0;
+                };
+
                 if (lowerCmd.includes('restock') || lowerCmd.includes('low') || lowerCmd.includes('short') || lowerCmd.includes('reorder') || lowerCmd.includes('supplies') || lowerCmd.includes('needed') || lowerCmd.includes('must-buy') || lowerCmd.includes('out-of-stock') || lowerCmd.includes('critical')) {
-                    const lowItems = inventoryData.filter(i => (parseFloat(i.quantity) || 0) < 50 && (i.isRestocked !== 'Yes' && i.isRestocked !== 'I')).slice(0, 3);
+                    const lowItems = inventoryData.filter(i => (parseFloat(i.quantity) || 0) < getMin(i) && (i.isRestocked !== 'Yes' && i.isRestocked !== 'I')).slice(0, 3);
                     if (lowItems.length > 0) {
                         setParsedResult({
                             isQuery: true,
-                            answer: `I've analyzed the stock levels. You should prioritize restocking: ${lowItems.map(i => i.name).join(', ')}. These are currently below critical safety thresholds.`
+                            answer: `I've analyzed the stock levels. Based on your settings, you should prioritize restocking: ${lowItems.map(i => i.name).join(', ')}.`
                         });
                     } else {
                         setParsedResult({
@@ -105,7 +111,22 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                     setParsedResult({ error: "I can help with restock checks, item status (quantity/location), transaction history, or supplier info. Try: 'Where is Blue Paint?' or 'Last log for SKU-101'" });
                 }
             } else {
-                // Handling Logging Commands
+                // Handling Logging Commands OR Undo Commands
+                const undoSynonyms = [
+                    'undo', 'reverse', 'revert', 'cancel last', 'wrong info', 'wrong information', 
+                    'wait wrong', 'mistake', 'error', 'wrong entry', 'nevermind', 'go back', 'delete that'
+                ];
+                
+                if (undoSynonyms.some(s => lowerCmd.includes(s))) {
+                    const result = await window.performUndo();
+                    setParsedResult({
+                        isQuery: true,
+                        answer: result || "Last change undone."
+                    });
+                    setIsThinking(false);
+                    return;
+                }
+
                 const qty = doc.values().toNumber().out('array')[0] || 0;
 
                 // 3. Multi-Strategy Item Matching (ID, Partial Name, Keywords)
@@ -158,14 +179,18 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
     const confirmAction = () => {
         if (!parsedResult || parsedResult.error || parsedResult.isQuery) return;
 
-        onPerformAction(parsedResult.type, {
+        const commitData = {
+            id: (parsedResult.isArrival ? 'IN-' : 'OUT-') + Math.floor(Math.random() * 1000000), // Map Firestore ID locally
             itemCode: parsedResult.item.id,
             quantity: parsedResult.quantity,
             date: parsedResult.date || new Date().toISOString().split('T')[0],
-            transactionId: (parsedResult.isArrival ? 'IN-' : 'OUT-') + Math.floor(Math.random() * 1000000),
+            transactionId: (parsedResult.isArrival ? 'IN-' : 'OUT-') + Date.now(),
             uom: parsedResult.item.uom || 'units',
             supplier: parsedResult.isArrival ? (supplierData[0]?.name || 'Internal') : 'Direct Fulfillment'
-        });
+        };
+
+        onPerformAction(parsedResult.type, commitData);
+        alert(`Successfully committed: ${parsedResult.humanReadable}`);
         setParsedResult(null);
         setCommand('');
     };

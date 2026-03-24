@@ -94,7 +94,7 @@ const GlobalSettingsTab = ({ globalSettings, onUpdateGlobalSettings }) => {
                     <SettingRow label="Suppliers Analytics" desc="Overview of top suppliers by volume." stateKey="showSuppliersOnly" />
                     <SettingRow label="Recent Arrivals Log" desc="List of inputs processed across selected warehouses." stateKey="showRecentArrivals" />
                     <SettingRow label="Recent Shipments Log" desc="List of outputs and fulfillments." stateKey="showRecentShipments" />
-                    <SettingRow label="Predictive Replenishment Beta" desc="Enables the AI forecasting alert system globally." stateKey="showCriticalReplenishment" />
+                    <SettingRow label="Critical Replenishment Alerts" desc="Highlights urgent items that need restocking based on MSL or Global Thresholds." stateKey="showCriticalReplenishment" />
                     <SettingRow label="Predictive Replenishment Engine" desc="Forecasts run-out dates and enables Google Calendar sync." stateKey="showPredictiveReplenish" />
                     <SettingRow label="InnoAssistant AI Command Center" desc="Cognitive intake processing powered by TensorFlow & Compromise." stateKey="showInnoAssistant" />
                     <SettingRow label="Category Performance" desc="Distribution pie or bar charts by category." stateKey="showCategoryPerformance" />
