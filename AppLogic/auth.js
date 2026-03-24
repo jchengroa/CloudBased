@@ -223,7 +223,7 @@ const Auth = ({ onLoginSuccess }) => {
                         </div>
                     ) : (
                         <div className="auth-logo" style={{ marginBottom: '1rem', textAlign: 'center' }}>
-                            {branding.companyName || 'CloudBased'}
+                            {branding.companyName || 'System'}
                         </div>
                     )}
                     <div className="auth-subtitle">

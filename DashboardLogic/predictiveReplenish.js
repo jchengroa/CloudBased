@@ -4,7 +4,7 @@
  * Combines forecasting with Google Calendar scheduling.
  */
 
-const PredictiveReplenish = ({ inventoryData, outputLogs }) => {
+const PredictiveReplenish = ({ branding, inventoryData, outputLogs }) => {
     const [visibleItems, setVisibleItems] = React.useState(3);
 
     // 1. Core Logic: Projecting Run-out Dates
@@ -50,7 +50,7 @@ const PredictiveReplenish = ({ inventoryData, outputLogs }) => {
             `Current Stock: ${item.quantity} ${item.uom}\n` +
             `Consumption Rate: ${item.dailyBurn} ${item.uom}/day\n` +
             `Predicted Stock-Out: ${dateObj.toLocaleDateString()}\n\n` +
-            `Scheduled via CloudBased Predictive Replenish Engine.`
+            `Scheduled via ${branding.companyName || 'System'} Predictive Replenish Engine.`
         );
 
         const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateRange}&details=${details}`;

@@ -194,7 +194,6 @@ A SOFDESG and LBYCPD2 Project. Created by Cheng Roa and Tejada
 - **Intelligent Dashboard Filtering & AI**: Refined "Predictive Replenish" logic blocks to automatically suppress alerts for items marked as "Restocked" or "In-Process."
 - **Intelligent Dashboard Filtering & AI**: Upgraded InnoAssistant (AI) cognitive processing to exclude restocked or in-transit items when generating suggestions.
 - **Intelligent Dashboard Filtering & AI**: Restored the `getDbError` handler for graceful reporting of database connectivity issues.
-
 ### Version 0.11.0 (March 24, 2026)
 - **Security & System Resilience**: Replaced standard browser alerts with a custom, branded confirmation dialog across both Login and Settings screens.
 - **Security & System Resilience**: Introduced a mandatory security warning regarding Firebase's 10-email-per-day quota limit and spam folder checks.
@@ -202,3 +201,13 @@ A SOFDESG and LBYCPD2 Project. Created by Cheng Roa and Tejada
 - **Rebranding & Identity**: Renamed all instances of "The Oracle" and "Oracle Forecast" to "Predictive Replenish" for branding alignment.
 - **Rebranding & Identity**: Finalized the rebranding of "AuraAI" to "InnoAssistant" across all neural processing and UI component layers.
 - **Rebranding & Identity**: Updated project documentation and historical logs to align with the new nomenclature.
+
+### Version 0.11.1 (March 24, 2026)
+- **Dynamic Branding & Identity**: Globally standardized system naming to fall back to "System" instead of "CloudBased" for white-label reliability.
+- **Dynamic Branding & Identity**: Fully integrated the administrator-defined Company Logo and Name into the Login, Loading, and Header screens.
+- **Dynamic Branding & Identity**: Preserved "CloudBased IMS" branding exclusively within the User Settings "About" section as a historical reference.
+- **InnoAssistant V2 (Neural Upgrade)**: Massively expanded the natural language synonym library, supporting dozens of new phrasing variations for arrivals, shipments, and queries.
+- **InnoAssistant V2 (Neural Upgrade)**: Implemented Context-Aware Error Reporting with specific suggestions based on missing item quantities or unidentified SKUs.
+- **InnoAssistant V2 (Neural Upgrade)**: Added Intelligent Property Queries allowing users to ask about item locations, categories, stock levels, and transaction history.
+- **InnoAssistant V2 (Neural Upgrade)**: Integrated Smart Date Recognition for "Today" and "Yesterday" keywords in logging commands.
+- **UI/UX Generalization**: Replaced hardcoded placeholder examples (e.g., specific names/emails) with generic professional labels across all management prompts.

@@ -144,7 +144,7 @@ const Prompt = ({
                                     name="description" 
                                     className="auth-input" 
                                     style={{ height: '80px', paddingTop: '0.8rem', resize: 'none' }} 
-                                    placeholder="Enter a brief description of the product..." 
+                                    placeholder="Description" 
                                     value={formData.description || ''} 
                                     onChange={handleChange}
                                 />
@@ -180,7 +180,7 @@ const Prompt = ({
                                         type="text" 
                                         name="imageUrl"
                                         className="auth-input" 
-                                        placeholder="Or paste external image URL (https://...)" 
+                                        placeholder="Image URL" 
                                         style={{ flex: 1, marginBottom: 0 }} 
                                         value={formData.imageUrl && !formData.imageUrl.startsWith('data:') ? formData.imageUrl : ''} 
                                         onChange={handleChange}

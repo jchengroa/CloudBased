@@ -1,4 +1,4 @@
-const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, settings, onPerformAction, openPrompt, globalSettings = {}, user }) => {
+const Dashboard = ({ branding, inventoryData, inputLogs, outputLogs, supplierData, settings, onPerformAction, openPrompt, globalSettings = {}, user }) => {
     const [activeWarehouseFilter, setActiveWarehouseFilter] = React.useState('All');
     const [activeView, setActiveView] = React.useState('overview');
 
@@ -106,7 +106,7 @@ const Dashboard = ({ inventoryData, inputLogs, outputLogs, supplierData, setting
                             user={user}
                         />}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
-                            {gSet.showPredictiveReplenish && <window.PredictiveReplenish inventoryData={filteredInventory} outputLogs={filteredOutputs} />}
+                            {gSet.showPredictiveReplenish && <window.PredictiveReplenish branding={branding} inventoryData={filteredInventory} outputLogs={filteredOutputs} />}
                             {gSet.showCriticalReplenishment && <window.CriticalReplenishment inventoryData={filteredInventory} settings={settings} supplierData={supplierData} openPrompt={openPrompt} />}
                         </div>
                     </div>

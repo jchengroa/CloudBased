@@ -25,7 +25,7 @@ window.AppDataHandler = (function () {
     } catch (e) { }
 
     // Synchronous-ish branding data (fetched as soon as possible)
-    let staticBranding = { companyName: 'CloudBased', logoUrl: '' };
+    let staticBranding = { companyName: 'System', logoUrl: '' };
     const brandingFetch = (async () => {
         const data = await fetchJson('AppData/branding.json');
         if (data) staticBranding = data;

@@ -411,7 +411,7 @@ const ManageDataTab = ({ inventoryData }) => {
                             <input 
                                 type="text" 
                                 className="auth-input" 
-                                placeholder="https://docs.google.com/spreadsheets/d/..." 
+                                placeholder="Google Sheets Link" 
                                 value={sheetUrl}
                                 onChange={e => setSheetUrl(e.target.value)}
                                 style={{ flex: 1, margin: 0 }}

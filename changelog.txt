@@ -198,3 +198,13 @@ Version 0.11.0 (March 24, 2026)
 - Rebranding & Identity: Predictive Replenish Integration (Renamed from Oracle).
 - Rebranding & Identity: InnoAssistant Cognitive Sync (Renamed from Aura AI).
 - Rebranding & Identity: Unified Branding: Synchronized documentation and historical logs.
+
+Version 0.11.1 (March 24, 2026)
+- Dynamic Branding & Identity: Globally standardized system naming to fall back to "System" instead of "CloudBased" for white-label reliability.
+- Dynamic Branding & Identity: Fully integrated the administrator-defined Company Logo and Name into the Login, Loading, and Header screens.
+- Dynamic Branding & Identity: Preserved "CloudBased IMS" branding exclusively within the User Settings "About" section as a historical reference.
+- InnoAssistant V2 (Neural Upgrade): Massively expanded the natural language synonym library, supporting dozens of new phrasing variations for arrivals, shipments, and queries.
+- InnoAssistant V2 (Neural Upgrade): Implemented Context-Aware Error Reporting with specific suggestions based on missing item quantities or unidentified SKUs.
+- InnoAssistant V2 (Neural Upgrade): Added Intelligent Property Queries allowing users to ask about item locations, categories, stock levels, and transaction history.
+- InnoAssistant V2 (Neural Upgrade): Integrated Smart Date Recognition for "Today" and "Yesterday" keywords in logging commands.
+- UI/UX Generalization: Replaced hardcoded placeholder examples (e.g., specific names/emails) with generic professional labels across all management prompts.

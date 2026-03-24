@@ -24,47 +24,133 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
         // --- NLP PROCESSING ---
         const doc = nlp(command);
         const lowerCmd = command.toLowerCase();
-        const isQuery = lowerCmd.includes('what') || lowerCmd.includes('how') || lowerCmd.includes('list') || lowerCmd.includes('query');
+
+        // 1. Better Query detection
+        const isQuery = lowerCmd.includes('what') || lowerCmd.includes('how') || lowerCmd.includes('list') ||
+            lowerCmd.includes('query') || lowerCmd.includes('status') || lowerCmd.includes('check');
+
+        // 2. Date Detection
+        let selectedDate = new Date().toISOString().split('T')[0];
+        if (lowerCmd.includes('yesterday')) {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            selectedDate = d.toISOString().split('T')[0];
+        }
 
         setTimeout(() => {
             if (isQuery) {
-                // Handling Restock Queries
-                if (lowerCmd.includes('restock') || lowerCmd.includes('low') || lowerCmd.includes('short')) {
+                // Pre-identify common targets: Item, Supplier
+                const rawWords = lowerCmd.split(' ');
+                const targetItem = inventoryData.find(i => 
+                    lowerCmd.includes(i.id.toLowerCase()) || 
+                    i.name.toLowerCase().split(' ').some(word => word.length > 3 && lowerCmd.includes(word))
+                );
+                const targetSup = supplierData.find(s => 
+                    lowerCmd.includes(s.name.toLowerCase()) || 
+                    s.name.toLowerCase().split(' ').some(word => word.length > 3 && lowerCmd.includes(word))
+                );
+
+                // 1. Handling Restock Queries
+                if (lowerCmd.includes('restock') || lowerCmd.includes('low') || lowerCmd.includes('short') || lowerCmd.includes('reorder') || lowerCmd.includes('supplies') || lowerCmd.includes('needed') || lowerCmd.includes('must-buy') || lowerCmd.includes('out-of-stock') || lowerCmd.includes('critical')) {
                     const lowItems = inventoryData.filter(i => (parseFloat(i.quantity) || 0) < 50 && (i.isRestocked !== 'Yes' && i.isRestocked !== 'I')).slice(0, 3);
                     if (lowItems.length > 0) {
                         setParsedResult({
                             isQuery: true,
-                            answer: `Based on current neural analysis, you should prioritize restocking: ${lowItems.map(i => i.name).join(', ')}. These are currently below safety thresholds.`
+                            answer: `I've analyzed the stock levels. You should prioritize restocking: ${lowItems.map(i => i.name).join(', ')}. These are currently below critical safety thresholds.`
                         });
                     } else {
                         setParsedResult({
                             isQuery: true,
-                            answer: "Neural check complete. All inventory levels are currently within safe operating parameters."
+                            answer: "Everything looks great. All inventory levels are currently within safe operating parameters."
                         });
                     }
+                } 
+                // 2. Handling Specific Item Queries (Quantity, Warehouse, Category)
+                else if (targetItem && (lowerCmd.includes('qty') || lowerCmd.includes('quantity') || lowerCmd.includes('stock') || lowerCmd.includes('much') || lowerCmd.includes('many'))) {
+                    setParsedResult({ isQuery: true, answer: `The current stock level for "${targetItem.name}" is ${targetItem.quantity} ${targetItem.uom || 'units'}.` });
+                }
+                else if (targetItem && (lowerCmd.includes('where') || lowerCmd.includes('location') || lowerCmd.includes('warehouse'))) {
+                    setParsedResult({ isQuery: true, answer: `"${targetItem.name}" is stored in the ${targetItem.warehouse || 'Main Warehouse'}.` });
+                }
+                else if (targetItem && (lowerCmd.includes('category') || lowerCmd.includes('type'))) {
+                    setParsedResult({ isQuery: true, answer: `"${targetItem.name}" is categorized under ${targetItem.category || 'General Inventory'}.` });
+                }
+                // 3. Handling Log/History Queries
+                else if (targetItem && (lowerCmd.includes('log') || lowerCmd.includes('history') || lowerCmd.includes('last') || lowerCmd.includes('transaction'))) {
+                    const itemLogs = [...inputLogs, ...outputLogs]
+                        .filter(l => l.itemCode === targetItem.id)
+                        .sort((a,b) => new Date(b.date) - new Date(a.date));
+                    if (itemLogs.length > 0) {
+                        const last = itemLogs[0];
+                        setParsedResult({ isQuery: true, answer: `The last transaction for "${targetItem.name}" was on ${last.date}. ${last.userName || 'A user'} processed ${last.quantity} ${last.uom || 'units'}.` });
+                    } else {
+                        setParsedResult({ isQuery: true, answer: `No transaction history found for "${targetItem.name}".` });
+                    }
+                }
+                // 4. Handling Supplier Queries
+                else if (targetItem && (lowerCmd.includes('supplier') || lowerCmd.includes('who provides') || lowerCmd.includes('buy from'))) {
+                    setParsedResult({ isQuery: true, answer: `"${targetItem.name}" is supplied by ${targetItem.supplier || 'Internal Production/Manual Management'}.` });
+                }
+                else if (targetSup) {
+                    const supItems = inventoryData.filter(i => i.supplier === targetSup.name);
+                    setParsedResult({ isQuery: true, answer: `${targetSup.name} is a known supplier. They provide ${supItems.length} items in your catalog, including ${supItems.slice(0,3).map(i => i.name).join(', ')}.` });
+                }
+                // 5. General Inventory Summary
+                else if (lowerCmd.includes('inventory') || lowerCmd.includes('summary') || lowerCmd.includes('status') || lowerCmd.includes('how many') || lowerCmd.includes('count') || lowerCmd.includes('report')) {
+                    setParsedResult({
+                        isQuery: true,
+                        answer: `You currently have ${inventoryData.length} unique items across all warehouses. Total stock value and distribution are visible in the cards below.`
+                    });
                 } else {
-                    setParsedResult({ error: "I can currently only answer queries about 'restocking' or 'low stock' status." });
+                    setParsedResult({ error: "I can help with restock checks, item status (quantity/location), transaction history, or supplier info. Try: 'Where is Blue Paint?' or 'Last log for SKU-101'" });
                 }
             } else {
                 // Handling Logging Commands
                 const qty = doc.values().toNumber().out('array')[0] || 0;
-                const potentialItems = doc.nouns().out('array');
-                const match = inventoryData.find(i =>
-                    potentialItems.some(word => i.name.toLowerCase().includes(word.toLowerCase()))
-                );
+
+                // 3. Multi-Strategy Item Matching (ID, Partial Name, Keywords)
+                // Use doc.nouns() and also raw words from the command
+                const rawWords = lowerCmd.split(' ');
+
+                const match = inventoryData.find(i => {
+                    const idMatch = i.id.toLowerCase() === lowerCmd.match(new RegExp(i.id.toLowerCase(), 'i'))?.[0];
+                    const nameMatch = i.name.toLowerCase().split(' ').some(word => word.length > 2 && lowerCmd.includes(word));
+                    const exactIdInString = rawWords.includes(i.id.toLowerCase());
+                    return idMatch || nameMatch || exactIdInString;
+                });
 
                 if (match && qty > 0) {
-                    const isArrival = lowerCmd.includes('received') || lowerCmd.includes('got') || lowerCmd.includes('in');
+                    // 4. Massive Expansion of Synonyms for Arrivals vs Shipments
+                    const arrivalKeywords = [
+                        'received', 'got', 'inbound', 'arrival', 'delivery', 'delivered', 'added', 'fill', 'refilled',
+                        'restock', 'replenish', 'replenished', 'in', 'stashed', 'purchased', 'bought', 'procured',
+                        'new', 'entry', 'input', 'supply', 'supplies', 'incoming', 'stocking', 'increase'
+                    ];
+                    const shipmentKeywords = [
+                        'shipped', 'out', 'outbound', 'dispatched', 'sent', 'removed', 'sale', 'sold', 'shipment',
+                        'dispatched', 'released', 'discharged', 'deducted', 'output', 'consumed', 'used', 'outgoing',
+                        'reduction', 'decreased', 'delivered-to-customer'
+                    ];
+
+                    const isArrival = arrivalKeywords.some(kw => lowerCmd.includes(kw)) && !shipmentKeywords.some(kw => lowerCmd.includes(kw));
+
                     setParsedResult({
                         type: isArrival ? 'add-input-log' : 'add-output-log',
                         item: match,
                         quantity: qty,
-                        isArrival
+                        isArrival,
+                        date: selectedDate,
+                        humanReadable: `I've identified ${isArrival ? 'an arrival' : 'a shipment'} of ${qty} ${match.uom || 'units'} for "${match.name}" ${lowerCmd.includes('yesterday') ? 'from yesterday' : 'for today'}.`
                     });
+                } else if (!match && qty > 0) {
+                    setParsedResult({ error: `I see you're trying to log ${qty} units, but I couldn't identify the item. Try using an exact SKU or a clearer name like: "Log ${qty} Blue Paint"` });
+                } else if (match && !qty) {
+                    setParsedResult({ error: `I've found "${match.name}", but I need a quantity to log the transaction. Try: "Received 50 ${match.name}"` });
                 } else {
-                    setParsedResult({ error: "Context could not be decoded. Ensure Item Name and Quantity are clear for logging." });
+                    setParsedResult({ error: "I couldn't identify the item or quantity. To log data, try something like: 'Received 50 Paint' or 'Shipped 10 PNT01 for today'" });
                 }
             }
+
             setIsThinking(false);
         }, 800);
     };
@@ -75,7 +161,7 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
         onPerformAction(parsedResult.type, {
             itemCode: parsedResult.item.id,
             quantity: parsedResult.quantity,
-            date: new Date().toISOString().split('T')[0],
+            date: parsedResult.date || new Date().toISOString().split('T')[0],
             transactionId: (parsedResult.isArrival ? 'IN-' : 'OUT-') + Math.floor(Math.random() * 1000000),
             uom: parsedResult.item.uom || 'units',
             supplier: parsedResult.isArrival ? (supplierData[0]?.name || 'Internal') : 'Direct Fulfillment'
@@ -133,13 +219,13 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                         <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: '#6366f1', letterSpacing: '0.05em' }}>Big Disclaimer</span>
                     </div>
                     <p style={{ fontSize: '0.75rem', margin: '0 0 0.6rem 0', color: 'var(--text-secondary)', fontWeight: '500' }}>
-                        This is NOT a Generative AI chatbot. It processes commands via local patterns and doesn't generate human like responses.
+                        This is NOT a Generative AI chatbot. It processes words via local patterns and doesn't understand complex sentences and generate human like responses.
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem 0.6rem' }}>
                         {[
-                            'Log Stock Arrivals',
-                            'Log Stock Shipments',
-                            'Query Low Stock',
+                            'Inventory Status & Location',
+                            'Transaction History Checks',
+                            'Supplier Information',
                             'Neural SKU Search'
                         ].map(skill => (
                             <div key={skill} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: 'var(--text-primary)', fontWeight: '600' }}>
@@ -163,7 +249,7 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                     <input
                         type="text"
                         className="search-bar"
-                        placeholder="e.g. Received 50 Paint OR 'What do I need to restock?'"
+                        placeholder="Type a command or ask a question..."
                         value={command}
                         onChange={handleCommandInput}
                         onKeyDown={e => e.key === 'Enter' && processCognitiveCommand()}
@@ -242,9 +328,9 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                                         <window.BoxIcon size={20} />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: '800', color: 'var(--text-secondary)', letterSpacing: '0.05em' }}>Neural Analysis Active</div>
-                                        <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: '700' }}>
-                                            {parsedResult.isArrival ? 'Add to stock' : 'Remove from stock'} {parsedResult.quantity} units of {parsedResult.item.name}
+                                        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: '800', color: 'var(--text-secondary)', letterSpacing: '0.05em' }}>Neural Identification</div>
+                                        <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: '700', lineHeight: 1.4 }}>
+                                            {parsedResult.humanReadable}
                                         </div>
                                     </div>
                                 </div>

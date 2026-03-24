@@ -1,6 +1,6 @@
 /**
  * App Component
- * The central controller for CloudBased.
+ * The central controller for the system.
  * Now supports an elegant Multi-User system with Card-Based Views and Account Management.
  */
 
@@ -198,11 +198,9 @@ const App = () => {
                 {branding.logoUrl ? (
                     <img src={branding.logoUrl} alt="Logo" style={{ height: '60px', opacity: 0.9 }} />
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-1.5px', opacity: 0.9 }} className="app-logo">
-                            {branding.companyName || 'CloudBased'}
+                            {branding.companyName || 'System'}
                         </div>
-                    </div>
                 )}
                 <div style={{ padding: '2px', width: '240px', background: 'var(--hover-bg)', borderRadius: '12px', overflow: 'hidden' }}>
                     <div style={{ width: '40%', height: '4px', background: 'var(--accent-color)', borderRadius: '12px', animation: 'load 1.8s infinite ease-in-out' }}></div>
@@ -221,7 +219,7 @@ const App = () => {
                         </div>
                     )}
                     <div className="app-logo" style={{ fontSize: '1.25rem', fontWeight: '800', border: 'none', background: 'none', padding: 0, WebkitTextFillColor: 'initial', color: 'var(--text-primary)' }}>
-                        {branding.companyName || 'CloudBased'}
+                        {branding.companyName || 'System'}
                     </div>
                 </div>
                 <nav className="nav-tabs-left">
@@ -296,7 +294,7 @@ const App = () => {
             )}
  
             <main className="app-layout">
-                {view === 'dashboard' && <window.Dashboard onPerformAction={handlePromptConfirm} openPrompt={openPrompt} globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ theme, isThresholdEnabled: user.settings?.isThresholdEnabled ?? false, lowStockThreshold: user.settings?.lowStockThreshold }} user={user} />}
+                {view === 'dashboard' && <window.Dashboard branding={branding} onPerformAction={handlePromptConfirm} openPrompt={openPrompt} globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ theme, isThresholdEnabled: user.settings?.isThresholdEnabled ?? false, lowStockThreshold: user.settings?.lowStockThreshold }} user={user} />}
                 {view === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} user={user} lowStockThreshold={user.settings?.lowStockThreshold} isThresholdEnabled={user.settings?.isThresholdEnabled ?? false} />}
                 {view === 'itemList' && <ItemList inventoryData={inventory} openPrompt={openPrompt} user={user} lowStockThreshold={user.settings?.lowStockThreshold} isThresholdEnabled={user.settings?.isThresholdEnabled ?? false} />}
                 {view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} user={user} />}

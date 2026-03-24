@@ -3,7 +3,7 @@
  */
 const BrandingTab = ({ branding, onUpdateBranding }) => {
     const [logoUrl, setLogoUrl] = React.useState(branding?.logoUrl || '');
-    const [companyName, setCompanyName] = React.useState(branding?.companyName || 'CloudBased');
+    const [companyName, setCompanyName] = React.useState(branding?.companyName || 'System');
     const [accentColor, setAccentColor] = React.useState(branding?.accentColor || '#4f46e5');
     const [isSaving, setIsSaving] = React.useState(false);
     const [message, setMessage] = React.useState('');
@@ -14,7 +14,7 @@ const BrandingTab = ({ branding, onUpdateBranding }) => {
         try {
             const data = { 
                 logoUrl, 
-                companyName: companyName || 'CloudBased',
+                companyName: companyName || 'System',
                 accentColor 
             };
             await window.AppDataHandler.saveBranding(data);
@@ -65,7 +65,7 @@ const BrandingTab = ({ branding, onUpdateBranding }) => {
                             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <input 
                                     className="auth-input" 
-                                    placeholder="Enter image URL..." 
+                                    placeholder="Logo URL" 
                                     value={logoUrl} 
                                     onChange={e => setLogoUrl(e.target.value)} 
                                     style={{ margin: 0, flex: 1 }}
@@ -122,7 +122,7 @@ const BrandingTab = ({ branding, onUpdateBranding }) => {
                     <label className="auth-label" style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Company Name</label>
                     <input 
                         className="auth-input" 
-                        placeholder="CloudBased" 
+                        placeholder="Company Name" 
                         value={companyName} 
                         onChange={e => setCompanyName(e.target.value)}
                         style={{ marginTop: '0.5rem' }}
