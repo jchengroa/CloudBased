@@ -223,3 +223,10 @@ Version 0.11.3 (March 24, 2026)
 - Multi-User Identity Tracking: Implemented granular session and profile event logging, including manual logins, account signups, password resets, and profile-specific administrative events.
 - Security & Auditor Enforcement: Hardened the internal permission layer to ensure that all restricted Auditor actions are blocked and omitted from the log history, preventing unauthorized clutter.
 - Administrative Maintenance: Added a "Clear Activity Logs" utility for administrators to reset purely administrative history while preserving the core business transaction records.
+
+Version 0.11.4 (March 25, 2026)
+- Security & Access Control: Disabled public user registration (Self-Signup) to preserve the integrity of the private database.
+- Auditor Permission Defaulting: Hardened the default security posture for new Auditors. All administrative restrictions are now enabled by default upon account creation or role assignment.
+- Session & Migration Logic: Enhanced the session initializer to automatically apply the full restriction set to existing Auditors without explicitly defined permissions.
+- Admin Dashboard Improvements: Synchronized the User Management interface to automatically reflect the new high-security defaults for the Auditor role.
+- System Maintenance: Updated the platform to Version 0.11.4.

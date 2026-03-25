@@ -13,6 +13,7 @@ window.AppDataHandler = (function () {
 
     const CONFIG_KEY = 'cloudbased_firebase_config';
     const BRANDING_CACHE_KEY = 'cloudbased_branding_cache';
+    const ALL_AUDITOR_RESTRICTIONS = ['AddItems', 'EditItems', 'RemoveItems', 'AddLogs', 'EditLogs', 'RemoveLogs', 'AddSuppliers', 'EditSuppliers', 'RemoveSuppliers'];
     let db = null;
     let auth = null;
     let dbError = null;
@@ -67,7 +68,11 @@ window.AppDataHandler = (function () {
                                 // MIGRATION: Treat as Auditor if no role exists
                                 if (!data.role) data.role = 'Auditor';
                                 
-                                currentUser = { ...data, uid: user.uid };
+                                currentUser = { 
+                                    ...data, 
+                                    uid: user.uid,
+                                    restrictions: data.restrictions || (data.role === 'Auditor' ? ALL_AUDITOR_RESTRICTIONS : [])
+                                };
                                 localStorage.setItem('cloudbased_session', JSON.stringify(currentUser));
                                 
                                 // Optional background update, fail silently if rules block it
@@ -133,7 +138,8 @@ window.AppDataHandler = (function () {
                 id: snap.docs[0].id,
                 ...userData, 
                 role: userData.role || 'Auditor', 
-                uid: credential.user.uid 
+                uid: credential.user.uid,
+                restrictions: userData.restrictions || (userData.role === 'Auditor' ? ALL_AUDITOR_RESTRICTIONS : (userData.role ? [] : ALL_AUDITOR_RESTRICTIONS))
             };
             
             // Background update to persist role only if missing - avoid failing if rules block it
@@ -167,7 +173,7 @@ window.AppDataHandler = (function () {
                 username: userData.username,
                 email:    userData.email,
                 role:     'Auditor', // Standardizing default role for new signups
-                restrictions: [], // Default to no restrictions
+                restrictions: ALL_AUDITOR_RESTRICTIONS, // Default to ALL restrictions for auditors
                 createdAt: new Date().toISOString(),
                 settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: false }
             };
@@ -195,6 +201,7 @@ window.AppDataHandler = (function () {
         },
 
         getCurrentUser: () => currentUser,
+        getAllAuditorRestrictions: () => [...ALL_AUDITOR_RESTRICTIONS],
 
         updateProfile: async function (data) {
             await initPromise;
@@ -332,7 +339,7 @@ window.AppDataHandler = (function () {
                     username:  userData.username,
                     email:     userData.email,
                     role:      userData.role || 'Auditor',
-                    restrictions: userData.role === 'Auditor' ? (userData.restrictions || []) : [],
+                    restrictions: userData.role === 'Auditor' ? (userData.restrictions || ALL_AUDITOR_RESTRICTIONS) : [],
                     createdAt: new Date().toISOString(),
                     settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: false }
                 };

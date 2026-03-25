@@ -61,35 +61,6 @@ const Auth = ({ onLoginSuccess }) => {
         }
     };
 
-    const handleSignup = async (e) => {
-        e.preventDefault();
-        const { name, username, email, password, confirmPassword } = formData;
-
-        if (!name || !username || !email || !password) {
-            setError("All fields are required.");
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setError("Passwords do not match.");
-            return;
-        }
-
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters.");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const user = await window.AppDataHandler.signup({ name, username, email, password });
-            onLoginSuccess(user);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const [confirmDialog, setConfirmDialog] = React.useState(null); // { title: '', message: '', onConfirm: fn }
 
@@ -191,7 +162,6 @@ const Auth = ({ onLoginSuccess }) => {
     };
 
     const getSubmitHandler = () => {
-        if (view === 'signup') return handleSignup;
         if (view === 'forgot') return handleForgotPassword;
         if (view === 'change') return handleChangePasswordDirectly;
         if (view === 'resetNewPassword') return handleResetPassword;
@@ -249,22 +219,8 @@ const Auth = ({ onLoginSuccess }) => {
                 )}
 
                 <form className="auth-form" onSubmit={getSubmitHandler()}>
-                    {view === 'signup' && (
-                        <div className="auth-input-group">
-                            <label className="auth-label">Full Name</label>
-                            <input
-                                type="text"
-                                name="name"
-                                className="auth-input"
-                                placeholder="John Doe"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required={view === 'signup'}
-                            />
-                        </div>
-                    )}
 
-                    {(view === 'login' || view === 'signup') && (
+                    {view === 'login' && (
                         <div className="auth-input-group">
                             <label className="auth-label">Username</label>
                             <input
@@ -274,25 +230,11 @@ const Auth = ({ onLoginSuccess }) => {
                                 placeholder="johndoe"
                                 value={formData.username}
                                 onChange={handleChange}
-                                required={view === 'login' || view === 'signup'}
+                                required={view === 'login'}
                             />
                         </div>
                     )}
 
-                    {view === 'signup' && (
-                        <div className="auth-input-group">
-                            <label className="auth-label">Email Address</label>
-                            <input
-                                type="email"
-                                name="email"
-                                className="auth-input"
-                                placeholder="john@example.com"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required={view === 'signup'}
-                            />
-                        </div>
-                    )}
 
                     {view === 'forgot' && (
                         <div className="auth-input-group">
@@ -328,7 +270,7 @@ const Auth = ({ onLoginSuccess }) => {
                             </div>
                         </>
                     )}
-                    {(view === 'login' || view === 'signup' || view === 'resetNewPassword') && (
+                    {(view === 'login' || view === 'resetNewPassword') && (
                         <div className="auth-input-group">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                 <label className="auth-label" style={{ marginBottom: 0 }}>Password</label>
@@ -346,7 +288,7 @@ const Auth = ({ onLoginSuccess }) => {
                                     placeholder="••••••••"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    required={view === 'login' || view === 'signup' || view === 'resetNewPassword'}
+                                    required={view === 'login' || view === 'resetNewPassword'}
                                 />
                                 <div className="auth-input-icon" onClick={() => setShowPassword(!showPassword)}>
                                     {showPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -355,7 +297,7 @@ const Auth = ({ onLoginSuccess }) => {
                         </div>
                     )}
 
-                    {(view === 'signup' || view === 'resetNewPassword') && (
+                    {view === 'resetNewPassword' && (
                         <div className="auth-input-group">
                             <label className="auth-label">Confirm Password</label>
                             <input
@@ -365,7 +307,7 @@ const Auth = ({ onLoginSuccess }) => {
                                 placeholder="••••••••"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                required={view === 'signup' || view === 'resetNewPassword'}
+                                required={view === 'resetNewPassword'}
                             />
                         </div>
                     )}
@@ -373,7 +315,6 @@ const Auth = ({ onLoginSuccess }) => {
                     <button type="submit" className="auth-btn-primary" disabled={loading}>
                         {loading && 'Processing...'}
                         {!loading && view === 'login' && 'Sign In'}
-                        {!loading && view === 'signup' && 'Create Account'}
                         {!loading && view === 'forgot' && 'Send Reset Link'}
                         {!loading && view === 'change' && 'Update Password'}
                         {!loading && view === 'resetNewPassword' && 'Set New Password'}
@@ -389,11 +330,6 @@ const Auth = ({ onLoginSuccess }) => {
                 )}
 
                 <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-                    {(view === 'login' || view === 'signup') && (
-                        <button className="auth-btn-text" onClick={() => { setView(view === 'login' ? 'signup' : 'login'); setError(''); }}>
-                            {view === 'login' ? "Don't have an account? Join now" : "Already have an account? Sign in"}
-                        </button>
-                    )}
                     {(view === 'forgot' || view === 'resetNewPassword' || view === 'change') && (
                         <button className="auth-btn-text" onClick={() => { setView('login'); setError(''); }}>
                             Back to Sign in

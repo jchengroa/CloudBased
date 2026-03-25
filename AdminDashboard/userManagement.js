@@ -6,7 +6,8 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
     
     const [searchQuery, setSearchQuery] = React.useState('');
     const [isAddingUser, setIsAddingUser] = React.useState(false);
-    const [addForm, setAddForm] = React.useState({ name: '', username: '', email: '', password: '', role: 'Auditor', restrictions: [] });
+    const allRestrictions = window.AppDataHandler.getAllAuditorRestrictions();
+    const [addForm, setAddForm] = React.useState({ name: '', username: '', email: '', password: '', role: 'Auditor', restrictions: allRestrictions });
 
     const [editingUser, setEditingUser] = React.useState(null);
     const [editRole, setEditRole] = React.useState('');
@@ -58,7 +59,7 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
             });
             onUpdateUser();
             setIsAddingUser(false);
-            setAddForm({ name: '', username: '', email: '', password: '', role: 'Auditor', restrictions: [] });
+            setAddForm({ name: '', username: '', email: '', password: '', role: 'Auditor', restrictions: allRestrictions });
         } catch(e) { alert(e.message || "Failed to register user."); }
         finally { setIsSaving(false); }
     };
@@ -163,7 +164,11 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Access Level</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
                         {['Administrator', 'Manager', 'Auditor'].map(role => (
-                            <button key={role} onClick={() => setAddForm({...addForm, role})} style={{ padding: '0.75rem', borderRadius: '12px', border: '1px solid', borderColor: addForm.role === role ? 'var(--accent-color)' : 'var(--border-color)', background: addForm.role === role ? 'var(--selected-bg)' : 'transparent', color: addForm.role === role ? 'var(--accent-color)' : 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>{role}</button>
+                            <button key={role} onClick={() => setAddForm({
+                                ...addForm, 
+                                role, 
+                                restrictions: role === 'Auditor' ? allRestrictions : [] 
+                            })} style={{ padding: '0.75rem', borderRadius: '12px', border: '1px solid', borderColor: addForm.role === role ? 'var(--accent-color)' : 'var(--border-color)', background: addForm.role === role ? 'var(--selected-bg)' : 'transparent', color: addForm.role === role ? 'var(--accent-color)' : 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>{role}</button>
                         ))}
                     </div>
                 </div>
@@ -204,7 +209,11 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
                             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Access Level</label>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
                                 {['Administrator', 'Manager', 'Auditor'].map(role => (
-                                    <button key={role} onClick={() => setEditRole(role)} style={{ padding: '0.75rem', borderRadius: '12px', border: '1px solid', borderColor: editRole === role ? 'var(--accent-color)' : 'var(--border-color)', background: editRole === role ? 'var(--selected-bg)' : 'transparent', color: editRole === role ? 'var(--accent-color)' : 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>{role}</button>
+                                    <button key={role} onClick={() => {
+                                        setEditRole(role);
+                                        if (role === 'Auditor' && editRestrictions.length === 0) setEditRestrictions(allRestrictions);
+                                        else if (role !== 'Auditor') setEditRestrictions([]);
+                                    }} style={{ padding: '0.75rem', borderRadius: '12px', border: '1px solid', borderColor: editRole === role ? 'var(--accent-color)' : 'var(--border-color)', background: editRole === role ? 'var(--selected-bg)' : 'transparent', color: editRole === role ? 'var(--accent-color)' : 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>{role}</button>
                                 ))}
                             </div>
                         </div>
