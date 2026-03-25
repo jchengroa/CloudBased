@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management System</title>
-    <link rel="stylesheet" href="Resources/index.css">
+    <link rel="stylesheet" href="assets/css/index.css">
 
     <script>
         // Pre-render theme check to prevent light-flash
@@ -42,44 +42,54 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
     <!-- Data & Utils -->
-    <script src="AppData/appDataHandler.js"></script>
-    <script src="AppLogic/exportTool.js"></script>
+    <!-- Data & Utils -->
+    <script src="src/data-management/modules/init.js"></script>
+    <script src="src/data-management/modules/admin.js"></script>
+    <script src="src/data-management/modules/auth.js"></script>
+    <script src="src/data-management/modules/data.js"></script>
+    <script src="src/data-management/modules/settings.js"></script>
+    <script src="src/utils/exportTool.js"></script>
 
     <!-- Core Logic & Components -->
-    <script type="text/babel" src="AppLogic/validation.js"></script>
-    <script type="text/babel" src="AppLogic/sharedComponents.js"></script>
-    <script type="text/babel" src="AppLogic/sorting.js"></script>
-    <script type="text/babel" src="AppLogic/prompt.js"></script>
-    <script type="text/babel" src="AppLogic/inventoryTable.js"></script>
-    <script type="text/babel" src="AppLogic/supplierTable.js"></script>
-    <script type="text/babel" src="AppLogic/itemList.js"></script>
-    <script type="text/babel" src="AppLogic/userSettings.js"></script>
+    <script type="text/babel" src="src/utils/validation.js"></script>
+    <script type="text/babel" src="src/components/shared/icons.js"></script>
+    <script type="text/babel" src="src/components/shared/tables.js"></script>
+    <script type="text/babel" src="src/components/shared/layout.js"></script>
+    <script type="text/babel" src="src/components/shared/forms.js"></script>
+    <script type="text/babel" src="src/components/shared/grid.js"></script>
+    <script type="text/babel" src="src/components/shared/utils.js"></script>
+    <script type="text/babel" src="src/utils/sorting.js"></script>
+    <script type="text/babel" src="src/components/shared/prompt.js"></script>
+    <script type="text/babel" src="src/components/views/inventory.js"></script>
+    <script type="text/babel" src="src/components/views/supplier.js"></script>
+    <script type="text/babel" src="src/components/views/itemList.js"></script>
+    <script type="text/babel" src="src/components/views/userSettings.js"></script>
 
     <!-- Dashboard Widgets -->
-    <script type="text/babel" src="DashboardLogic/totalItems.js"></script>
-    <script type="text/babel" src="DashboardLogic/lowStock.js"></script>
-    <script type="text/babel" src="DashboardLogic/suppliersOnly.js"></script>
-    <script type="text/babel" src="DashboardLogic/recentArrivals.js"></script>
-    <script type="text/babel" src="DashboardLogic/recentShipments.js"></script>
-    <script type="text/babel" src="DashboardLogic/criticalReplenishment.js"></script>
-    <script type="text/babel" src="DashboardLogic/categoryPerformance.js"></script>
-    <script type="text/babel" src="DashboardLogic/warehouseDistribution.js"></script>
-    <script type="text/babel" src="DashboardLogic/predictiveReplenish.js"></script>
-    <script type="text/babel" src="DashboardLogic/productStatSummary.js"></script>
-    <script type="text/babel" src="DashboardLogic/innoAssistant.js"></script>
-    <script type="text/babel" src="AppLogic/dashboard.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/totalItems.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/lowStock.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/suppliersOnly.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/recentArrivals.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/recentShipments.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/criticalReplenishment.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/categoryPerformance.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/warehouseHealth.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/predictiveReplenish.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/productStatSummary.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/widgets/innoAssistant.js"></script>
+    <script type="text/babel" src="src/components/views/dashboard/dashboard.js"></script>
     
     <!-- Admin Dashboard Components -->
-    <script type="text/babel" src="AdminDashboard/overview.js"></script>
-    <script type="text/babel" src="AdminDashboard/userManagement.js"></script>
-    <script type="text/babel" src="AdminDashboard/activityLogs.js"></script>
-    <script type="text/babel" src="AdminDashboard/manageData.js"></script>
-    <script type="text/babel" src="AdminDashboard/branding.js"></script>
-    <script type="text/babel" src="AdminDashboard/globalSettings.js"></script>
-    <script type="text/babel" src="AppLogic/adminDashboard.js"></script>
+    <script type="text/babel" src="src/components/admin/tabs/overview.js"></script>
+    <script type="text/babel" src="src/components/admin/tabs/userManagement.js"></script>
+    <script type="text/babel" src="src/components/admin/tabs/activityLogs.js"></script>
+    <script type="text/babel" src="src/components/admin/tabs/manageData.js"></script>
+    <script type="text/babel" src="src/components/admin/tabs/assetManagement.js"></script>
+    <script type="text/babel" src="src/components/admin/tabs/globalSettings.js"></script>
+    <script type="text/babel" src="src/components/admin/adminDashboard.js"></script>
 
     <!-- Main Entry -->
-    <script type="text/babel" src="AppLogic/app.js"></script>
+    <script type="text/babel" src="src/app.js"></script>
 </body>
 
 </html>

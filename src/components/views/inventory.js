@@ -1,10 +1,10 @@
 /**
- * Inventory Table Component
+ * Inventory Component
  * A unified table shell for Overview and Transaction Logs.
  * Uses the new 'Stock on Hand' vs 'Optimal Stock' system.
  */
 
-const InventoryTable = ({
+const Inventory = ({
     openPrompt,
     inventoryData = [],
     inputLogs = [],
@@ -15,9 +15,9 @@ const InventoryTable = ({
     isThresholdEnabled
 }) => {
     const { StatusBadge } = window;
-    const [selectedRows, setSelectedRows]   = React.useState([]);
-    const [searchQuery,  setSearchQuery]    = React.useState('');
-    const [activeView,   setActiveView]     = React.useState('overview');
+    const [selectedRows, setSelectedRows] = React.useState([]);
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [activeView, setActiveView] = React.useState('overview');
     const [activeWarehouseFilter, setActiveWarehouseFilter] = React.useState('All');
 
     React.useEffect(() => {
@@ -26,7 +26,7 @@ const InventoryTable = ({
     }, [activeView, inventoryData]);
 
     const isOverview = activeView === 'overview';
-    const isInput    = activeView === 'input';
+    const isInput = activeView === 'input';
 
     const baseProcessed = React.useMemo(() => {
         let base = [];
@@ -61,7 +61,7 @@ const InventoryTable = ({
     const { sortedData: processed, requestSort, SortIndicator } = window.useSorting(baseProcessed, isOverview ? 'name' : 'date', isOverview ? 'asc' : 'desc');
 
     const toggleRow = (id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
-    
+
     // Extract unique warehouses for filter dropdown
     const availableWarehouses = ['All', ...new Set(inventoryData.map(i => i.warehouse).filter(Boolean))].sort();
 
@@ -70,8 +70,8 @@ const InventoryTable = ({
             {availableWarehouses.length > 0 && (
                 <div className="location-pills">
                     {availableWarehouses.map(w => (
-                        <button 
-                            key={w} 
+                        <button
+                            key={w}
                             className={`location-pill ${activeWarehouseFilter === w ? 'active' : ''}`}
                             onClick={() => setActiveWarehouseFilter(w)}
                         >
@@ -93,14 +93,14 @@ const InventoryTable = ({
                 user={user}
                 restrictionScope={isOverview ? 'Items' : 'Logs'}
                 viewSwitcher={(
-                    <window.ViewSwitcher 
-                        activeView={activeView} 
-                        setActiveView={setActiveView} 
+                    <window.ViewSwitcher
+                        activeView={activeView}
+                        setActiveView={setActiveView}
                         options={[
                             { key: 'overview', label: 'Overview' },
-                            { key: 'input',    label: 'Arrivals' },
-                            { key: 'output',   label: 'Shipments' }
-                        ]} 
+                            { key: 'input', label: 'Arrivals' },
+                            { key: 'output', label: 'Shipments' }
+                        ]}
                     />
                 )}
             />
@@ -115,9 +115,9 @@ const InventoryTable = ({
                                 setSelectedRows(processed.map(p => isOverview ? p.id : p.transactionId));
                             }
                         }}>
-                             <input 
-                                type="checkbox" 
-                                checked={selectedRows.length === processed.length && processed.length > 0} 
+                            <input
+                                type="checkbox"
+                                checked={selectedRows.length === processed.length && processed.length > 0}
                                 style={{ pointerEvents: 'none' }}
                                 readOnly
                             />
@@ -185,3 +185,5 @@ const InventoryTable = ({
         </div>
     );
 };
+window.Inventory = Inventory;
+window.InventoryTable = Inventory; // For compatibility if needed elsewhere temporarily

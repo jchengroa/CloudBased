@@ -73,7 +73,7 @@ const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate, 
         { id: 'users', label: 'User Management', icon: <Icons.Users size={16} /> },
         { id: 'logs', label: 'Activity Logs', icon: <Icons.FileText size={16} /> },
         { id: 'manage', label: 'Manage Data', icon: <Icons.ArrowDownCircle size={16} /> },
-        { id: 'branding', label: 'Branding', icon: <Icons.Image size={16} /> },
+        { id: 'assets', label: 'Asset Management', icon: <Icons.Layers size={16} /> },
         { id: 'settings', label: 'Global Settings', icon: <Icons.Settings size={16} /> }
     ];
 
@@ -124,8 +124,8 @@ const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate, 
             {activeTab === 'users' && <window.AdminUserManagementTab users={users} onUpdateUser={loadData} currentUser={currentUser} />}
             {activeTab === 'logs' && <window.AdminActivityLogsTab activityLogs={activityLogs} onClearLogs={loadData} />}
             {activeTab === 'manage' && <window.AdminManageDataTab inventoryData={inventoryData} />}
-            {activeTab === 'branding' && <window.AdminBrandingTab branding={branding} onUpdateBranding={(b) => { setBranding(b); onBrandingUpdate(b); }} />}
-            {activeTab === 'settings' && <window.AdminGlobalSettingsTab globalSettings={globalSettings} onUpdateGlobalSettings={setGlobalSettings} />}
+            {activeTab === 'assets' && <window.AdminAssetManagementTab onUpdate={loadData} />}
+            {activeTab === 'settings' && <window.AdminGlobalSettingsTab globalSettings={globalSettings} onUpdateGlobalSettings={setGlobalSettings} branding={branding} onUpdateBranding={(b) => { setBranding(b); onBrandingUpdate(b); }} />}
 
         </div>
     );

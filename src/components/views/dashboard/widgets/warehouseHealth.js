@@ -1,4 +1,4 @@
-const WarehouseDistribution = ({ inventoryData, settings }) => {
+const WarehouseHealth = ({ inventoryData, settings }) => {
     const getMin = (item) => parseFloat(item.optimalStock) || (settings?.lowStockThreshold || 1000);
     
     // Group by warehouse
@@ -15,7 +15,7 @@ const WarehouseDistribution = ({ inventoryData, settings }) => {
 
     const whList = Object.keys(warehouses).map(name => {
         const data = warehouses[name];
-        const score = data.totalOptimal > 0 ? Math.round((data.totalQty / data.totalOptimal) * 100) : 100;
+        const score = data.totalOptimal > 0 ? Math.min(100, Math.round((data.totalQty / data.totalOptimal) * 100)) : 100;
         
         let scoreColor = '#10b981'; // green
         if (score < 50) scoreColor = '#ef4444'; // red
@@ -33,9 +33,9 @@ const WarehouseDistribution = ({ inventoryData, settings }) => {
         <div className="dashboard-card" style={{ padding: '0', overflow: 'hidden' }}>
             <div style={{ padding: '1.2rem', borderBottom: '1px solid var(--border-color)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)', fontWeight: '700', fontSize: '1rem' }}>
-                    <window.ActivityIcon stroke="#0ea5e9" /> Warehouse Distribution
+                    <window.ActivityIcon stroke="#0ea5e9" /> Warehouse Health
                 </div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>Stock across locations</div>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>Inventory Stock Integrity</div>
             </div>
             <div style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '300px', overflowY: 'auto' }}>
                 {whList.length === 0 ? (
@@ -60,7 +60,7 @@ const WarehouseDistribution = ({ inventoryData, settings }) => {
                                 <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{formatNumber(w.totalQty)}</div>
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Score</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Health</div>
                                 <div style={{ fontWeight: '800', fontSize: '1.1rem', color: w.scoreColor }}>{w.score}%</div>
                             </div>
                         </div>
@@ -70,4 +70,4 @@ const WarehouseDistribution = ({ inventoryData, settings }) => {
         </div>
     );
 };
-window.WarehouseDistribution = WarehouseDistribution;
+window.WarehouseHealth = WarehouseHealth;

@@ -1,12 +1,12 @@
 /* 
- * Supplier Table Component
+ * Supplier Component
  * View for managing supplier contact info, sharing core features with inventory.
  */
 
-const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError, user }) => {
+const Supplier = ({ openPrompt, supplierData, inventoryData = [], dbError, user }) => {
     // local state
     const [selectedRows, setSelectedRows] = React.useState([]);
-    const [searchQuery,  setSearchQuery]  = React.useState('');
+    const [searchQuery, setSearchQuery] = React.useState('');
     const [activeWarehouseFilter, setActiveWarehouseFilter] = React.useState('All');
 
     // drop selection when data source changes
@@ -17,7 +17,7 @@ const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError, 
     const baseFiltered = React.useMemo(() => {
         return supplierData.filter(item => {
             const sq = searchQuery.toLowerCase();
-            
+
             // Filter by warehouse association if chosen
             if (activeWarehouseFilter !== 'All') {
                 const hasItemInWarehouse = inventoryData.some(inv => inv.supplier === item.id && inv.warehouse === activeWarehouseFilter);
@@ -25,10 +25,10 @@ const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError, 
             }
 
             return (
-                (item.name || '').toLowerCase().includes(sq)    ||
+                (item.name || '').toLowerCase().includes(sq) ||
                 (item.contact || '').toLowerCase().includes(sq) ||
                 (item.address || '').toLowerCase().includes(sq) ||
-                (item.phone || '').toLowerCase().includes(sq)   ||
+                (item.phone || '').toLowerCase().includes(sq) ||
                 (item.email || '').toLowerCase().includes(sq)
             );
         });
@@ -59,8 +59,8 @@ const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError, 
             {availableWarehouses.length > 1 && (
                 <div className="location-pills">
                     {availableWarehouses.map(w => (
-                        <button 
-                            key={w} 
+                        <button
+                            key={w}
                             className={`location-pill ${activeWarehouseFilter === w ? 'active' : ''}`}
                             onClick={() => setActiveWarehouseFilter(w)}
                         >
@@ -104,20 +104,20 @@ const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError, 
                 </thead>
 
                 <tbody>
-                    <TableMessage 
-                        colSpan="6" 
-                        dbError={dbError} 
-                        isEmpty={filteredData.length === 0} 
-                        emptyMessage={searchQuery ? `No suppliers found matching "${searchQuery}".` : 'No suppliers yet.'} 
+                    <TableMessage
+                        colSpan="6"
+                        dbError={dbError}
+                        isEmpty={filteredData.length === 0}
+                        emptyMessage={searchQuery ? `No suppliers found matching "${searchQuery}".` : 'No suppliers yet.'}
                     />
                     {filteredData.length > 0 && (
                         filteredData.map((item) => {
                             const isSelected = selectedRows.includes(item.id);
                             return (
-                                <tr 
-                                    key={item.id} 
-                                    className={`data-row ${isSelected ? 'selected' : ''}`} 
-                                    onClick={(e) => { e.stopPropagation(); toggleSelection(item.id); }} 
+                                <tr
+                                    key={item.id}
+                                    className={`data-row ${isSelected ? 'selected' : ''}`}
+                                    onClick={(e) => { e.stopPropagation(); toggleSelection(item.id); }}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <td className="checkbox-col">
@@ -139,4 +139,5 @@ const SupplierTable = ({ openPrompt, supplierData, inventoryData = [], dbError, 
         </div>
     );
 };
-window.SupplierTable = SupplierTable;
+window.Supplier = Supplier;
+window.SupplierTable = Supplier;

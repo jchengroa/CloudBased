@@ -63,6 +63,13 @@ h1, h2, h3, .app-logo {
     font-family: 'Outfit', sans-serif;
 }
 
+.company-logo-img {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    display: block;
+}
+
 #root {
     width: 100%;
     height: 100%;
@@ -780,3 +787,23 @@ select.auth-input option {
     border-radius: 16px;
     border: 1px solid var(--border-color);
 }
+
+/* Animations */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.fade-in { animation: authFadeIn 0.3s ease-out; }
+.slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+

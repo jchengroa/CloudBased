@@ -232,3 +232,23 @@ A SOFDESG and LBYCPD2 Project. Created by Cheng Roa and Tejada
 - **Session & Migration Logic**: Enhanced the session initializer to automatically apply the full restriction set to existing Auditors without explicitly defined permissions.
 - **Admin Dashboard Improvements**: Synchronized the User Management interface to automatically reflect the new high-security defaults for the Auditor role.
 - **System Maintenance**: Updated the platform to Version 0.11.4.
+
+### Version 0.12.0 (March 25, 2026)
+- **Modular Dashboard Grid System**: Implemented a fully customizable 2D grid layout for the Overview and Act tabs. Users can now reorder modules using directional controls and toggle between half-width and full-width sizes.
+- **Admin Dashboard Redesign**: Consolidated all system-wide configurations into a new "Global Settings" tab. This includes Branding, Module Visibility, Warehouse Management, and Database Configuration.
+- **Branding & Identity Customization**: 
+    - Added a Global Accent Color picker that instantly updates the corporate color scheme across the entire platform.
+    - Implemented dynamic browser tab synchronization: the page title and favicon now automatically reflect the Administrator-defined Company Name and Logo.
+    - Fixed PNG transparency support by upgrading the image processing engine to preserve alpha channels (WebP/PNG).
+- **Module Evolution & Warehouse Health**: 
+    - Renamed "Warehouse Distribution" to **Warehouse Health**.
+    - Re-engineered the Health Score to represent "Stock Integrity" out of 100%, providing a clearer business grade for inventory levels.
+- **InnoAssistant Layout Fixes**: 
+    - Resolved a critical UI bug where the AI disclaimer and response areas would be cut off on smaller screens. 
+    - Implemented responsive stacking for the assistant interface, ensuring 100% visibility on all desktop resolutions.
+- **Data Logic & Sync Enhancements**:
+    - Fixed a bug where the `isRestocked` flag would stick permanently; the system now automatically resets restock statuses upon any new arrival (Input Log).
+    - Improved dashboard data reactivity by ensuring local caches are correctly invalidated when global settings or branding data changes.
+- **Administrative Experience (UX)**: 
+    - Added "Quick Save" buttons to each major settings block (Branding, Modules, Firebase) for faster configuration without scrolling.
+    - Grouped core metrics (Total Items, Low Stock, Suppliers) into a locked, non-resizable unit to preserve the high-level KPI layout.

@@ -189,7 +189,7 @@ const Auth = ({ onLoginSuccess }) => {
                 <div className="auth-header">
                     {branding.logoUrl ? (
                         <div style={{ height: '48px', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-                            <img src={branding.logoUrl} alt="Logo" style={{ maxHeight: '100%', objectFit: 'contain' }} />
+                            <img src={branding.logoUrl} alt="Logo" className="company-logo-img" style={{ maxHeight: '100%', objectFit: 'contain' }} />
                         </div>
                     ) : (
                         <div className="auth-logo" style={{ marginBottom: '1rem', textAlign: 'center' }}>

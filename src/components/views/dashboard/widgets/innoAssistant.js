@@ -237,14 +237,15 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                     padding: '1rem',
                     borderRadius: '16px',
                     border: '1px solid rgba(99, 102, 241, 0.1)',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    zIndex: 5
                 }}>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.6rem' }}>
                         <window.AlertTriangleIcon size={14} color="#6366f1" />
                         <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: '#6366f1', letterSpacing: '0.05em' }}>Big Disclaimer</span>
                     </div>
                     <p style={{ fontSize: '0.75rem', margin: '0 0 0.6rem 0', color: 'var(--text-secondary)', fontWeight: '500' }}>
-                        This is NOT a Generative AI chatbot. It processes words via local patterns and doesn't understand complex sentences and generate human like responses.
+                        This is NOT a Generative AI chatbot. It processes words via local patterns and doesn't understand complex sentences.
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem 0.6rem' }}>
                         {[
@@ -261,6 +262,19 @@ const InnoAssistant = ({ inventoryData, outputLogs, inputLogs, supplierData, onP
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                @media (max-width: 1400px) {
+                    .innoassistant-disclaimer-box {
+                        position: static !important;
+                        transform: none !important;
+                        width: 100% !important;
+                        max-width: 700px !important;
+                        margin-top: 1rem !important;
+                        right: auto !important;
+                    }
+                }
+            `}</style>
 
             <div style={{ width: '100%', maxWidth: '700px', position: 'relative' }}>
                 <div style={{

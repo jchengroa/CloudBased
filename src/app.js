@@ -84,16 +84,15 @@ const App = () => {
             setSuppliers(sups);
             setUoms(units);
             setWarehouses(whs);
-            setTheme(settings.theme || 'light');
+            const finalTheme = settings.theme || (gSet.globalDarkMode ? 'dark' : 'light');
+            setTheme(finalTheme);
             setBranding(brand);
             setGlobalSettings(gSet);
             setDbError(window.AppDataHandler.getDbError());
             
-            // Initial title and theme sync
-            if (brand.companyName) {
-                document.title = brand.companyName;
-            }
-            document.documentElement.setAttribute('data-theme', settings.theme || 'light');
+            // Initial sync
+            updateTabMetas(brand);
+            document.documentElement.setAttribute('data-theme', finalTheme);
             
             // Priority: User Setting > Company Global Branding > Default Indigo
             const finalAccent = settings.themeColor || brand.accentColor || '#4f46e5';
@@ -103,11 +102,23 @@ const App = () => {
         } finally { setDbLoading(false); }
     };
 
+    const updateTabMetas = (brand) => {
+        if (!brand) return;
+        if (brand.companyName) document.title = brand.companyName;
+        if (brand.logoUrl) {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+            link.href = brand.logoUrl;
+        }
+    };
+
     const handleBrandingChange = (newBranding) => {
         setBranding(newBranding);
-        if (newBranding.companyName) {
-            document.title = newBranding.companyName;
-        }
+        updateTabMetas(newBranding);
     };
 
     const handlePromptConfirm = async (arg1, arg2) => {
@@ -170,7 +181,8 @@ const App = () => {
                 const nextLogs = [...currentLogs, data];
                 const nextInventory = inventory.map(i => i.id === data.itemCode ? { 
                     ...i, 
-                    quantity: isInput ? (parseFloat(i.quantity) || 0) + parseFloat(data.quantity) : (parseFloat(i.quantity) || 0) - parseFloat(data.quantity) 
+                    quantity: isInput ? (parseFloat(i.quantity) || 0) + parseFloat(data.quantity) : (parseFloat(i.quantity) || 0) - parseFloat(data.quantity),
+                    isRestocked: isInput ? 'No' : i.isRestocked // Reset restock status on arrivals
                 } : i);
 
                 setLogs(nextLogs);
@@ -312,7 +324,7 @@ const App = () => {
         return (
             <div style={{ background: 'var(--bg-color)', color: 'var(--text-primary)', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
                 {branding.logoUrl ? (
-                    <img src={branding.logoUrl} alt="Logo" style={{ height: '60px', opacity: 0.9 }} />
+                    <img src={branding.logoUrl} alt="Logo" className="company-logo-img" style={{ height: '60px', opacity: 0.9 }} />
                 ) : (
                         <div style={{ fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-1.5px', opacity: 0.9 }} className="app-logo">
                             {branding.companyName || 'System'}
@@ -331,7 +343,7 @@ const App = () => {
                 <div className="brand-left" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     {branding.logoUrl && (
                         <div style={{ height: '32px', display: 'flex', alignItems: 'center' }}>
-                            <img src={branding.logoUrl} alt="Logo" style={{ maxHeight: '100%', objectFit: 'contain' }} />
+                            <img src={branding.logoUrl} alt="Logo" className="company-logo-img" style={{ maxHeight: '100%', objectFit: 'contain' }} />
                         </div>
                     )}
                     <div className="app-logo" style={{ fontSize: '1.25rem', fontWeight: '800', border: 'none', background: 'none', padding: 0, WebkitTextFillColor: 'initial', color: 'var(--text-primary)' }}>
@@ -389,9 +401,6 @@ const App = () => {
                     <div style={{ position: 'fixed', inset: 0, zIndex: 999 }} onClick={() => setIsProfileOpen(false)}></div>
                     <div style={{ position: 'fixed', top: '75px', right: '4vw', zIndex: 1000 }}>
                         <div style={{ background: 'var(--glass-bg)', backdropFilter: 'blur(24px)', border: '1px solid var(--glass-border)', borderRadius: '20px', padding: '0.6rem', minWidth: '220px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
-                            <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '0.4rem' }}>
-                                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>My Workspace</div>
-                            </div>
                             <button style={{ width: '100%', textAlign: 'left', padding: '0.8rem 1rem', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '12px', fontSize: '0.9rem', fontWeight: '500', display: 'flex', gap: '0.75rem', alignItems: 'center' }} 
                                 onMouseEnter={e => e.target.style.background = 'var(--hover-bg)'}
                                 onMouseLeave={e => e.target.style.background = 'none'}
@@ -410,10 +419,10 @@ const App = () => {
             )}
  
             <main className="app-layout">
-                {view === 'dashboard' && <window.Dashboard branding={branding} onPerformAction={handlePromptConfirm} openPrompt={openPrompt} globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ theme, isThresholdEnabled: user.settings?.isThresholdEnabled ?? false, lowStockThreshold: user.settings?.lowStockThreshold }} user={user} />}
-                {view === 'inventory' && <InventoryTable openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} user={user} lowStockThreshold={user.settings?.lowStockThreshold} isThresholdEnabled={user.settings?.isThresholdEnabled ?? false} />}
+                {view === 'dashboard' && <window.Dashboard branding={branding} onPerformAction={handlePromptConfirm} openPrompt={openPrompt} globalSettings={globalSettings} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} supplierData={suppliers} settings={{ ...user.settings, theme }} user={user} />}
+                {view === 'inventory' && <Inventory openPrompt={openPrompt} inventoryData={inventory} inputLogs={inputLogs} outputLogs={outputLogs} dbError={dbError} user={user} lowStockThreshold={user.settings?.lowStockThreshold} isThresholdEnabled={user.settings?.isThresholdEnabled ?? false} />}
                 {view === 'itemList' && <ItemList inventoryData={inventory} openPrompt={openPrompt} user={user} lowStockThreshold={user.settings?.lowStockThreshold} isThresholdEnabled={user.settings?.isThresholdEnabled ?? false} />}
-                {view === 'suppliers' && <SupplierTable openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} user={user} />}
+                {view === 'suppliers' && <Supplier openPrompt={openPrompt} supplierData={suppliers} inventoryData={inventory} dbError={dbError} user={user} />}
                 {user.role === 'Administrator' && view === 'adminDashboard' && (
                     <window.AdminDashboard 
                         currentUser={user} 

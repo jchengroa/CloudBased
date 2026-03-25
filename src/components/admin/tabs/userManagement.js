@@ -45,8 +45,8 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
     };
 
     const handleRegister = async () => {
-        if (!addForm.name || !addForm.username || !addForm.email || !addForm.password) {
-            alert("Please fill in all identity fields.");
+        if (!addForm.name || !addForm.username || !addForm.password) {
+            alert("Name, Username, and Password are required.");
             return;
         }
         setIsSaving(true);
@@ -157,7 +157,8 @@ const UserManagementTab = ({ users, onUpdateUser, currentUser }) => {
                     <FormInput label="Full Name" placeholder="e.g. Juan Dela Cruz" value={addForm.name} onChange={e => setAddForm({...addForm, name: e.target.value})} />
                     <FormInput label="Username" placeholder="juan_dc" value={addForm.username} onChange={e => setAddForm({...addForm, username: e.target.value})} />
                 </div>
-                <FormInput label="Email Address" type="email" placeholder="juan@company.com" value={addForm.email} onChange={e => setAddForm({...addForm, email: e.target.value})} style={{marginBottom: '1.25rem'}} />
+                <FormInput label="Email Address (Optional)" type="email" placeholder="Leave blank for username-only login" value={addForm.email} onChange={e => setAddForm({...addForm, email: e.target.value})} style={{marginBottom: '0.25rem'}} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>If blank, a system email will be generated internally.</p>
                 <FormInput label="Initial Password" type="password" placeholder="Min 6 characters" value={addForm.password} onChange={e => setAddForm({...addForm, password: e.target.value})} style={{marginBottom: '1.5rem'}} />
 
                 <div style={{ marginBottom: '1.5rem' }}>
