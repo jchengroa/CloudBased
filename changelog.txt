@@ -250,3 +250,25 @@ Version 0.12.0 (March 25, 2026)
 - Administrative Experience (UX): 
     - Added "Quick Save" buttons to each major settings block (Branding, Modules, Firebase) for faster configuration without scrolling.
     - Grouped core metrics (Total Items, Low Stock, Suppliers) into a locked, non-resizable unit to preserve the high-level KPI layout.
+
+Version 0.13.0 (March 26, 2026)
+- Hybrid Cloud Architecture:
+    - Implemented a unified 'Dual-Backend' system supporting both independent PocketBase (VPS) and Legacy Firebase (Cloud) modes.
+    - Added a hidden database-mode toggle on the Login screen to switch between environments.
+    - Engineered 'FirebaseBridge' as a modular adapter to restore full legacy auth and data functionality without bloat.
+- Infrastructure & Deployment:
+    - Successfully migrated production to a Linux VPS with Caddy-based Reverse Proxy and DuckDNS resolution (cloudbased.duckdns.org).
+    - Hardened server security by removing UI-based endpoint configuration and moving to master config files.
+    - Configured PocketBase as a high-availability 'systemd' service with automated Port 8090 routing.
+- Data Reliability & Cloud Sync:
+    - Restored full User, Activity Log, and Stock sync for legacy Firebase environments.
+    - Synchronized Global Assets (Units of Measure, Warehouses) and Corporate Branding across both database backends.
+    - Solved critical "null reference" and "security rule" crashes by re-routing settings to legacy Firestore 'system' and 'uoms' collections.
+    - Fixed specialized data-type mapping (Invalid Date/MIGRATION_KEY) to ensure 100% data integrity during backend switching.
+- Infrastructure Migration (Firebase to PocketBase Heritage): 
+    - Integrated PocketBase JS SDK as the primary local/cloud database engine.
+    - Re-engineered 'AppDataHandler' to support PocketBase collection methods (getList, create, getFullList).
+    - Implemented a 'Master Config' switch via `assets/data/pocketbase_config.json` for centralized cloud pointing.
+- Admin Dashboard & Server Management:
+    - Modernized the Activity Logs tab with robust date-handling logic to prevent deduplication errors.
+    - Standardized branding to pull from local 'assets/images/icon.png' for offline-resilient white-labeling.

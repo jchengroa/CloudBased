@@ -6,25 +6,29 @@
 
     Handler.login = async function(username, password) {
         await _.initPromise;
-        const snap = await _.db.collection('users').where('username', '==', username).get();
-        if (snap.empty) throw new Error("Incorrect username or password.");
-        
-        const userData = snap.docs[0].data();
-        const credential = await _.auth.signInWithEmailAndPassword(userData.email, password);
-        
-        const userProfile = { 
-            id: snap.docs[0].id,
-            ...userData, 
-            role: userData.role || 'Auditor', 
-            uid: credential.user.uid,
-            restrictions: userData.restrictions || (userData.role === 'Auditor' ? _.ALL_AUDITOR_RESTRICTIONS : (userData.role ? [] : _.ALL_AUDITOR_RESTRICTIONS))
-        };
-        
-        if (!userData.role) {
-            _.db.collection('users').doc(userProfile.id).set({ role: 'Auditor' }, { merge: true })
-              .catch(e => console.warn("Background role update blocked:", e.message));
+
+        if (_.getMode() === 'FIREBASE') {
+            const fbUser = await window.FirebaseBridge.login(username, password);
+            _.currentUser = { 
+                uid: fbUser.uid, 
+                email: fbUser.email, 
+                role: 'Administrator',
+                restrictions: []
+            };
+            localStorage.setItem('cloudbased_session', JSON.stringify(_.currentUser));
+            return _.currentUser;
         }
 
+        const authData = await _.pb.collection('users').authWithPassword(username, password);
+        const userRec = authData.record;
+        
+        const userProfile = { 
+            ...userRec, 
+            uid: userRec.id,
+            role: userRec.role || 'Auditor', 
+            restrictions: userRec.restrictions || (userRec.role === 'Auditor' ? _.ALL_AUDITOR_RESTRICTIONS : (userRec.role ? [] : _.ALL_AUDITOR_RESTRICTIONS))
+        };
+        
         _.currentUser = userProfile;
         localStorage.setItem('cloudbased_session', JSON.stringify(_.currentUser));
         
@@ -39,29 +43,26 @@
 
     Handler.signup = async function(userData) {
         await _.initPromise;
-        const usernameLower = userData.username.toLowerCase();
-        const check = await _.db.collection('users').get();
-        const existingUser = check.docs.find(d => d.data().username?.toLowerCase() === usernameLower);
-        if (existingUser) throw new Error("Username already taken.");
-
-        let emailToUse = userData.email || `${userData.username.toLowerCase()}@cloudbased.internal`;
+        if (_.getMode() === 'FIREBASE') {
+            throw new Error("Self-Signup is disabled in Legacy Cloud Mode.");
+        }
+        
+        const profile = {
+            username: userData.username,
+            email:    userData.email || `${userData.username.toLowerCase()}@local.internal`,
+            password: userData.password,
+            passwordConfirm: userData.password,
+            name:     userData.name,
+            role:     'Auditor',
+            restrictions: _.ALL_AUDITOR_RESTRICTIONS,
+            settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: false }
+        };
 
         try {
-            const credential = await _.auth.createUserWithEmailAndPassword(emailToUse, userData.password);
-            const profile = {
-                uid:      credential.user.uid,
-                name:     userData.name,
-                username: userData.username,
-                email:    userData.email || '',
-                role:     'Auditor',
-                restrictions: _.ALL_AUDITOR_RESTRICTIONS,
-                createdAt: new Date().toISOString(),
-                settings: { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: false }
-            };
-
-            await _.db.collection('users').doc(credential.user.uid).set(profile);
+            const userRec = await _.pb.collection('users').create(profile);
+            await _.pb.collection('users').authWithPassword(profile.username, profile.password);
             
-            _.currentUser = profile;
+            _.currentUser = { ...userRec, uid: userRec.id };
             localStorage.setItem('cloudbased_session', JSON.stringify(_.currentUser));
             
             await Handler.addActivityLog({
@@ -72,35 +73,24 @@
 
             return _.currentUser;
         } catch (e) {
-            if (e.code === 'auth/email-already-in-use' && !userData.email) {
-                throw new Error("A system-generated email for this username already exists. Please contact an admin.");
-            }
             throw e;
         }
     };
 
     Handler.logout = function() {
-        if (_.auth) _.auth.signOut();
+        if (_.getMode() === 'FIREBASE') {
+            window.FirebaseBridge.logout();
+        } else if (_.pb) {
+            _.pb.authStore.clear();
+        }
         _.currentUser = null;
-        _.collectionCache = {
-            inventory: { data: null, timestamp: 0 },
-            inputLogs: { data: null, timestamp: 0 },
-            outputLogs: { data: null, timestamp: 0 },
-            suppliers: { data: null, timestamp: 0 }
-        };
         localStorage.removeItem('cloudbased_session');
         location.reload();
     };
 
     Handler.updateProfile = async function(data) {
         await _.initPromise;
-        
-        if (data.username && data.username.toLowerCase() !== _.currentUser.username.toLowerCase()) {
-            const users = await Handler.getUsers();
-            if (users.some(u => u.username?.toLowerCase() === data.username.toLowerCase())) {
-                throw new Error("Username is already taken.");
-            }
-        }
+        if (_.getMode() === 'FIREBASE') return _.currentUser;
 
         const updates = {
             name: data.name,
@@ -109,24 +99,12 @@
         };
 
         if (data.email !== undefined && data.email !== _.currentUser.email) {
-            const user = _.auth.currentUser;
-            if (user) {
-                if (data.email) {
-                    await user.updateEmail(data.email);
-                } else {
-                    await user.updateEmail(`${updates.username.toLowerCase()}@cloudbased.internal`);
-                }
-                updates.email = data.email || '';
-            }
+            updates.email = data.email || `${updates.username.toLowerCase()}@local.internal`;
         }
         
-        await _.db.collection('users').doc(_.currentUser.uid).update(updates);
+        const updatedRec = await _.pb.collection('users').update(_.currentUser.uid, updates);
 
-        if (_.auth.currentUser) {
-            await _.auth.currentUser.updateProfile({ displayName: data.name });
-        }
-        _.currentUser = { ..._.currentUser, ...updates };
-        localStorage.setItem('cloudbased_session', JSON.stringify(_.currentUser));
+        _.currentUser = { ...updatedRec, uid: updatedRec.id };
         
         await Handler.addActivityLog({
             title: 'Profile Updated',
@@ -139,10 +117,13 @@
 
     Handler.changePassword = async function(oldPass, newPass) {
         await _.initPromise;
-        const user = _.auth.currentUser;
-        const cred = firebase.auth.EmailAuthProvider.credential(user.email, oldPass);
-        await user.reauthenticateWithCredential(cred);
-        await user.updatePassword(newPass);
+        if (_.getMode() === 'FIREBASE') throw new Error("Manual password change not supported in Legacy Cloud Mode.");
+
+        await _.pb.collection('users').update(_.currentUser.uid, {
+            oldPassword: oldPass,
+            password: newPass,
+            passwordConfirm: newPass
+        });
 
         await Handler.addActivityLog({
             title: 'Security Sync',
@@ -151,41 +132,25 @@
         });
     };
 
-    Handler.deleteAccount = async function() {
-        await _.initPromise;
-        const user = _.auth.currentUser;
-        if (user) {
-            await _.db.collection('users').doc(user.uid).delete();
-            await user.delete();
-            _.currentUser = null;
-            localStorage.removeItem('cloudbased_session');
-            location.reload();
-        }
-    };
-
     Handler.sendPasswordResetEmail = async function(identifier) {
         await _.initPromise;
+        if (_.getMode() === 'FIREBASE') {
+            return window.FirebaseBridge.sendReset(identifier);
+        }
+
         let emailToSend = identifier;
         if (!identifier.includes('@')) {
-            const usernameLower = identifier.toLowerCase();
-            const snap = await _.db.collection('users').get();
-            const userDoc = snap.docs.find(d => d.data().username?.toLowerCase() === usernameLower);
-            
-            if (!userDoc) throw new Error("User not found.");
-            
-            const data = userDoc.data();
-            emailToSend = data.email || `${data.username.toLowerCase()}@cloudbased.internal`;
-            
-            if (!data.email) {
-                throw new Error("This account does not have a registered email address. Please contact an admin to reset your password.");
-            }
+            const userRec = await _.pb.collection('users').getFirstListItem(`username="${identifier}"`).catch(() => null);
+            if (!userRec) throw new Error("User not found.");
+            emailToSend = userRec.email;
         }
-        await _.auth.sendPasswordResetEmail(emailToSend);
+        await _.pb.collection('users').requestPasswordReset(emailToSend);
     };
 
-    Handler.confirmPasswordReset = async function(code, newPassword) {
+    Handler.confirmPasswordReset = async function(token, newPassword) {
         await _.initPromise;
-        await _.auth.confirmPasswordReset(code, newPassword);
+        if (_.getMode() === 'FIREBASE') throw new Error("Reset link must be used in the original Firebase deployment.");
+        await _.pb.collection('users').confirmPasswordReset(token, newPassword, newPassword);
     };
 
 })(window.AppDataHandler);

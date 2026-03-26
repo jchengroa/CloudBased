@@ -8,31 +8,51 @@
 
     async function saveData(collection, items) {
         await _.initPromise;
-        const coll = _.db.collection(collection);
-        const existing = await coll.get();
-        const batch = _.db.batch();
+
+        // Firebase Mode Branch
+        if (_.getMode() === 'FIREBASE') {
+            await Promise.all(items.map(item => {
+                return window.FirebaseBridge.upsertData(collection, item);
+            }));
+            return;
+        }
+
+        // PocketBase Mode
+        const pbCollection = collection === 'inputLogs' ? 'logs_input' : 
+                             collection === 'outputLogs' ? 'logs_output' : 
+                             collection;
+
+        const existing = await _.pb.collection(pbCollection).getFullList();
+        await Promise.all(existing.map(rec => _.pb.collection(pbCollection).delete(rec.id)));
         
-        existing.docs.forEach(doc => batch.delete(doc.ref));
-        
-        items.forEach(item => {
+        await Promise.all(items.map(item => {
             const { id, ...fields } = item;
-            const docId = id ? String(id) : coll.doc().id;
-            batch.set(coll.doc(docId), fields);
-        });
+            return _.pb.collection(pbCollection).create({ ...fields, itemCode: id });
+        }));
         
         if (_.collectionCache[collection]) {
             const newTimestamp = Date.now();
             _.collectionCache[collection] = { data: items, timestamp: newTimestamp };
             _.savePersistentCache();
-            batch.set(_.db.collection('system').doc('lastUpdated'), { [collection]: newTimestamp }, { merge: true });
+            
+            const list = await _.pb.collection('system_settings').getList(1, 1, { filter: 'key="lastUpdated"' });
+            if (list.items.length > 0) {
+                const rec = list.items[0];
+                await _.pb.collection('system_settings').update(rec.id, { 
+                    value: { ...rec.value, [collection]: newTimestamp } 
+                });
+            } else {
+                await _.pb.collection('system_settings').create({ 
+                    key: 'lastUpdated', 
+                    value: { [collection]: newTimestamp } 
+                });
+            }
         }
-        
-        await batch.commit();
     }
 
     Handler.getInventory =   () => getData('inventory');
-    Handler.getInputLogs =   () => getData('inputLogs');
-    Handler.getOutputLogs =  () => getData('outputLogs');
+    Handler.getInputLogs =   () => getData('logs_input');
+    Handler.getOutputLogs =  () => getData('logs_output');
     Handler.getSuppliers =   () => getData('suppliers');
 
     Handler.saveInventory =  (d) => saveData('inventory', d);
@@ -42,60 +62,98 @@
 
     Handler.getUOMs = async function () {
         const defaults = ["Pieces", "Boxes", "Bags"];
+        await _.initPromise;
+        if (_.getMode() === 'FIREBASE') {
+            try {
+                const items = await window.FirebaseBridge.getData('uoms');
+                const rec = items.find(i => i.id === 'list');
+                return rec ? rec.values : defaults;
+            } catch (e) { return defaults; }
+        }
+        
         try {
-            await _.initPromise;
-            const doc = await _.db.collection('uoms').doc('list').get();
-            if (doc.exists) return doc.data().values;
-            await _.db.collection('uoms').doc('list').set({ values: defaults }).catch(e => console.warn("Could not set default UOMs:", e));
+            const rec = await _.pb.collection('system_settings').getOne('uoms').catch(() => null);
+            if (rec) return rec.value;
+            await _.pb.collection('system_settings').create({ id: 'uoms', key: 'uoms', value: defaults }).catch(() => {});
             return defaults;
         } catch (e) { 
-            console.warn("Graceful fallback: reading uoms failed, using defaults."); 
             return defaults; 
         }
     };
 
     Handler.saveUOMs = async function(values) {
         await _.initPromise;
-        await _.db.collection('uoms').doc('list').set({ values }).catch(e => console.error("saveUOMs error:", e));
+        if (_.getMode() === 'FIREBASE') {
+            return window.FirebaseBridge.upsertData('uoms', { id: 'list', values: values });
+        }
+        await _.pb.collection('system_settings').update('uoms', { value: values }).catch(async () => {
+            await _.pb.collection('system_settings').create({ id: 'uoms', key: 'uoms', value: values });
+        });
     };
 
     Handler.getWarehouses = async function () {
         const defaults = ["Main Warehouse"];
+        await _.initPromise;
+        if (_.getMode() === 'FIREBASE') {
+            try {
+                const items = await window.FirebaseBridge.getData('warehouses');
+                const rec = items.find(i => i.id === 'list');
+                return rec ? rec.values : defaults;
+            } catch (e) { return defaults; }
+        }
+
         try {
-            await _.initPromise;
-            const doc = await _.db.collection('warehouses').doc('list').get();
-            if (doc.exists) return doc.data().values;
-            await _.db.collection('warehouses').doc('list').set({ values: defaults }).catch(e => console.warn("Could not set default Warehouses:", e));
+            const rec = await _.pb.collection('system_settings').getOne('warehouses').catch(() => null);
+            if (rec) return rec.value;
+            await _.pb.collection('system_settings').create({ id: 'warehouses', key: 'warehouses', value: defaults }).catch(() => {});
             return defaults;
         } catch (e) { 
-            console.warn("Graceful fallback: reading warehouses failed, using defaults."); 
             return defaults; 
         }
     };
 
     Handler.saveWarehouses = async function(values) {
         await _.initPromise;
-        await _.db.collection('warehouses').doc('list').set({ values }).catch(e => console.error("saveWarehouses error:", e));
+        if (_.getMode() === 'FIREBASE') {
+            return window.FirebaseBridge.upsertData('warehouses', { id: 'list', values: values });
+        }
+        await _.pb.collection('system_settings').update('warehouses', { value: values }).catch(async () => {
+            await _.pb.collection('system_settings').create({ id: 'warehouses', key: 'warehouses', value: values });
+        });
     };
 
     Handler.getSettings = async function () {
         const defaults = { theme: 'light', lowStockThreshold: 1000, isThresholdEnabled: false };
+        await _.initPromise;
+        if (_.getMode() === 'FIREBASE') {
+            if (!_.currentUser) return defaults;
+            try {
+                const profile = await window.FirebaseBridge.getProfile(_.currentUser.uid);
+                return profile?.settings || defaults;
+            } catch (e) { return defaults; }
+        }
+
         try {
-            await _.initPromise;
             if (_.currentUser) {
-                const doc = await _.db.collection('users').doc(_.currentUser.uid).get();
-                if (doc.exists && doc.data().settings) return doc.data().settings;
+                const userRec = await _.pb.collection('users').getOne(_.currentUser.uid);
+                if (userRec && userRec.settings) return userRec.settings;
             }
             return defaults;
         } catch (e) { 
-            console.warn("Graceful fallback: reading settings failed, using defaults.");
             return defaults; 
         }
     };
 
     Handler.saveSettings = async function (settings) {
         await _.initPromise;
-        if (_.currentUser) await _.db.collection('users').doc(_.currentUser.uid).update({ settings });
+        if (_.getMode() === 'FIREBASE') {
+            if (_.currentUser) {
+                const profile = await window.FirebaseBridge.getProfile(_.currentUser.uid);
+                return window.FirebaseBridge.upsertData('users', { id: _.currentUser.uid, ...profile, settings });
+            }
+            return;
+        }
+        if (_.currentUser) await _.pb.collection('users').update(_.currentUser.uid, { settings });
     };
 
 })(window.AppDataHandler);

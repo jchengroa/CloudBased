@@ -90,6 +90,10 @@ const App = () => {
             setGlobalSettings(gSet);
             setDbError(window.AppDataHandler.getDbError());
             
+            // Re-sync the user state once the initPromise is guaranteed to be finished
+            const latestUser = window.AppDataHandler.getCurrentUser();
+            if (latestUser) setUser(latestUser);
+
             // Initial sync
             updateTabMetas(brand);
             document.documentElement.setAttribute('data-theme', finalTheme);

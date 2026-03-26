@@ -69,11 +69,11 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
             onUpdateUser(updated);
             setAuthAction(null);
             showMessage('Profile updated successfully!');
-        } catch (e) { 
+        } catch (e) {
             if (e.message.includes('recent-login')) {
                 showMessage("Security: Please log out and back in to change your email.", true);
             } else {
-                showMessage(e.message, true); 
+                showMessage(e.message, true);
             }
         }
         finally { setLoading(false); }
@@ -301,16 +301,19 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                                 <UIIcons.Info size={16} /> Version Info
                             </div>
                             <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontWeight: '500' }}>CloudBased IMS</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.12.0</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Date Modified: March 25, 2026</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Version 0.13</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Date Modified: March 26, 2026</div>
                         </div>
                         <div style={{ background: 'var(--hover-bg)', padding: '1.5rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
                             <img src="assets/images/icon.png" alt="Icon" style={{ width: '40px', height: '40px', marginBottom: '0.75rem', opacity: 0.9 }} onError={(e) => { e.target.style.display = 'none'; }} />
-                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>Made by Group 5</div>
+                            <div style={{ fontWeight: '700', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>CloudBased</div>
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Created by: Cheng Roa & Tejada</div>
                         </div>
                     </div>
-                    <button style={{ background: 'var(--accent-color)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
+                    <button
+                        onClick={() => window.open('https://docs.google.com/document/d/1IDJJCSr47DScc8_yXGR1jIdeV20nKvXWF1PBAPHheIs/edit?usp=sharing', '_blank')}
+                        style={{ background: 'var(--accent-color)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer' }}
+                    >
                         <UIIcons.Book size={18} /> Access User Manual
                     </button>
                 </SettingsCard>
@@ -326,11 +329,11 @@ const UserSettings = ({ user, onClose, onUpdateUser, inventoryData = [] }) => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <FormInput label="Display Name" value={name} onChange={e => setName(e.target.value)} />
                                 <FormInput label="Username" value={username} onChange={e => setUsername(e.target.value)} />
-                                <FormInput 
-                                    label="Email Address (Optional)" 
+                                <FormInput
+                                    label="Email Address (Optional)"
                                     placeholder="Leave blank for username-based login only"
-                                    value={email} 
-                                    onChange={e => setEmail(e.target.value)} 
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
                                 />
                                 <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '-0.5rem' }}>
                                     Note: Updating your email may require a <a href="#" onClick={() => window.AppDataHandler.logout()} style={{ color: 'var(--accent-color)' }}>fresh login</a> for security reasons.
