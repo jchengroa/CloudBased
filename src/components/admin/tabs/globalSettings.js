@@ -262,6 +262,104 @@ const GlobalSettingsTab = ({ globalSettings, onUpdateGlobalSettings, branding, o
                         </div>
                     </div>
                 </div>
+                <FirebaseConfigurator />
+            </div>
+        </div>
+    );
+};
+
+const FirebaseConfigurator = () => {
+    const [config, setConfig] = React.useState({
+        apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: ''
+    });
+    const [showKey, setShowKey] = React.useState(false);
+    const [status, setStatus] = React.useState('');
+
+    React.useEffect(() => {
+        const fetchCurrent = async () => {
+            try {
+                const response = await fetch('assets/data/defaultDatabase.json');
+                const defaultData = response.ok ? await response.json() : {};
+                const saved = window.AppDataHandler.getFirebaseConfig();
+                setConfig({ ...defaultData, ...saved });
+            } catch(e) {}
+        };
+        fetchCurrent();
+    }, []);
+
+    const handleSave = () => {
+        window.AppDataHandler.saveFirebaseConfig(config);
+        setStatus('Configuration saved! Please reload the page to apply changes.');
+    };
+
+    const handleReset = async () => {
+        try {
+            const response = await fetch('assets/data/defaultDatabase.json');
+            const defaultData = response.ok ? await response.json() : {};
+            setConfig(defaultData);
+            window.AppDataHandler.resetFirebaseConfig();
+            setStatus('Reset to default values. Please reload to apply.');
+        } catch(e) { alert("Reset failed."); }
+    };
+
+    const inputStyle = { width: '100%', padding: '0.8rem', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', marginBottom: '1rem' };
+
+    return (
+        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', background: 'var(--hover-bg)' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <Icons.Shield size={20} /> Firebase Backend Configuration
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.4rem' }}>Update your Firestore and Authentication endpoints here.</p>
+            </div>
+            
+            <div style={{ padding: '1.5rem' }}>
+                {status && <div style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', padding: '1rem', borderRadius: '10px', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: '700' }}>{status}</div>}
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ gridColumn: 'span 2', position: 'relative' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>API Key</label>
+                        <div style={{ position: 'relative' }}>
+                            <input 
+                                type={showKey ? 'text' : 'password'} 
+                                style={{ ...inputStyle, paddingRight: '3rem', marginBottom: 0 }} 
+                                value={config.apiKey} 
+                                onChange={e => setConfig({...config, apiKey: e.target.value})} 
+                            />
+                            <button 
+                                onClick={() => setShowKey(!showKey)}
+                                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5, color: 'var(--text-primary)' }}
+                            >
+                                {showKey ? <Icons.EyeOff size={18} /> : <Icons.Eye size={18} />} 
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Project ID</label>
+                        <input style={inputStyle} value={config.projectId} onChange={e => setConfig({...config, projectId: e.target.value})} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Auth Domain</label>
+                        <input style={inputStyle} value={config.authDomain} onChange={e => setConfig({...config, authDomain: e.target.value})} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Storage Bucket</label>
+                        <input style={inputStyle} value={config.storageBucket} onChange={e => setConfig({...config, storageBucket: e.target.value})} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>Messaging Sender ID</label>
+                        <input style={inputStyle} value={config.messagingSenderId} onChange={e => setConfig({...config, messagingSenderId: e.target.value})} />
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.4rem', opacity: 0.7 }}>App ID</label>
+                        <input style={inputStyle} value={config.appId} onChange={e => setConfig({...config, appId: e.target.value})} />
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button className="nav-btn" onClick={handleSave} style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--accent-color)' }}>Save Configuration</button>
+                    <button onClick={handleReset} style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer' }}>Reset to Factory Defaults</button>
+                </div>
             </div>
         </div>
     );

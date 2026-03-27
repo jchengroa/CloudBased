@@ -27,14 +27,6 @@ const Auth = ({ onLoginSuccess }) => {
         identifier: ''
     });
 
-    const [dbMode, setDbMode] = React.useState(window.AppDataHandler.getCloudMode());
-
-    const toggleDbMode = () => {
-        const next = dbMode === 'FIREBASE' ? 'VPS' : 'FIREBASE';
-        window.AppDataHandler.setCloudMode(next);
-        setDbMode(next);
-    };
-
     React.useEffect(() => {
         const loadBranding = async () => {
             const b = await window.AppDataHandler.getBranding();
@@ -283,21 +275,9 @@ const Auth = ({ onLoginSuccess }) => {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                 <label className="auth-label" style={{ marginBottom: 0 }}>Password</label>
                                 {view === 'login' && (
-                                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                                        <button type="button" className="auth-btn-text" style={{ fontSize: '0.8rem', padding: 0 }} onClick={() => { setView('forgot'); setError(''); }}>
-                                            Forgot password?
-                                        </button>
-                                        <span style={{ opacity: 0.1, pointerEvents: 'none' }}>|</span>
-                                        <button 
-                                            type="button" 
-                                            className="auth-btn-text" 
-                                            style={{ fontSize: '0.75rem', padding: 0, color: dbMode === 'FIREBASE' ? '#f59e0b' : 'var(--text-secondary)', opacity: 0.5 }} 
-                                            onClick={toggleDbMode}
-                                            title="Backend DB Toggle"
-                                        >
-                                            {dbMode === 'FIREBASE' ? '🔥 Cloud' : '☁️ VPS'}
-                                        </button>
-                                    </div>
+                                    <button type="button" className="auth-btn-text" style={{ fontSize: '0.8rem', padding: 0 }} onClick={() => { setView('forgot'); setError(''); }}>
+                                        Forgot password?
+                                    </button>
                                 )}
                             </div>
                             <div className="auth-input-wrapper">

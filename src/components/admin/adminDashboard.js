@@ -44,10 +44,9 @@ const AdminDashboard = ({ currentUser, inputLogs, outputLogs, onBrandingUpdate, 
             // Deduplicate to avoid showing same transaction twice (once from logs, once from activityLogs)
             const finalLogs = [];
             const seen = new Set();
-            merged.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)).forEach(log => {
+            merged.sort((a,b) => b.timestamp - a.timestamp).forEach(log => {
                 // Approximate key for deduplication
-                const ts = log.timestamp || new Date().getTime();
-                const key = `${Math.floor(ts/1000)}-${log.user}-${log.title.substring(0,10)}`;
+                const key = `${Math.floor(log.timestamp/1000)}-${log.user}-${log.title.substring(0,10)}`;
                 if (!seen.has(key)) {
                     seen.add(key);
                     finalLogs.push(log);

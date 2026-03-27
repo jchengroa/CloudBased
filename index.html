@@ -31,13 +31,10 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- PocketBase SDK -->
-    <script src="https://cdn.jsdelivr.net/gh/pocketbase/js-sdk/dist/pocketbase.umd.js"></script>
-
-    <!-- Firebase SDK (Modular Support) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <!-- Firebase SDK (compat builds work with plain <script> tags, no bundler needed) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
     <!-- Machine Learning & NLP Frameworks -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -45,7 +42,7 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
     <!-- Data & Utils -->
-    <script src="src/data-management/modules/firebase_bridge.js"></script>
+    <!-- Data & Utils -->
     <script src="src/data-management/modules/init.js"></script>
     <script src="src/data-management/modules/admin.js"></script>
     <script src="src/data-management/modules/auth.js"></script>
