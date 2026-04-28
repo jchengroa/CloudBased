@@ -8,7 +8,7 @@ CloudBased is a cloud-based Inventory Management System (IMS) designed to solve 
 
 > **Version:** 0.16.4 (April 28, 2026)  
 > **Status:** Production Ready (Local-Only)  
-> **GitHub Repository:** https://github.com/j-chen77/CloudBased
+> **GitHub Repository:** https://github.com/jchengroa/CloudBased
 
 ---
 
