@@ -8,6 +8,7 @@ const Validation = {
     validateItem: (formData, inventoryData, isEdit, originalId) => {
         if (!formData.id) return 'Item ID is required.';
         if (!formData.name) return 'Item Name is required.';
+        if ((parseFloat(formData.optimalStock) || 0) < 0) return 'Optimal stock cannot be negative.';
         
         const isDuplicate = inventoryData.some(i => i.id === formData.id && (!isEdit || i.id !== originalId));
         if (isDuplicate) return `Item ID "${formData.id}" already exists.`;
@@ -17,11 +18,7 @@ const Validation = {
 
     // Supplier Validation
     validateSupplier: (formData, supplierData, isEdit, originalId) => {
-        if (!formData.id) return 'Supplier ID is required.';
         if (!formData.name) return 'Supplier Name is required.';
-
-        const isIdDuplicate = supplierData.some(s => s.id === formData.id && (!isEdit || s.id !== originalId));
-        if (isIdDuplicate) return `Supplier ID "${formData.id}" already exists.`;
 
         const isNameDuplicate = supplierData.some(s => s.name === formData.name && (!isEdit || s.id !== originalId));
         if (isNameDuplicate) return `Supplier Name "${formData.name}" already exists.`;
@@ -32,6 +29,8 @@ const Validation = {
     // Log Validation (Input/Output)
     validateLog: (formData, inputLogs, outputLogs, isEdit, originalId) => {
         if (!formData.transactionId) return 'Transaction ID is required.';
+        if (!formData.itemCode) return 'Please select an item.';
+        if (!formData.quantity || (parseFloat(formData.quantity) || 0) <= 0) return 'Quantity must be greater than zero.';
         
         const allLogs = [...inputLogs, ...outputLogs];
         const isDuplicate = allLogs.some(l => l.transactionId === formData.transactionId && (!isEdit || l.transactionId !== originalId));

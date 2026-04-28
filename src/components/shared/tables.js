@@ -1,7 +1,14 @@
 // Dropdown filter pill button
-const SortButton = ({ options = [], currentKey, onSort }) => {
+const SortButton = ({ options = [], currentKey, currentDirection = 'asc', onSort }) => {
+    const Icons = window.createIconProxy ? window.createIconProxy() : window.Icons || {};
     const [isOpen, setIsOpen] = React.useState(false);
     const dropRef = React.useRef(null);
+    const renderSafeIcon = (icon) => {
+        if (!React.isValidElement(icon)) return null;
+        const iconType = icon.type;
+        const isRenderableType = typeof iconType === 'string' || typeof iconType === 'function';
+        return isRenderableType ? icon : null;
+    };
 
     if (!options || options.length === 0) return null;
 
@@ -13,56 +20,66 @@ const SortButton = ({ options = [], currentKey, onSort }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const activeOption = options.find(o => o.key === currentKey);
+    const activeOption = options.find((o) => o.key === currentKey);
 
     return (
         <div className="sort-wrapper" ref={dropRef} style={{ position: 'relative' }}>
             <button
                 className={`sort-btn ${currentKey ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
-                style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.75rem', 
-                    fontWeight: '600',
-                    background: 'var(--hover-bg)',
-                    border: '1px solid var(--border-color)',
-                    padding: '0.6rem 1.25rem',
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    fontWeight: '700',
+                    background: currentKey ? 'rgba(99, 102, 241, 0.15)' : 'var(--hover-bg)',
+                    border: '1px solid',
+                    borderColor: currentKey ? 'var(--accent-color)' : 'var(--border-color)',
+                    padding: '0.6rem',
+                    minWidth: '44px',
                     borderRadius: '12px',
-                    color: 'var(--text-primary)',
+                    color: currentKey ? 'var(--accent-color)' : 'var(--text-primary)',
                     cursor: 'pointer',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
+                title={activeOption ? `Sorted by: ${activeOption.label}` : 'Sort Properties'}
             >
-                <Icons.Sort />
-                <span>{activeOption ? activeOption.label : 'Sort Properties'}</span>
-                <Icons.ChevronDown />
+                <Icons.Layers size={18} style={{ opacity: currentKey ? 1 : 0.6 }} />
+                {activeOption && <span style={{ fontSize: '0.85rem', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeOption.label}</span>}
+                <Icons.ChevronDown size={14} style={{ opacity: 0.5 }} />
             </button>
-            
+
             {isOpen && (
-                <div className="sort-menu">
-                    <div style={{ padding: '0.5rem', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Sort By Property</div>
-                    {options.map(opt => (
-                        <div
-                            key={opt.key}
-                            className={`sort-item ${currentKey === opt.key ? 'active' : ''}`}
-                            onClick={() => { onSort(opt.key); setIsOpen(false); }}
-                        >
-                            <span style={{ opacity: 0.7, display: 'flex' }}>{opt.icon || <Icons.Sort />}</span>
-                            <span>{opt.label}</span>
-                            {currentKey === opt.key && <span style={{ marginLeft: 'auto', opacity: 0.5 }}>✓</span>}
-                        </div>
-                    ))}
-                    {currentKey && (
-                        <div
-                            className="sort-item"
-                            onClick={() => { onSort(''); setIsOpen(false); }}
-                            style={{ color: 'var(--danger)', borderTop: '1px solid var(--border-color)', marginTop: '0.4rem', paddingTop: '0.6rem' }}
-                        >
-                            <Icons.Trash />
-                            <span>Reset Sort</span>
-                        </div>
-                    )}
+                <div className="sort-menu" style={{ zIndex: 100 }}>
+                    <div style={{ padding: '0.5rem', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+                        Sort By Property
+                    </div>
+                    {options.map((opt) => {
+                        const isActive = currentKey === opt.key;
+                        return (
+                            <div
+                                key={opt.key}
+                                className={`sort-item ${isActive ? 'active' : ''}`}
+                                onClick={() => { onSort(opt.key); setIsOpen(false); }}
+                            >
+                                <span>{opt.label}</span>
+                                {isActive && (
+                                    <span style={{ marginLeft: 'auto', color: 'var(--accent-color)', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                        {currentDirection === 'asc' ? '↑' : '↓'}
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    })}
+                    <div
+                        className="sort-item"
+                        onClick={() => { onSort(''); setIsOpen(false); }}
+                        style={{ color: currentKey ? 'var(--danger)' : 'var(--text-secondary)', borderTop: '1px solid var(--border-color)', marginTop: '0.4rem', paddingTop: '0.6rem', opacity: currentKey ? 1 : 0.4 }}
+                    >
+                        <Icons.Trash size={14} />
+                        <span>Reset Sort</span>
+                    </div>
                 </div>
             )}
         </div>
@@ -85,16 +102,51 @@ const TableToolbar = ({
     viewSwitcher = null,
     filterElement = null,
     user,
-    restrictionScope = "Items" // Items, Logs, Suppliers
+    restrictionScope = "Items"
 }) => {
+    const Icons = window.createIconProxy ? window.createIconProxy() : window.Icons || {};
     const hasRes = (action) => {
         if (!user || user.role === 'Administrator') return false;
         return (user.restrictions || []).includes(`${action}${restrictionScope}`);
     };
 
-    const canAdd    = !hasRes('Add');
-    const canEdit   = !hasRes('Edit');
+    const canAdd = !hasRes('Add');
+    const canEdit = !hasRes('Edit');
     const canRemove = !hasRes('Remove');
+
+    const isSearchActive = searchQuery && searchQuery.length > 0;
+    const useHubToolbar = selectedCount === 0 && !!viewSwitcher && !!filterElement;
+    const searchControl = (
+        <div className="toolbar-search-wrap" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Icons.Search 
+                size={18}
+                style={{ 
+                    position: 'absolute', 
+                    left: '0.85rem', 
+                    opacity: 0.5, 
+                    color: isSearchActive ? 'var(--accent-color)' : 'inherit',
+                    pointerEvents: 'none',
+                    zIndex: 2
+                }} 
+            />
+            <input
+                type="text"
+                className="search-bar"
+                placeholder={searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ 
+                    paddingLeft: '2.5rem', 
+                    width: '100%',
+                    background: 'var(--hover-bg)',
+                    borderColor: isSearchActive ? 'var(--accent-color)' : 'var(--border-color)',
+                    borderRadius: '12px',
+                    height: '42px',
+                    transition: 'border-color 0.2s'
+                }}
+            />
+        </div>
+    );
 
     return (
         <div className="management-toolbar">
@@ -123,27 +175,35 @@ const TableToolbar = ({
                             )}
                         </div>
                     </div>
-                ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <SortButton options={sortOptions} currentKey={currentSortKey} onSort={onSortChange} />
-                        {filterElement}
-                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-                            <Icons.Search style={{ position: 'absolute', left: '1rem', opacity: 0.5, pointerEvents: 'none' }} />
-                            <input 
-                                type="text"
-                                className="search-bar"
-                                placeholder={searchPlaceholder}
-                                value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
-                                style={{ paddingLeft: '2.5rem', width: '260px' }}
-                            />
+                ) : useHubToolbar ? (
+                    <div className="toolbar-hub-layout">
+                        <div className="toolbar-hub-top">
+                            <div className="toolbar-view-slot">{viewSwitcher}</div>
+                            <div className="toolbar-filter-slot">{filterElement}</div>
                         </div>
-                        {viewSwitcher}
+                        <div className="toolbar-hub-bottom">
+                            <div className="toolbar-hub-bottom-left">
+                                <SortButton options={sortOptions} currentKey={currentSortKey} currentDirection={currentSortDirection} onSort={onSortChange} />
+                                {searchControl}
+                            </div>
+                            {canAdd && (
+                                <button className="tool-btn add-btn toolbar-hub-add" onClick={onAdd} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Icons.Plus /> {addLabel}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="toolbar-controls-row">
+                        <SortButton options={sortOptions} currentKey={currentSortKey} onSort={onSortChange} />
+                        {filterElement ? <div className="toolbar-filter-slot">{filterElement}</div> : null}
+                        {searchControl}
+                        {viewSwitcher ? <div className="toolbar-view-slot">{viewSwitcher}</div> : null}
                     </div>
                 )}
             </div>
             <div className="toolbar-right">
-                {selectedCount === 0 && canAdd && (
+                {!useHubToolbar && selectedCount === 0 && canAdd && (
                     <button className="tool-btn add-btn" onClick={onAdd} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Icons.Plus /> {addLabel}
                     </button>
@@ -159,7 +219,7 @@ const TableMessage = ({ colSpan, dbError, isEmpty, emptyMessage }) => {
         return (
             <tr>
                 <td colSpan={colSpan} style={{ textAlign: 'center', padding: '6rem 3rem' }}>
-                    <Icons.Alert />
+                    <Icons.Alert size={64} color="var(--danger)" style={{ margin: '0 auto 1.25rem' }} />
                     <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Connection Interrupted</div>
                     <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto', lineHeight: 1.6 }}>{dbError}</div>
                 </td>
@@ -182,16 +242,16 @@ const TableMessage = ({ colSpan, dbError, isEmpty, emptyMessage }) => {
 window.TableMessage = TableMessage;
 
 const StatusBadge = ({ type, value }) => {
-    let style = { padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '800' };
-    
+    const style = { padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '800' };
+
     if (type === 'role') {
-        if(value === 'Administrator') { style.background = 'rgba(16, 185, 129, 0.15)'; style.color = 'rgb(4, 120, 87)'; }
-        else if(value === 'Manager') { style.background = 'rgba(59, 130, 246, 0.15)'; style.color = 'rgb(29, 78, 216)'; }
+        if (value === 'Administrator') { style.background = 'rgba(16, 185, 129, 0.15)'; style.color = 'rgb(4, 120, 87)'; }
+        else if (value === 'Manager') { style.background = 'rgba(59, 130, 246, 0.15)'; style.color = 'rgb(29, 78, 216)'; }
         else { style.background = 'rgba(245, 158, 11, 0.15)'; style.color = 'rgb(180, 83, 9)'; }
     } else if (type === 'stock') {
         const isReorder = value === 'Reorder' || value === 'To Restock';
         const isInProcess = value === 'I' || value === 'In Progress' || value === 'Restocking (I)';
-        
+
         if (isReorder) { style.background = 'rgba(239, 68, 68, 0.1)'; style.color = 'var(--danger)'; }
         else if (isInProcess) { style.background = 'rgba(99, 102, 241, 0.1)'; style.color = 'var(--accent-color)'; }
         else { style.background = 'rgba(16, 185, 129, 0.1)'; style.color = 'var(--success)'; }
@@ -203,4 +263,3 @@ const StatusBadge = ({ type, value }) => {
     return <span style={style}>{value}</span>;
 };
 window.StatusBadge = StatusBadge;
-

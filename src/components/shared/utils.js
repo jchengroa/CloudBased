@@ -34,3 +34,13 @@ window.resizeImage = (file, maxSide = 500) => {
         };
     });
 };
+
+window.formatStockQuantity = (value) => {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return '0';
+
+    return new Intl.NumberFormat(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    }).format(numericValue);
+};

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Inventory Management</title>
+    <link rel="icon" type="image/png" href="assets/images/icon.png">
+    <link rel="stylesheet" href="assets/css/index.css">
+    <style>
+        body { overflow: auto !important; height: auto !important; }
+        .admin-page-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
+    </style>
+
+    <script>
+        // Security Check: Redirect non-admins or unauthenticated users
+        try {
+            const saved = localStorage.getItem('cloudbased_session');
+            const session = saved ? JSON.parse(saved) : null;
+            if (!session || session.role !== 'Administrator') {
+                window.location.href = 'index.html';
+            }
+            const theme = session?.settings?.theme || 'light';
+            const accent = session?.settings?.themeColor;
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            if (accent) document.documentElement.style.setProperty('--accent-color', accent);
+        } catch (e) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <!-- React & Babel -->
+    <script src="vendor/react.development.js" crossorigin></script>
+    <script src="vendor/react-dom.development.js" crossorigin></script>
+    <script src="vendor/babel.min.js"></script>
+
+
+    <!-- Spreadsheet Parser -->
+    <script src="vendor/xlsx.full.min.js"></script>
+
+    <!-- Data & Utils -->
+    <script src="src/data-management/modules/coreDataHandler.js"></script>
+    <script src="src/data-management/modules/adminDataManager.js"></script>
+    <script src="src/data-management/modules/authDataManager.js"></script>
+    <script src="src/data-management/modules/inventoryDataManager.js"></script>
+    <script src="src/data-management/modules/settingsDataManager.js"></script>
+    <script src="src/utils/exportTool.js"></script>
+    <script src="src/utils/importDataHelper.js"></script>
+
+    <!-- Shared Components (Required for Admin UI) -->
+    <script type="text/babel" src="src/utils/validation.js"></script>
+    <script type="text/babel" src="src/components/shared/icons.js"></script>
+    <script type="text/babel" src="src/components/shared/tables.js"></script>
+    <script type="text/babel" src="src/components/shared/layout.js"></script>
+    <script type="text/babel" src="src/components/shared/forms.js"></script>
+    <script type="text/babel" src="src/components/shared/navigation.js"></script>
+    <script type="text/babel" src="src/components/shared/utils.js"></script>
+    <script type="text/babel" src="src/components/shared/grid.js"></script>
+
+    <!-- Dashboard Engines -->
+    <script type="text/babel" src="src/components/engine/basicWidgetsEngine.js"></script>
+    <script type="text/babel" src="src/components/engine/predictiveReplenishEngine.js"></script>
+    <script type="text/babel" src="src/components/engine/criticalReplenishEngine.js"></script>
+    <script type="text/babel" src="src/components/engine/innoAssistantEngine.js"></script>
+
+    <!-- Admin Bundle -->
+    <script type="text/babel" src="src/components/admin/adminDashboard.js"></script>
+
+    <!-- Entry Point -->
+    <script type="text/babel">
+        /** @jsx React.createElement */
+        const AdminApp = () => {
+            const [user, setUser] = React.useState(window.AppDataHandler.getCurrentUser());
+            const [inventory, setInventory] = React.useState([]);
+            const [inputLogs, setInputLogs] = React.useState([]);
+            const [outputLogs, setOutputLogs] = React.useState([]);
+            const [loading, setLoading] = React.useState(true);
+
+            const loadData = async () => {
+                try {
+                    const [inv, iLogs, oLogs] = await Promise.all([
+                        window.AppDataHandler.getInventory(),
+                        window.AppDataHandler.getInputLogs(),
+                        window.AppDataHandler.getOutputLogs()
+                    ]);
+                    setInventory(inv);
+                    setInputLogs(iLogs);
+                    setOutputLogs(oLogs);
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            React.useEffect(() => {
+                loadData();
+            }, []);
+
+            const { Icons, AdminDashboard, DashboardGrid } = window;
+            const ArrowLeftIcon = Icons?.ArrowLeft || (() => null);
+
+            // Exhaustive check for all required global components to prevent race conditions
+            const isReady = !loading && 
+                window.AdminDashboard && 
+                window.Icons && 
+                window.DashboardGrid &&
+                window.GenericModal &&
+                window.StatusBadge &&
+                window.FormInput;
+
+            if (!isReady) return (
+                <div style={{ 
+                    height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', 
+                    justifyContent: 'center', background: 'var(--bg-color)', color: 'var(--text-secondary)',
+                    gap: '1.5rem'
+                }}>
+                    <div className="admin-loading-spinner" style={{ 
+                        width: '40px', height: '40px', border: '3px solid var(--hover-bg)', 
+                        borderTopColor: 'var(--accent-color)', borderRadius: '50%', animation: 'spin 1s linear infinite' 
+                    }}></div>
+                    <div style={{ fontWeight: '600', letterSpacing: '0.02em', fontSize: '0.9rem' }}>Initializing Administrative Shell...</div>
+                    <style>{`
+                        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                    `}</style>
+                </div>
+            );
+
+            return (
+                <div className="admin-page-wrapper" style={{ minHeight: '100vh', background: 'var(--bg-color)' }}>
+                    <header className="top-brand-bar">
+                         <div className="brand-left" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <button onClick={() => window.location.href = 'index.html'} className="tool-btn" style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '700' }}>
+                                <ArrowLeftIcon size={18} /> Back to App
+                            </button>
+                        </div>
+                        <div className="brand-right">
+                             <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center', marginRight: '0.8rem' }}>
+                                <span style={{ fontSize: '0.85rem', fontWeight: '700' }}>{user?.name}</span>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--accent-color)', fontWeight: '800', textTransform: 'uppercase' }}>Administrator</span>
+                            </div>
+                        </div>
+                    </header>
+                    <main style={{ paddingTop: '2rem' }}>
+                        <AdminDashboard 
+                            currentUser={user} 
+                            inputLogs={inputLogs} 
+                            outputLogs={outputLogs} 
+                            inventoryData={inventory}
+                            onDataSync={loadData}
+                            onBrandingUpdate={() => window.location.reload()} 
+                        />
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AdminApp />);
+    </script>
+</body>
+
+</html>

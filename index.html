@@ -5,9 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management System</title>
-    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="icon" type="image/png" href="assets/images/icon.png">
+    <link rel="stylesheet" href="assets/css/index.css?v=0.15.1">
 
     <script>
+        // High-Priority Password Reset Redirect
+        (function() {
+            const params = new URLSearchParams(window.location.search || window.location.hash.split('?')[1]);
+            const isReset = params.get('mode') === 'resetPassword' || params.get('token') || params.get('oobCode');
+            if (isReset) {
+                const query = window.location.search || (window.location.hash.includes('?') ? '?' + window.location.hash.split('?')[1] : '');
+                window.location.href = 'login.html' + query;
+            }
+        })();
+
         // Pre-render theme check to prevent light-flash
         try {
             const saved = localStorage.getItem('cloudbased_session');
@@ -27,27 +38,22 @@
     <div id="root"></div>
 
     <!-- React & Babel -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="vendor/react.development.js" crossorigin></script>
+    <script src="vendor/react-dom.development.js" crossorigin></script>
+    <script src="vendor/babel.min.js"></script>
 
-    <!-- Firebase SDK (compat builds work with plain <script> tags, no bundler needed) -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
     <!-- Machine Learning & NLP Frameworks -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/compromise@latest/builds/compromise.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="vendor/tf.min.js"></script>
+    <script src="vendor/compromise.min.js"></script>
+    <script src="vendor/xlsx.full.min.js"></script>
 
     <!-- Data & Utils -->
-    <!-- Data & Utils -->
-    <script src="src/data-management/modules/init.js"></script>
-    <script src="src/data-management/modules/admin.js"></script>
-    <script src="src/data-management/modules/auth.js"></script>
-    <script src="src/data-management/modules/data.js"></script>
-    <script src="src/data-management/modules/settings.js"></script>
+    <script src="src/data-management/modules/coreDataHandler.js"></script>
+    <script src="src/data-management/modules/adminDataManager.js"></script>
+    <script src="src/data-management/modules/authDataManager.js"></script>
+    <script src="src/data-management/modules/inventoryDataManager.js"></script>
+    <script src="src/data-management/modules/settingsDataManager.js"></script>
     <script src="src/utils/exportTool.js"></script>
 
     <!-- Core Logic & Components -->
@@ -55,38 +61,33 @@
     <script type="text/babel" src="src/components/shared/icons.js"></script>
     <script type="text/babel" src="src/components/shared/tables.js"></script>
     <script type="text/babel" src="src/components/shared/layout.js"></script>
-    <script type="text/babel" src="src/components/shared/forms.js"></script>
-    <script type="text/babel" src="src/components/shared/grid.js"></script>
-    <script type="text/babel" src="src/components/shared/utils.js"></script>
-    <script type="text/babel" src="src/utils/sorting.js"></script>
-    <script type="text/babel" src="src/components/shared/prompt.js"></script>
-    <script type="text/babel" src="src/components/views/inventory.js"></script>
-    <script type="text/babel" src="src/components/views/supplier.js"></script>
-    <script type="text/babel" src="src/components/views/itemList.js"></script>
-    <script type="text/babel" src="src/components/views/userSettings.js"></script>
+    <script type="text/babel" src="src/components/shared/navigation.js"></script>
+    <script type="text/babel" src="src/components/shared/forms.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/components/shared/grid.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/components/shared/utils.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/components/shared/filters.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/utils/sorting.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/utils/toast.js?v=0.16.0"></script>
+    <script type="text/babel" src="src/utils/mobileNavHelper.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/utils/history.js?v=0.16.0"></script>
+    <script type="text/babel" src="src/components/shared/prompt.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/components/views/assets.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/components/views/partners.js?v=0.15.1"></script>
+    <script type="text/babel" src="src/components/views/userSettings.js?v=0.15.1"></script>
 
-    <!-- Dashboard Widgets -->
-    <script type="text/babel" src="src/components/views/dashboard/widgets/totalItems.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/lowStock.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/suppliersOnly.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/recentArrivals.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/recentShipments.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/criticalReplenishment.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/categoryPerformance.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/warehouseHealth.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/predictiveReplenish.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/productStatSummary.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/widgets/innoAssistant.js"></script>
-    <script type="text/babel" src="src/components/views/dashboard/dashboard.js"></script>
+    <!-- Dashboard Engines -->
+    <script type="text/babel" src="src/components/engine/basicWidgetsEngine.js"></script>
+    <script type="text/babel" src="src/components/engine/predictiveReplenishEngine.js"></script>
+    <script type="text/babel" src="src/components/engine/criticalReplenishEngine.js"></script>
+    <script type="text/babel" src="src/components/engine/innoAssistantEngine.js"></script>
     
-    <!-- Admin Dashboard Components -->
-    <script type="text/babel" src="src/components/admin/tabs/overview.js"></script>
-    <script type="text/babel" src="src/components/admin/tabs/userManagement.js"></script>
-    <script type="text/babel" src="src/components/admin/tabs/activityLogs.js"></script>
-    <script type="text/babel" src="src/components/admin/tabs/manageData.js"></script>
-    <script type="text/babel" src="src/components/admin/tabs/assetManagement.js"></script>
-    <script type="text/babel" src="src/components/admin/tabs/globalSettings.js"></script>
-    <script type="text/babel" src="src/components/admin/adminDashboard.js"></script>
+    <!-- Automation Engine & Widget -->
+    <script type="text/babel" src="src/components/engine/automationEngine.js"></script>
+    <script type="text/babel" src="src/components/shared/automation.js"></script>
+
+    <script type="text/babel" src="src/components/views/dashboard.js"></script>
+    
+    <!-- Admin components have been moved to admin.html for improved security and code isolation -->
 
     <!-- Main Entry -->
     <script type="text/babel" src="src/app.js"></script>

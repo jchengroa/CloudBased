@@ -8,17 +8,9 @@
     <link rel="stylesheet" href="assets/css/index.css">
 
     <script>
-        // Check if user is already logged in, redirect to app instantly
-        try {
-            const saved = localStorage.getItem('cloudbased_session');
-            if (saved) {
-                window.location.href = 'index.html';
-            }
-            const theme = saved ? (JSON.parse(saved).settings?.theme || 'light') : 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-        } catch (e) {
-            document.documentElement.setAttribute('data-theme', 'light');
-        }
+        // High-Security: Clear everything when hitting the login page
+        localStorage.clear();
+        document.documentElement.setAttribute('data-theme', 'light');
     </script>
 </head>
 
@@ -26,28 +18,24 @@
     <div id="root"></div>
 
     <!-- React & Babel -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="vendor/react.development.js" crossorigin></script>
+    <script src="vendor/react-dom.development.js" crossorigin></script>
+    <script src="vendor/babel.min.js"></script>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
     <!-- Core Logic & Components -->
-    <script src="src/data-management/modules/init.js"></script>
-    <script src="src/data-management/modules/admin.js"></script>
-    <script src="src/data-management/modules/auth.js"></script>
-    <script src="src/data-management/modules/data.js"></script>
-    <script src="src/data-management/modules/settings.js"></script>
+    <script src="src/data-management/modules/coreDataHandler.js"></script>
+    <script src="src/data-management/modules/adminDataManager.js"></script>
+    <script src="src/data-management/modules/authDataManager.js"></script>
+    <script src="src/data-management/modules/inventoryDataManager.js"></script>
+    <script src="src/data-management/modules/settingsDataManager.js"></script>
     <script type="text/babel" src="src/utils/validation.js"></script>
     <script type="text/babel" src="src/components/shared/icons.js"></script>
     <script type="text/babel" src="src/components/shared/tables.js"></script>
     <script type="text/babel" src="src/components/shared/layout.js"></script>
     <script type="text/babel" src="src/components/shared/forms.js"></script>
     <script type="text/babel" src="src/components/shared/utils.js"></script>
-    <script type="text/babel" src="src/components/auth/auth.js"></script>
+    <script type="text/babel" src="src/components/auth/authView.js"></script>
     
     <!-- Entry Point for Login -->
     <script type="text/babel">

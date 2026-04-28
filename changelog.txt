@@ -250,3 +250,285 @@ Version 0.12.0 (March 25, 2026)
 - Administrative Experience (UX): 
     - Added "Quick Save" buttons to each major settings block (Branding, Modules, Firebase) for faster configuration without scrolling.
     - Grouped core metrics (Total Items, Low Stock, Suppliers) into a locked, non-resizable unit to preserve the high-level KPI layout.
+
+Version 0.13.0 - March 26, 2026
+-------------------------------------------------------
+- Hybrid Cloud Architecture:
+    - Implemented a unified dual-backend system supporting both independent PocketBase (VPS) and legacy Firebase (cloud) modes.
+    - Added a hidden database-mode toggle on the Login screen to switch between environments.
+    - Engineered `FirebaseBridge` as a modular adapter to restore legacy auth and data functionality without bloating the main runtime.
+- Infrastructure & Deployment:
+    - Migrated production to a Linux VPS with Caddy reverse proxying and DuckDNS resolution.
+    - Hardened server security by removing UI-based endpoint configuration and moving connectivity to master config files.
+    - Configured PocketBase as a `systemd` service with automated routing to port 8090.
+- Data Reliability & Cloud Sync:
+    - Restored full user, activity log, and stock synchronization for legacy Firebase environments.
+    - Synchronized global assets, warehouses, and branding across both database backends.
+    - Solved critical null-reference and security-rule crashes by rerouting settings to the correct legacy Firestore collections.
+    - Fixed specialized data-type mapping such as invalid dates and migration keys to keep backend switching reliable.
+- Infrastructure Migration:
+    - Integrated the PocketBase JS SDK as the primary local/cloud database engine.
+    - Re-engineered `AppDataHandler` around PocketBase collection methods such as `getList`, `getFullList`, and `create`.
+    - Added `assets/data/pocketbase_config.json` as the centralized PocketBase connection source.
+- Admin Dashboard & Server Management:
+    - Modernized the Activity Logs tab with more defensive date handling to prevent deduplication issues.
+    - Standardized branding to fall back to `assets/images/icon.png` for offline-resilient white labeling.
+
+Version 0.13.1 - March 27, 2026
+-------------------------------------------------------
+- Data Management & Reliability:
+    - Fixed a critical cold-start bug where Activity Logs could silently fail to load in the Admin Dashboard.
+    - Resolved the `initPromise` bypass in `admin.js` so PocketBase is fully ready before administrative queries run.
+    - Improved the merged activity-log view so historical stock records and system audit events render more consistently.
+- UI/UX Scaling & Visual Fidelity:
+    - Fixed a major SVG rendering bug where icons could shrink, blur, or disappear because `size` props leaked into the DOM.
+    - Refactored the shared icon library to consume only safe SVG attributes, improving consistency across the app.
+    - Stabilized small action icons such as edit and permission controls so they remain aligned and visible.
+
+Version 0.13.2 - March 27, 2026
+-------------------------------------------------------
+- PocketBase Schema Alignment:
+    - Reworked create, edit, and save flows to match the live PocketBase collections instead of older Firebase-era assumptions.
+    - Fixed user management writes so optional auth emails stay blank unless a valid email is actually provided.
+    - Restored profile-avatar, inventory-image, supplier, and transaction-log saves using PocketBase-compatible file and field handling.
+    - Added end-to-end persistence for the new PocketBase `date` fields on `logs_input` and `logs_output`, so imported Receive/Out dates are now stored correctly.
+    - Added metadata persistence for imported log supplier, batch/lot, and description values so optional spreadsheet fields are preserved even when they are not part of the core PocketBase log schema.
+- Dashboard, Navigation & Personalization:
+    - Added per-user dashboard widget visibility controls and persisted those choices in user settings.
+    - Brought the main navigation animation in line with the smoother Overview/Act tab transition style.
+    - Improved fade and remount behavior for dashboard view switching, including the Critical Replenishment widget.
+    - Centered the expanded Admin Dashboard tab bar and rebuilt it with a cleaner pill layout for large screens.
+    - Rebuilt the main navigation into a modular shared component with a fluid desktop selector that matches the Overview and Act tab behavior while keeping the full tab labels visible.
+    - Added a separate floating mobile bottom-navigation mode with a brighter translucent glass style that hides after scrolling down and reappears only when the user returns to the top.
+    - Stabilized desktop navigation indicator positioning so switching between far-left and far-right tabs no longer breaks the icon-collapse animation.
+    - Tightened desktop navigation and admin-tab container sizing so the bars no longer leave oversized empty gutters at either end.
+- Warehouse Filtering & Responsive UI:
+    - Fixed warehouse filters to use configured warehouse locations plus persisted item metadata, so missing inline fields no longer break the pill tabs.
+    - Added a shared warehouse-pill component that truncates long location names cleanly, shows full names on hover, and scrolls smoothly on small screens.
+    - Expanded small-screen layout support across navigation, dashboards, toolbars, tables, and modal content for better mobile usability.
+    - Corrected mobile layout alignment issues in Admin Dashboard and User Settings where stacked controls and content blocks could drift out of place.
+    - Updated the Inventory view switcher to use dedicated icons on mobile for Overview, Arrivals, and Shipments while keeping icon-plus-label tabs on desktop.
+    - Extended the same responsive tab-switcher treatment to the Dashboard Overview and Act control for cleaner small-screen navigation.
+- Import & Spreadsheet Sync:
+    - Fixed quantity parsing so import no longer mistakes `Weight/Pc per QTY` columns for the real movement quantity column.
+    - Updated spreadsheet import rules so the `Items` tab only contributes item-master fields, while stock on hand is recalculated from `Receive` minus `Out`.
+    - Made supplier and batch/lot optional for imported logs while still preserving them whenever the spreadsheet provides those values.
+    - Added automatic UoM collection updates when imported sheets contain valid units that do not yet exist in the database.
+    - Corrected review-sync commit behavior so imported Receive and Out logs now replace the existing log sets instead of only appending new entries.
+- InnoAssistant Expansion:
+    - Extended local command handling to answer warehouse summaries, stock movement totals, supplier contact lookups, and top-mover queries.
+    - Added direct item-state actions such as marking an item as Restocked or In Process without leaving the dashboard.
+    - Introduced guided suggestion chips and clearer response cards to make the assistant faster to use for common workflows.
+- Branding & Release Sync:
+    - Switched favicon and About assets back to the existing `assets/images/icon.png`.
+    - Updated the About panel and release metadata for version 0.13.2.
+
+Version 0.13.3 - March 28, 2026
+-------------------------------------------------------
+- Authentication & Brand Identity Refinement:
+    - UI/UX Aesthetics: Implemented a new premium, high-fidelity Login UI featuring edge-to-edge blurred backgrounds and sophisticated glassmorphism.
+    - BackgroundManager Engine: Developed a dedicated `backgroundManager.js` utility to handle dynamic, performant background transitions and blur filtering.
+    - Universal Auth Mode: Enabled "Username or Email" authentication, allowing users more flexibility when signing into the platform.
+    - Branding & Layout: Enlarged corporate branding elements and enforced a static, unified copyright footer across the authentication gateway.
+    - Global Theme Sync: Ensured consistent application of Administrator-defined global accent colors across all login and setup components.
+
+Version 0.13.4 - March 28, 2026
+-------------------------------------------------------
+- Mobile Navigation Fix (Critical):
+    - Identified and resolved a Chrome-specific bug where `backdrop-filter` on the top brand bar created a new containing block for `position: fixed` child elements, trapping the mobile bottom navigation inside the header instead of pinning it to the viewport bottom.
+    - Applied `backdrop-filter: none` at the ≤680px breakpoint to restore correct fixed positioning of the bottom nav without affecting the desktop glass effect.
+- Sticky Header Architecture:
+    - Established a proper full-height scroll container chain (`html → body → #root → app-wrapper → app-layout`) so that `position: sticky` on the top brand bar is respected at all viewport widths.
+    - Added `#root` flex layout rules and `html, body { height: 100% }` to constrain scrolling exclusively to `app-layout`, preventing the document body from acting as the scroll target.
+- Admin Dashboard Tab Bar Redesign:
+    - Rebuilt the desktop tab bar as a single-row horizontal pill strip (consistent with the main app navigation style), replacing the old multi-row wrapping grid.
+    - Redesigned the mobile (≤680px) tab bar as a clean vertical stacked list — each tab is full-width with left-aligned icon and label, separated by subtle dividers, matching the intended mobile UX.
+    - Removed the legacy `min-width: 152px` constraint and `flex-wrap: wrap` behavior that caused tabs to spill into uneven multi-row layouts at intermediate widths.
+
+Version 0.14.0 - March 30, 2026
+-------------------------------------------------------
+- Assets & Partners UI Refactoring:
+    - Re-engineered the industrial control hierarchy: Warehouse filters moved to the top-level, followed by tab switchers and circular display toggles.
+    - Implemented a more aggressive high-density layout by reducing vertical whitespace across Hero sections, KPI cards, and Management toolbars.
+    - Widened the search bar for improved usability and accessibility.
+- Admin Dashboard Architecture:
+    - Resolved critical "Element type is invalid" runtime errors by correcting component scope and initialization for OverviewTab and Icons.
+    - Integrated a fully responsive DashboardGrid that dynamically adjusts to container size and supports persistent widget reordering.
+    - Consolidated the backend architecture by unifying state management and stripping redundant initialization logic.
+- Data Import & Synchronization:
+    - Finalized the "Master Sync Engine" with full support for bulk data reconciliation and error handling.
+    - Implemented a GitHub-style visual diff review interface within the ManageDataTab for auditing spreadsheet imports before committing.
+    - Restored missing Export and Data Health panels to the main synchronization interface.
+- Navigation & Brand Identity:
+    - Polished the modular ERP sidebar with consistent visual branding and intuitive state transitions (expanded/collapsed).
+    - Hardened responsive navigation logic for mobile and small-screen devices.
+
+Version 0.14.1 - March 30, 2026
+-------------------------------------------------------
+- Admin Dashboard Stability & Bug Fixes:
+    - Resolved persistent "Element type is invalid" runtime error by correcting component scoping and initialization timing.
+    - Elevated `Icons` to file-level scope in `adminDashboard.js` to ensure all internal sub-components have consistent access to global assets.
+    - Implemented defensive rendering in the Admin Shell to gracefully handle script execution race conditions with an "Initializing..." state and loading spinner.
+    - Added `/** @jsx React.createElement */` pragma across core components to ensure standard Babel standalone compilation and prevent JSX transform mismatches.
+
+Version 0.14.2 - March 30, 2026
+-------------------------------------------------------
+- VPS Compatibility & Initialization Stability:
+    - Fixed a critical race condition where components would attempt to access `Icons` or `AdminDashboard` before their respective scripts had fully initialized.
+    - Moved all global icon extractions from the file-level top scope into local component function scopes, ensuring total initialization safety on high-latency network connections.
+    - Added comprehensive null-safe fallbacks (`window.Icons || {}`) across all shared and administrative modules to prevent "got: undefined" React render crashes.
+    - Hardened the `AdminApp` entry point with a robust synchronization check before mounting any administrative sub-components.
+- Implemented "Bulletproof" Initialization:
+    - Added a mandatory global dependency check in admin.html before React mounting.
+    - Tier 2 protection: Added a Proxy-based failsafe for Icons to prevent "Element type is invalid" crashes.
+
+Version 0.15.0 - March 30, 2026
+-------------------------------------------------------
+- Role-Based Access Control (RBAC) System:
+    - Implemented a granular permission model based on the `user.restrictions` JSON array.
+    - Dynamic route guards injected into `getPathView()` to prevent unauthorized hub navigation.
+    - Automatic UI logic to filter restricted navigation tabs (Dashboard, Assets, Partners).
+    - Administrative "Hub Access" panel for positive permission granting at a per-user level.
+    - Unified "Revoked Actions" panel for disabling Add/Edit/Remove across all non-admin roles.
+    - Comprehensive `AVAILABLE_ROLES` system to support custom roles (Manager, Sales, etc.).
+- Infrastructure & Offline Resilience:
+    - Migrated all external CDN dependencies (React, Babel, PocketBase, SheetJS) to local vendor assets.
+    - Decoupled the platform from public internet requirements, enabling private intranet deployments.
+- UI & Code Consolidation:
+    - Refactored the "Unified Action Bar" into a modular shared component (`src/components/shared/layout.js`).
+    - Consolidated search, sorting, and display toggles into the new `ActionBar` across all relevant hubs.
+    - Merged `tmp_partners.js` into the main `partners.js` codebase and cleared technical debt.
+    - Sanitized critical core files (app.js) with UTF-8 encoding and standardized line endings.
+- Asset & Logic Modernization:
+    - Re-engineered the icon system to load SVG assets directly from the filesystem via `Icons.js`.
+    - Deprecated 500+ legacy React-wrapped icon components for high-performance native SVG fetching.
+    - Optimized Hero filter rails with high-density pill selectors for location and asset visibility.
+- Stability & Error Handling:
+    - Hardened the `AdminDashboard` mounting sequence with strict global dependency validation.
+    - Implemented a Proxy-based failsafe for `Icons` to ensure smooth rendering on missing icon requests.
+
+Version 0.16.0 - April 6, 2026
+-------------------------------------------------------
+- Core Logic & Data Integration:
+    - Fully implemented the "Customers" collection within the Partner Management system.
+    - Integrated Customer CRUD operations into the global application state and `inventoryDataManager`.
+    - Enhanced `Assets` view with contextual partner badging (Suppliers for materials, Customers for products).
+    - Established bi-directional item linking for both suppliers and customers.
+- User Experience & Interface:
+    - Refactored `Partners` Hub with a dual-channel management interface (Suppliers/Customers tabs).
+    - Improved item-linking workflow with a unified, searchable, and category-aware prompting system.
+    - Standardized management toolbars across Partners and Assets for better UI consistency.
+    - Added "Item Removed" and other interaction-specific confirmation toasts.
+- Data Management & Synchronization:
+    - Updated `inventory` schema to support multi-partner relationships.
+    - Fixed real-time stock level synchronization for input and output transactions.
+    - Repaired various JSX syntax and nesting errors in major view components.
+    - Fixed "Database Integrity" panel in the overview tab of admin dashboard, where the percentage and score is removed.
+    - Implemented "Export All" functionality for Input Logs and Output Logs, still based on the Frappe Guidelines for ERPNext.
+    - The factory data reset will now reset specific parts of the database, like inventory master, input and output logs, suppliers, and customers.
+- Data Management & Stability:
+    - Resolved a critical data integrity bug where partial stock updates could lead to unintended record deletions and "forever" sync hangs.
+    - Expanded the PocketBase synchronization engine to fully support `batch` and `date` fields for all transaction logs.
+    - Optimized the `saveData` core logic to strictly distinguish between incremental updates and full deletions.
+- UI/UX & Form Modernization:
+    - Re-engineered the Item Management form: converted Category into a dynamic dropdown with "Add New" capability.
+    - Streamlined the inventory prompt by removing redundant auto-calculated status fields.
+    - Polished the transaction logging interface with dedicated fields for Batch, Date, and internal notes.
+    - Corrected the labeling for Supplier Partners to improve field clarity.
+- Role-Based Access Control (RBAC) System:
+    - Finalized Global Role Access Settings allowing administrators to configure platform-wide hub permissions for all User Roles (Administrator, Manager, WarehouseStaff, Sales, Auditor).
+    - Implemented a "Deferred Save" mechanism for Role settings, requiring a "Done" confirmation before persisting changes to the database.
+    - Integrated automatic access-level derivation for individual users based on their assigned role, with an "Administrator" lock to prevent accidental lockout.
+    - Restricted "Revoked Actions" visibility solely to the "Auditor" mapping, keeping the interface clean for other roles.
+- Dashboard Widget Visibility & Personalization:
+    - Engineered a new "Eye-Off" (Hide) interaction for all Dashboard and Admin widgets, allowing users to customize their views directly from the grid.
+    - Developed a unified "Widget Visibility Controls" panel that stays perfectly synchronized with on-card hide buttons.
+    - Implemented support for "Grouped Visibility" (e.g., hiding the Metrics card toggles all sub-meters like Low Stock and Partners simultaneously).
+    - Added a "Restore All" recovery function to the Admin Overview to reset hidden widgets instantly.
+    - Optimized the Dashboard Grid to handle external visibility state, preventing "ghosting" artifacts where hidden items would fail to reappear.
+- UI/UX & Component Standardization:
+    - Refactored the Admin Overview toolbar to include Rearrange Mode and Role Access Settings.
+    - Modernized the widget control buttons with integrated status icons (Eye/Eye-Off) and distinct active/inactive states.
+    - Switched all layout and visibility state updates to functional setters, ensuring zero-latency responsiveness during rapid UI interactions.
+- Icon System & Fallbacks:
+    - Integrated a suite of built-in SVG icons (Undo, Redo, Question) to ensure zero-latency loading and reliable 404-safe fallbacks.
+    - Set the built-in "Question" mark as the global default for unmapped or missing assets.
+
+Version 0.16.1 (April 6, 2026)
+-------------------------------------------------------
+- Security & Data Consistency (Cache Busting):
+    - Implemented a mandatory Version-Locked Cache Invalidation system in `coreDataHandler.js`.
+    - The platform now automatically detects when a new version is deployed and clears stale `localStorage` data associated with previous builds.
+    - Synchronized the internal `VERSION` constant (0.16.1) across the core data handler and UI settings to ensure consistent version reporting.
+- Infrastructure & Deployment Stability:
+    - Resolved a critical "Ghost Data" issue where client-side caches could conflict with live database records on high-latency VPS deployments.
+    - Optimized the initial loading sequence to perform an early version verification before mounting the main application state.
+- UI/UX Refinement:
+    - Updated version indicators in User Settings and Admin Overview to reflect build 0.16.1.
+    - Standardized copyright and author labels across all administrative and user-facing modals.
+
+Version 0.16.2 (April 6, 2026)
+-------------------------------------------------------
+- Smart Automation & Intelligence:
+    - Re-engineered the automation engine to detect complex operational issues including stock-out risks, unlinked items, and stagnant stock.
+    - Added an actionable Urgent Actions list for direct one-click replenishment and dispatch handling.
+- InnoAssistant Engine Expansion:
+    - Expanded NLP capabilities to handle broader warehouse, inventory, and partner-specific queries.
+    - Added support for direct item state modifications and executable commerce commands.
+- Dashboard & Widget Modernization:
+    - Redesigned Warehouse Health and Category Performance widgets with descriptive analytics.
+    - Integrated the new Smart Automation hub as a central dashboard component.
+    - Added Warehouse Health toggle to the rearrange mode visibility panel.
+- Smart Automation Consistency Improvements:
+    - Synchronized item-level warnings in Assets and Partners views with the core automation engine.
+    - Updated the AutomationRibbon to represent all 5 intelligence categories (Critical, Forecast, Dispatch, Setup, Dormant).
+    - Integrated smart engine insights directly into the Product Statistics summary panel.
+    - Added actionable automation badges to both card and table views across the application.
+- Login UI & Visual Polish:
+    - Implemented a premium sequential background cycling system (backgrounds 1 through 4) on the login screen.
+    - Resolved a background-skipping issue caused by React StrictMode double-mounting by isolating the increment logic to a one-time useEffect hook.
+- Data Management & Performance Optimization:
+    - Optimized the `saveData` core logic in `inventoryDataManager.js` with `Promise.all` parallelization, enabling high-speed bulk CRUD operations.
+    - Implemented Request Deduplication (shared promises) in `coreDataHandler.js` to prevent redundant simultaneous network calls during app load.
+    - Added a 500ms debounced persistence mechanism for the local cache to eliminate UI stutters during large-scale data updates.
+    - Increased the system metadata cache TTL to 10 seconds to significantly reduce redundant network polling for 'lastUpdated' maps.
+    - Fixed a critical bug in handlePromptConfirm to support direct assistant-driven item edits.
+    - Synchronized application version to 0.16.2 across all shared modules.
+- General Stability & State Management:
+    - Fixed a critical bug in `handlePromptConfirm` to support direct assistant-driven item edits.
+    - Synchronized application version to 0.16.2 and updated internal constants in `coreDataHandler.js` to ensure consistent cache invalidation.
+
+Version 0.16.3 (April 8, 2026)
+-------------------------------------------------------
+- PocketBase Authentication & Password Recovery:
+    - Successfully migrated the "Reset Password" feature from Firebase-compat to native PocketBase logic.
+    - Configured PocketBase to use Mailtrap SMTP (Port 2525) to bypass Contabo VPS outbound port restrictions.
+    - Implemented a modern, responsive HTML email template for password resets featuring glassmorphic buttons and gradient aesthetics.
+    - Integrated `{ACTION_URL}` and `{APP_URL}` validation fixes for local and production VPS environments.
+- UI/UX & Parameter Stability:
+    - Engineered a "Bulletproof" URL parameter parser in `AuthView` that handles query strings in both standard and hash-based routing (`/#/...`).
+    - Implemented a session-guard bypass in `App.js` to allow unauthorized users to remain on the password reset screen without being redirected to login.
+    - Fixed a critical "Email not found" bug by implementing a username-to-email lookup bridge for forgotten password requests.
+- General Performance & Infrastructure:
+    - Updated global `VERSION` constant to 0.16.3 to trigger build-critical cache invalidation.
+    - Optimized VPS-specific auth redirects to ensure reliability on high-latency DuckDNS connections.
+    - Cleaned up duplicate activity log triggers in `AuthDataManager` for better audit trail accuracy.
+
+Version 0.16.4 (April 28, 2026)
+-------------------------------------------------------
+- Migration to Local-Only Architecture:
+    - Removed all PocketBase VPS dependencies to support full local execution.
+    - Implemented a browser-based persistent cache system via `localStorage` for all inventory and system data.
+    - Optimized system memory by removing the PocketBase SDK from the vendor bundle.
+- Security & Environment Updates:
+    - Replaced `pocketbase_config.json` with a secure `.env` configuration system.
+    - Created '.gitignore' to ignore .env and other unnecessary files.
+    - Implemented high-security session management: `localStorage` is automatically cleared on logout and login page load.
+- Guest Mode Implementation:
+    - Added a hardcoded administrative account for immediate local access (`default` / `cb_demo_2026`).
+    - Configured the default user to operate in an ephemeral "Guest Mode" where session changes are temporary.
+    - Disabled remote authentication features (signup, password recovery) which are inapplicable in local-only mode.
+- System Stability & Performance:
+    - Fixed critical initialization race conditions in the core data handler.
+    - Synchronized application version to 0.16.4 across all shared modules and UI components.
+    - Cleaned up redundant network calls previously used for PocketBase heartbeat checks.
