@@ -532,3 +532,14 @@ Version 0.16.4 (April 28, 2026)
     - Fixed critical initialization race conditions in the core data handler.
     - Synchronized application version to 0.16.4 across all shared modules and UI components.
     - Cleaned up redundant network calls previously used for PocketBase heartbeat checks.
+
+Version 0.16.5 (April 28, 2026)
+-------------------------------------------------------
+- Deployment Optimization & Infrastructure:
+    - Successfully deployed the application to Vercel for cloud-based accessibility.
+    - Migrated all major library dependencies (React, React DOM, Babel, TensorFlow, Compromise, SheetJS) to CDN-based loading (unpkg.com).
+    - Resolved 404 resource errors on deployment by bypassing `.gitignore` restrictions via CDN integration.
+    - Upgraded core libraries to production-optimized builds, significantly reducing initial page load weight and improving runtime security.
+- Version Synchronization:
+    - Synchronized application version to 0.16.5 across the core data handler, user settings, and documentation.
+    - Updated cache-busting version strings in HTML entry points to ensure immediate delivery of the latest assets.

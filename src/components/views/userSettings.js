@@ -20,7 +20,7 @@ const UIIcons = {
 
 const UISafeIcons = UIIcons;
 const APP_BUILD_DATE = 'April 28, 2026';
-const APP_VERSION_FALLBACK = '0.16.4';
+const APP_VERSION_FALLBACK = '0.16.5';
 
 const FormInput = ({ label, type = "text", id, ...props }) => {
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : Math.random().toString(36).substr(2, 9));

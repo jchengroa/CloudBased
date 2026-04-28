@@ -4,8 +4,8 @@
 
 CloudBased is a cloud-based Inventory Management System (IMS) designed to solve the operational inefficiencies faced by SME's that manage inventory, shipments, and arrivals across multiple, disconnected Google Sheets due to having multiple warehouses. Procurement of missing raw ingredients is handled through a fragmented process where staff must cross-reference inventory with a separate, often incomplete Excel supplier list. This project centralizes multisite inventory tracking and vendor details into a robust platform, solving data fragmentation. Developed following the Agile Software Development Life Cycle (SDLC), the solution evolved from gathering these specific user pain points to systematically designing, implementing, and testing a centralized web application.
 
-> **Version:** 0.16.4 (April 28, 2026)  
-> **Status:** Production Ready (Local-Only)  
+> **Version:** 0.16.5 (April 28, 2026)  
+> **Status:** Production Ready (Vercel Deployed)  
 > **GitHub Repository:** https://github.com/j-chen77/CloudBased
 
 ---

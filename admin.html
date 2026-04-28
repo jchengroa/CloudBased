@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Inventory Management</title>
     <link rel="icon" type="image/png" href="assets/images/icon.png">
-    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="stylesheet" href="assets/css/index.css?v=0.16.5">
     <style>
         body { overflow: auto !important; height: auto !important; }
         .admin-page-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
@@ -34,14 +34,14 @@
 <body>
     <div id="root"></div>
 
-    <!-- React & Babel -->
-    <script src="vendor/react.development.js" crossorigin></script>
-    <script src="vendor/react-dom.development.js" crossorigin></script>
-    <script src="vendor/babel.min.js"></script>
+    <!-- React & Babel (Production Versions) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 
     <!-- Spreadsheet Parser -->
-    <script src="vendor/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
     <!-- Data & Utils -->
     <script src="src/data-management/modules/coreDataHandler.js"></script>

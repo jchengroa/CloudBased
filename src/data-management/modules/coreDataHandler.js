@@ -14,7 +14,7 @@ if (!window.crypto.randomUUID) {
 window.AppDataHandler = (function () {
     const CONFIG_KEY = 'cloudbased_pocketbase_url';
     const BRANDING_CACHE_KEY = 'cloudbased_branding_cache';
-    const VERSION = '0.16.4';
+    const VERSION = '0.16.5';
     const ALL_AUDITOR_RESTRICTIONS = ['AddItems', 'EditItems', 'RemoveItems', 'AddLogs', 'EditLogs', 'RemoveLogs', 'AddSuppliers', 'EditSuppliers', 'RemoveSuppliers'];
     const createEmptyCollectionCache = () => ({
         inventory: { data: null, timestamp: 0 },
