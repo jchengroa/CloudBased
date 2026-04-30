@@ -17,7 +17,7 @@ CloudBased is a cloud-based Inventory Management System (IMS) designed to solve 
 ### Option 1: Quick Start (Live Demo)
 
 The application is deployed and can be accessed directly through the web browser at:
-**TBA**
+**[Demo Website](https://cloudbasedims.vercel.app/)** 
 
 ### Option 2: Local Development
 
